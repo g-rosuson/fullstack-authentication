@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "target": "es5",
+    "strict": true,
+    "esModuleInterop": true,
+    "composite": true,
+    "paths": {
+      "*": ["src/*"]
+    },
+  },
+  "include": ["src/**/*.ts", "src/**/*.json"]
+}

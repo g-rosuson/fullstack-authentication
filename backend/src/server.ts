@@ -8,7 +8,6 @@ import db from 'db';
 
 import config from 'config';
 
-// TODO: Add DB
 // TODO: Add custom error handling and go over status codes
 // TODO: Add logger
 // TODO: Validate typing

@@ -10,7 +10,7 @@ const _signAccessToken = (payload: { email: string; userId: string; }) => {
 };
 
 const _signRefreshToken = (payload: { userId: string }) => {
-    return sign(payload, config.refreshTokenSecret, { expiresIn: TokenExpiration.Refresh });
+    return sign(payload, config.refreshTokenSecret, { expiresIn: '30s' });
 };
 
 const createTokens = (userData: IPartialUser) => {

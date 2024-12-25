@@ -1,11 +1,10 @@
 import { getDatabase } from 'db/client';
 
 const COLLECTION_NAME = 'users';
+const db = getDatabase();
 
 const create = async (userData: { email: string; password: string; refreshToken: string }) => {
     try {
-        const db = getDatabase();
-
         return await db.collection(COLLECTION_NAME).insertOne(userData);
 
     } catch (error) {
@@ -15,8 +14,6 @@ const create = async (userData: { email: string; password: string; refreshToken:
 
 const update = async (userId: string, fieldName: string, fieldValue: string) => {
     try {
-        const db = getDatabase();
-
         return await db.collection(COLLECTION_NAME).updateOne({ id: userId }, { $set: { [fieldName]: fieldValue } });
 
     } catch (error) {

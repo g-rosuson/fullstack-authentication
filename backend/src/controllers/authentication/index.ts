@@ -13,7 +13,7 @@ const REFRESH_COOKIE_OPTIONS: CookieOptions = {
     httpOnly: true,
     secure: config.isProduction, // Whether https is being used
     sameSite: config.isProduction ? 'strict' : 'lax',
-    domain: config.baseDomain,
+    domain: config.isProduction ? config.baseDomain : undefined,
     path: '/',
     maxAge: TokenExpiration.Refresh,
 }
@@ -41,7 +41,7 @@ const register = async (req: Request, res: Response) => {
 
         res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS)
             .status(201)
-            .json({ message: `User with email: ${email} successfully created`, accessToken });
+            .json({ accessToken })
 
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
@@ -78,7 +78,7 @@ const login = async (req: Request, res: Response) => {
         // Update user's refresh token in the database
         await db.service.mutations.users.update(userDocument.id, 'refreshToken', refreshToken);
 
-        // Set refresh token as a cookie and send access token in the response
+        // Set refresh token as a cookie and send access token to client
         res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS)
             .status(200)
             .json({ accessToken });
@@ -92,13 +92,14 @@ const signOut = async (req: Request, res: Response) => {
     const cookies = req.cookies;
 
     if (!cookies?.refreshToken) {
-        return res.status(204).json({ message: 'No token present' });
+        res.status(204).json({ message: 'No token present' });
+        return;
     }
 
     res.clearCookie('refreshToken', {
         httpOnly: REFRESH_COOKIE_OPTIONS.httpOnly,
         secure: REFRESH_COOKIE_OPTIONS.secure
-    }).json({ message: 'User logged out!' });
+    })
 }
 
 const authentication = {

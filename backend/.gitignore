@@ -3,3 +3,9 @@
 
 # environment variables
 .env
+
+# IDE settings
+.idea
+
+# macOs metadata
+.DS_STORE

@@ -9,13 +9,16 @@ import db from 'db';
 import services from 'services';
 import config from 'config';
 
+// Convert the cookie max age to ms
+const MAX_AGE = TokenExpiration.Refresh * 1000;
+
 const REFRESH_COOKIE_OPTIONS: CookieOptions = {
     httpOnly: true,
-    secure: config.isProduction, // Whether https is being used
-    sameSite: config.isProduction ? 'strict' : 'lax',
+    secure: config.isProduction,
+    sameSite: 'strict',
     domain: config.isProduction ? config.baseDomain : undefined,
     path: '/',
-    maxAge: TokenExpiration.Refresh,
+    maxAge: MAX_AGE,
 }
 
 const register = async (req: Request, res: Response) => {

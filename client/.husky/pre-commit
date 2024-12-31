@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Emojis
+CHECK_MARK='\xE2\x9C\x85'
+WARNING='\xE2\x9A\xA0'
+CROSS_MARK='\xE2\x9D\x8C'
+HOURGLASS='\xE2\x8C\x9B'
+ROCKET='\xF0\x9F\x9A\x80'
+
+# Step 1: Run ESLint
+printf "\n${HOURGLASS} ${YELLOW}Validating ESLint rules. Please wait...${NC}\n"
+npm run lint --silent
+echo "${CHECK_MARK} ${GREEN}ESLint validation complete.${NC}"
+
+# Step 2: Run Stylelint
+printf "\n${HOURGLASS} ${YELLOW}Validating Stylelint rules. Please wait...${NC}\n"
+npm run lint-styling --silent
+echo "${CHECK_MARK} ${GREEN}Stylelint validation complete.${NC}"

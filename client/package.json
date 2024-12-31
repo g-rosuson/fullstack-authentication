@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" --max-warnings=0 --cache",
     "lint-fix": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix",
-    "lint-styling": "npx stylelint \"**/*.{css,scss}\" --max-warnings=0"
+    "lint-styling": "npx stylelint \"**/*.{css,scss}\" --max-warnings=0",
+    "prepare": "husky"
   },
   "dependencies": {
     "react": "^18.3.1",

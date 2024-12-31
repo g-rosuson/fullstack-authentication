@@ -1,0 +1,109 @@
+{
+  "extends": "stylelint-config-standard-scss",
+  "plugins": [
+    "stylelint-declaration-strict-value",
+    "stylelint-order"
+  ],
+  "rules": {
+    "selector-class-pattern": null,
+    "shorthand-property-no-redundant-values": null,
+    "media-feature-range-notation": null,
+    "scss/at-extend-no-missing-placeholder": null,
+    "no-descending-specificity": null,
+    "declaration-empty-line-before": "never",
+    "no-empty-source": null,
+    "custom-property-empty-line-before": "never",
+    "font-family-name-quotes": null,
+    "keyframes-name-pattern": null,
+    "property-no-vendor-prefix": [
+      true,
+      {
+        "ignoreProperties": [
+          "appearance"
+        ]
+      }
+    ],
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global"]
+      }
+    ],
+    "declaration-block-no-redundant-longhand-properties": null,
+    "rule-empty-line-before": null,
+    "value-keyword-case": [
+      "lower",
+      {
+        "ignoreKeywords": ["optimizeLegibility"]
+      }
+    ],
+    "color-no-hex": true,
+    "color-no-invalid-hex": true,
+    "color-hex-alpha": "never",
+    "color-named": "never",
+    "scale-unlimited/declaration-strict-value": [
+      ["background", "background-color", "color"],
+      {
+        "ignoreValues": ["transparent", "none", "inherit", "currentcolor"]
+      }
+    ],
+    "order/properties-order": [
+      "content",
+      "position",
+      "top",
+      "right",
+      "bottom",
+      "left",
+      "width",
+      "max-width",
+      "min-height",
+      "height",
+      "min-height",
+      "max-height",
+      "line-height",
+      "display",
+      "flex",
+      "flex-shrink",
+      "flex-grow",
+      "flex-direction",
+      "justify-content",
+      "align-items",
+      "align-self",
+      "flex-wrap",
+      "gap",
+      "margin",
+      "margin-top",
+      "margin-right",
+      "margin-bottom",
+      "margin-left",
+      "padding",
+      "padding-top",
+      "padding-right",
+      "padding-bottom",
+      "padding-left",
+      "border-radius",
+      "border",
+      "border-top",
+      "border-right",
+      "border-bottom",
+      "border-left",
+      "background-color",
+      "background",
+      "box-shadow",
+      "transition",
+      "transform",
+      "opacity",
+      "animation",
+      "letter-spacing",
+      "white-space",
+      "text-overflow",
+      "font-size",
+      "font-weight",
+      "color",
+      "overflow",
+      "outline",
+      "z-index",
+      "cursor"
+    ]
+  }
+}

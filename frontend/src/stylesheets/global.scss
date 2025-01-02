@@ -1,0 +1,42 @@
+/* stylelint-disable custom-property-empty-line-before, color-no-hex, color-named */
+:root {
+    --color-1-100: #151515;
+
+    --gap: 1.2rem;
+    --gap-small: 1.8rem;
+
+    --border-radius: 8px;
+    --border-radius-large: 12px;
+}
+
+html {
+    box-sizing: border-box;
+    transition: filter 0.5s;
+    font-size: 50%;
+}
+
+body {
+    position: relative;
+    display: block;
+    margin: 0;
+    background-color: var(--color-1-800);
+    transition: background-color 0.4s;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 1.6rem;
+    color: var(--color-1-800);
+}
+
+* {
+    box-sizing: inherit;
+    letter-spacing: 0.2px;
+    font-family: "Inter", -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+*::before,
+*::after {
+    box-sizing: inherit;
+}

@@ -1,3 +1,4 @@
+import './stylesheets/global.scss';
 import styling from './App.module.scss';
 
 function App() {

@@ -7,8 +7,9 @@
       "jsx": true
     }
   },
-  "plugins": ["simple-import-sort", "unicorn"],
+  "plugins": ["simple-import-sort", "unicorn", "eslint-plugin-css-modules"],
   "rules": {
+    "css-modules/no-unused-class": "warn",
     "unicorn/filename-case": [
       "error",
       {

@@ -1,0 +1,10 @@
+# Dependencies
+node_modules
+
+# Editor directories and files
+.idea/
+!.idea/codeStyles/
+!.idea/.name
+*/.idea
+
+.DS_Store

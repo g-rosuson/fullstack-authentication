@@ -11,7 +11,7 @@ HOURGLASS='\xE2\x8C\x9B'
 SPARKLES='\xE2\x9C\xa8'
 GREEN='\033[0;32m'
 
-# Step 6: Validate commit message
+# Validate commit message
 printf "\n${HOURGLASS} ${YELLOW}Validating commit message. Please wait...${NC}\n"
 npx --no -- commitlint --edit ${1}
 echo "${CHECK_MARK} ${GREEN}Commit message validation complete.${NC}"

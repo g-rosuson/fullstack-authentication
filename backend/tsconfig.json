@@ -5,9 +5,10 @@
     "strict": true,
     "esModuleInterop": true,
     "composite": true,
+    "baseUrl": "./",
     "paths": {
       "*": ["src/*"]
     },
   },
-  "include": ["src/**/*.ts", "src/**/*.json"]
+  "include": ["src/**/*.ts", "src/**/*.json", ".eslintrc.js"]
 }

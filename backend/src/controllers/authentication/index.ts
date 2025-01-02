@@ -2,7 +2,7 @@ import { CookieOptions, Request, Response } from 'express';
 import { v4 as generateId } from 'uuid';
 import bcrypt from 'bcrypt';
 
-import { TokenExpiration } from 'schemas/enums/tokens'
+import { TokenExpiration } from 'schemas/enums/tokens';
 import { IRegisterUserRequest } from 'schemas/types/authentication';
 
 import db from 'db';
@@ -19,7 +19,7 @@ const REFRESH_COOKIE_OPTIONS: CookieOptions = {
     domain: config.isProduction ? config.baseDomain : undefined,
     path: '/',
     maxAge: MAX_AGE,
-}
+};
 
 const register = async (req: Request, res: Response) => {
     try {
@@ -27,7 +27,7 @@ const register = async (req: Request, res: Response) => {
 
         const tokenPayload = {
             email,
-            id: generateId()
+            id: generateId(),
         };
 
         const { accessToken, refreshToken } = services.jwt.createTokens(tokenPayload);
@@ -37,15 +37,12 @@ const register = async (req: Request, res: Response) => {
         const newUser = {
             ...tokenPayload,
             refreshToken,
-            password: hashedPassword
-        }
+            password: hashedPassword,
+        };
 
         await db.service.mutations.users.create(newUser);
 
-        res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS)
-            .status(201)
-            .json({ accessToken })
-
+        res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS).status(201).json({ accessToken });
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
     }
@@ -73,7 +70,7 @@ const login = async (req: Request, res: Response) => {
         // Create JWT tokens
         const tokenPayload = {
             id: userDocument.id,
-            email: userDocument.email
+            email: userDocument.email,
         };
 
         const { accessToken, refreshToken } = services.jwt.createTokens(tokenPayload);
@@ -81,11 +78,8 @@ const login = async (req: Request, res: Response) => {
         // Update user's refresh token in the database
         await db.service.mutations.users.update(userDocument.id, 'refreshToken', refreshToken);
 
-        // Set refresh token as a cookie and send access token to client
-        res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS)
-            .status(200)
-            .json({ accessToken });
-
+        // Set refresh token as a cookie and send access token to frontend
+        res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS).status(200).json({ accessToken });
     } catch (error) {
         res.status(500).json({ message: 'Internal server error', error });
     }
@@ -101,14 +95,14 @@ const signOut = async (req: Request, res: Response) => {
 
     res.clearCookie('refreshToken', {
         httpOnly: REFRESH_COOKIE_OPTIONS.httpOnly,
-        secure: REFRESH_COOKIE_OPTIONS.secure
-    })
-}
+        secure: REFRESH_COOKIE_OPTIONS.secure,
+    });
+};
 
 const authentication = {
     register,
     signOut,
-    login
-}
+    login,
+};
 
 export default authentication;

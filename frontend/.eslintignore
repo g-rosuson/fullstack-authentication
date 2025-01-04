@@ -4,4 +4,4 @@ build/
 dist/
 
 src/vite-env.d.ts
-commitlint.config.js
+*.config.*

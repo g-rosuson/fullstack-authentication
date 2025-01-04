@@ -12,6 +12,9 @@
       "jsx": true
     }
   },
+  "env": {
+    "browser": true
+  },
   "plugins": ["simple-import-sort", "unicorn", "eslint-plugin-css-modules"],
   "rules": {
     "react/react-in-jsx-scope": "off",

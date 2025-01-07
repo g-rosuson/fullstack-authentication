@@ -38,7 +38,7 @@
     }
   },
 
-  "include": ["src", "vite.config.ts"],
+  "include": ["src", "vite.config.ts", "global.d.ts"],
   "exclude": ["node_modules", "build", "dist"],
   "references": [{"path": "./tsconfig.node.json"}]
 }

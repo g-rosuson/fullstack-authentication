@@ -9,3 +9,9 @@
 
 # macOs metadata
 .DS_STORE
+
+# Cached resources
+.eslintcache
+
+# Other info
+tsconfig.tsbuildinfo

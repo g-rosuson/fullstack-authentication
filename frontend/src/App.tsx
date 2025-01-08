@@ -1,5 +1,5 @@
-import AppSetup from './components/container/appSetup/AppSetup.tsx';
-import Authenticator from './components/layout/authenticator/Authenticator.tsx';
+import AppSetup from 'components/container/appSetup/AppSetup';
+import Authenticator from 'components/layout/authenticator/Authenticator';
 
 import './stylesheets/global.scss';
 import styling from './App.module.scss';

@@ -1,5 +1,7 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 
+import api from 'api';
+
 const Authenticator = ({ children }: { children: ReactNode}) => {
     const [state, setState] = useState({
         accessToken: null,
@@ -9,13 +11,7 @@ const Authenticator = ({ children }: { children: ReactNode}) => {
 
     const fetchTokens = useCallback(async () => {
         try {
-            const response = await fetch('http://localhost:1000/api/refresh', {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
+            const response = await api.service.resources.authentication.refreshAccessToken();
 
             const data = await response.json();
 

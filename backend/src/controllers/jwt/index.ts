@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { verify,  JwtPayload, VerifyErrors } from 'jsonwebtoken';
+import { verify, JwtPayload, VerifyErrors } from 'jsonwebtoken';
 
 import { IPartialUser } from 'schemas/types/authentication';
 
@@ -24,22 +24,26 @@ const renewAccessToken = async (req: Request, res: Response) => {
         return;
     }
 
-    verify(refreshToken, config.refreshTokenSecret, (error: VerifyErrors | null, decoded: JwtPayload | string | undefined) => {
-        if (error) {
-            res.status(401).json({ message: 'Unauthorized' });
-            return;
+    verify(
+        refreshToken,
+        config.refreshTokenSecret,
+        (error: VerifyErrors | null, decoded: JwtPayload | string | undefined) => {
+            if (error) {
+                res.status(401).json({ message: 'Unauthorized' });
+                return;
+            }
+
+            const { accessToken } = services.jwt.createTokens(decoded as IPartialUser);
+
+            // TODO/NOTE: Also send a new httpOnly refresh token cookie
+            //  and elongate the expiry date?
+            res.status(200).json({ accessToken });
         }
-
-        const { accessToken } = services.jwt.createTokens(decoded as IPartialUser);
-
-        // TODO/NOTE: We could optionally send a refresh token
-        //  as well, depending on authentication strategy?
-        res.status(200).json({ accessToken });
-    });
-}
+    );
+};
 
 const jwt = {
-    renewAccessToken
-}
+    renewAccessToken,
+};
 
 export default jwt;

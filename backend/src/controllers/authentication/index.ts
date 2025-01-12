@@ -89,14 +89,15 @@ const signOut = async (req: Request, res: Response) => {
     const cookies = req.cookies;
 
     if (!cookies?.refreshToken) {
-        res.status(204).json({ message: 'No token present' });
-        return;
+        return res.status(400).json({ message: 'No refresh token present' });
     }
 
     res.clearCookie('refreshToken', {
         httpOnly: REFRESH_COOKIE_OPTIONS.httpOnly,
         secure: REFRESH_COOKIE_OPTIONS.secure,
     });
+
+    res.status(200).json({ message: 'User successfully logged out' });
 };
 
 const authentication = {

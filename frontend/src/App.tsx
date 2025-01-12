@@ -1,17 +1,22 @@
+import { BrowserRouter } from 'react-router-dom';
+
 import AppSetup from 'components/container/appSetup/AppSetup';
-import Authenticator from 'components/layout/authenticator/Authenticator';
+import Content from 'components/layout/content/Content';
+import TopBar from 'components/layout/topBar/TopBar';
+import Routes from 'components/routing/routes/Routes';
 
 import './stylesheets/global.scss';
-import styling from './App.module.scss';
 
 const App = () => {
     return (
         <AppSetup>
-            <Authenticator>
-                <div className={styling.container}>
-                    App
-                </div>
-            </Authenticator>
+            <BrowserRouter>
+                <TopBar/>
+
+                <Content>
+                    <Routes/>
+                </Content>
+            </BrowserRouter>
         </AppSetup>
     );
 }

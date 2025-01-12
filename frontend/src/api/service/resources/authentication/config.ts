@@ -1,7 +1,7 @@
 const domain = 'auth/';
 
 const config = {
-    paths: {
+    path: {
         register:  domain + 'register',
         login: domain + 'login',
         logout: domain + 'logout',

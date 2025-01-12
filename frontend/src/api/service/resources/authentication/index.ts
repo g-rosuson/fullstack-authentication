@@ -6,7 +6,7 @@ import config from './config';
  * refresh token cookie is sent to the backend end-point.
  */
 const refreshAccessToken = async () => {
-    return await client.get(config.paths.refresh);
+    return await client.get(config.path.refresh);
 }
 
 /**
@@ -14,7 +14,7 @@ const refreshAccessToken = async () => {
  * are sent to the register backend endpoint.
  */
 const register = async (credentials: { email: string, password: string}) => {
-    return await client.post(config.paths.register, credentials);
+    return await client.post(config.path.register, credentials);
 }
 
 /**
@@ -22,7 +22,7 @@ const register = async (credentials: { email: string, password: string}) => {
  * to the login backend endpoint.
  */
 const login = async (credentials: { email: string, password: string }) => {
-    return await client.post(config.paths.login, credentials);
+    return await client.post(config.path.login, credentials);
 }
 
 /**
@@ -30,7 +30,7 @@ const login = async (credentials: { email: string, password: string }) => {
  * to the logout backend endpoint.
  */
 const logout = async () => {
-    return await client.post(config.paths.logout);
+    return await client.post(config.path.logout);
 }
 
 const resources = {

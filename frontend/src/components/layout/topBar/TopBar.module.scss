@@ -1,0 +1,11 @@
+.header {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--gap-small);
+}
+
+.links {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-small);
+}

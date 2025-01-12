@@ -13,11 +13,9 @@ const Authenticator = ({ children }: { children: ReactNode}) => {
         try {
             const response = await api.service.resources.authentication.refreshAccessToken();
 
-            const data = await response.json();
-
             setState(prevState => ({
                 ...prevState,
-                accessToken: data.accessToken || null
+                accessToken: response.accessToken || null
             }));
 
         } catch (error) {
@@ -37,11 +35,7 @@ const Authenticator = ({ children }: { children: ReactNode}) => {
     }, [fetchTokens])
 
 
-    return (
-        <div>
-            {children}
-        </div>
-    );
+    return children;
 };
 
 export default Authenticator;

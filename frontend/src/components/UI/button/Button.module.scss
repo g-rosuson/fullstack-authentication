@@ -1,0 +1,22 @@
+.button {
+    width: 100%;
+    height: var(--ui-element-height);
+    min-width: 12rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--gap-small);
+    border-radius: var(--border-radius);
+    background-color: var(--color-primary);
+    transition: border 0.2s, background-color 0.2s;
+    white-space: nowrap;
+    user-select: none;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--color-button-label);
+    overflow: hidden;
+}
+
+.marginTop {
+    margin-top: var(--gap-large);
+}

@@ -1,0 +1,16 @@
+.container {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.form {
+    width: var(--form-max-width);
+
+    > :not(:last-child) {
+        margin-bottom: var(--gap);
+    }
+}
+
+.link {
+    margin-top: var(--gap-small);
+}

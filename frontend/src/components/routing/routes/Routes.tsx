@@ -1,17 +1,19 @@
 import { Route, Routes as ReactRouterDOMRoutes } from 'react-router-dom';
 
-import Authentication from 'components/pages/authentication/Authentication';
-import Home from 'components/pages/home/Home';
+import Authenticator from '../../layout/authenticator/Authenticator';
+import Authentication from '../../pages/authentication/Authentication';
+import Home from '../../pages/home/Home';
+
+import config from 'config';
 
 const Routes = () => {
     return (
         <ReactRouterDOMRoutes>
-            {/* Routes that don't require authentication */}
-            <Route path="/login" element={<Authentication/>} />
-            <Route path="/register" element={<Authentication/>} />
-
-            {/* Routes that require authentication */}
-            <Route path="/" element={<Home/>}/>
+            <Route element={<Authenticator/>}>
+                <Route path={config.routes.login} element={<Authentication/>} />
+                <Route path={config.routes.register} element={<Authentication/>} />
+                <Route path={config.routes.root} element={<Home/>}/>
+            </Route>
         </ReactRouterDOMRoutes>
     )
 };

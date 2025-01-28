@@ -1,8 +1,8 @@
-import authentication from './authentication';
 import ui from './ui';
+import user from './user';
 
 const reducers = Object.freeze({
-    authentication,
+    user,
     ui
 });
 

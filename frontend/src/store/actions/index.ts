@@ -19,8 +19,7 @@ for (const [domain, resources] of Object.entries(reducerDomains)) {
 
 type Actions = {
     [Domain in keyof typeof reducerDomains]: {
-        // eslint-disable-next-line no-unused-vars
-        [Resource in (typeof reducerDomains[Domain][number])['type']]: string;
+        [Resource in (typeof reducerDomains[Domain][number])['type']]: `${Domain}/${Resource}`;
     };
 };
 

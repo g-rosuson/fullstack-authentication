@@ -1,11 +1,16 @@
 .header {
+    height: var(--ui-element-height);
     display: flex;
-    justify-content: flex-end;
-    padding: var(--gap-small);
+    justify-content: space-between;
 }
 
 .links {
     display: flex;
     align-items: center;
     gap: var(--gap-small);
+}
+
+.avatar {
+    width: 4.5rem;
+    height: 4.5rem;
 }

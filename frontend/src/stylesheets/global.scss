@@ -2,6 +2,8 @@
 :root {
     --color-primary: #3f25d2;
     --color-border: #c7c7c7;
+    --color-bg-primary: #fafafa;
+    --color-bg-primary-hover: #f1f1f1;
     --color-text-primary: #1a1919;
     --color-text-secondary: #423f3f;
     --color-button-label: #f5f5f5;
@@ -10,12 +12,14 @@
     --gap: 2rem;
     --gap-small: 1rem;
 
-    --border-radius: 6px;
     --border-radius-large: 10px;
+    --border-radius: 6px;
+    --border-radius-small: 4px;
 
     --container-max-width: 150rem;
-    --form-max-width: 50rem;
     --ui-element-height: 4.5rem;
+
+    --shadow-light: rgb(199 205 215 / 45%) 0px 2px 4px 0px, rgb(199 205 215 / 15%) 0px 4px 12px 0px;
 }
 
 html {
@@ -30,6 +34,10 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-size: 1.6rem;
+}
+
+a {
+    text-decoration: none;
 }
 
 p,

@@ -42,7 +42,15 @@ const register = async (req: Request, res: Response) => {
 
         await db.service.mutations.users.create(newUser);
 
-        res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS).status(201).json({ accessToken });
+        // Determine user data to send to the front-end
+        const userData = {
+            accessToken,
+            email,
+            id: tokenPayload.id,
+        };
+
+        // Set refresh token as a cookie and send user data to front-end
+        res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS).status(201).json(userData);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
     }
@@ -78,8 +86,15 @@ const login = async (req: Request, res: Response) => {
         // Update user's refresh token in the database
         await db.service.mutations.users.update(userDocument.id, 'refreshToken', refreshToken);
 
-        // Set refresh token as a cookie and send access token to frontend
-        res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS).status(200).json({ accessToken });
+        // Determine user data to send to the front-end
+        const userData = {
+            accessToken,
+            email,
+            id: tokenPayload.id,
+        };
+
+        // Set refresh token as a cookie and send user data to front-end
+        res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS).status(200).json(userData);
     } catch (error) {
         res.status(500).json({ message: 'Internal server error', error });
     }

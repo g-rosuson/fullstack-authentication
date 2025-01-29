@@ -35,9 +35,15 @@ const renewAccessToken = async (req: Request, res: Response) => {
 
             const { accessToken } = services.jwt.createTokens(decoded as IPartialUser);
 
+            const userData = {
+                accessToken,
+                email: userDocument.email,
+                id: userDocument.id,
+            };
+
             // TODO/NOTE: Also send a new httpOnly refresh token cookie
             //  and elongate the expiry date?
-            res.status(200).json({ accessToken });
+            res.status(200).json(userData);
         }
     );
 };

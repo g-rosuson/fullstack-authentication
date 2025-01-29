@@ -1,12 +1,12 @@
-import React, { useEffect,useState } from 'react';
+import { type ChangeEvent, type FormEvent, useEffect,useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import Button from 'components/UI/button/Button';
-import Input from 'components/UI/input/Input';
+import Button from '../../UI/button/Button';
+import Input from '../../UI/input/Input';
 
 import api from 'api';
 import config from 'config';
-import { actions,useStore } from 'store';
+import { actions, useStore } from 'store';
 import utils from 'utils';
 
 import styling from './Authentication.module.scss';
@@ -14,15 +14,15 @@ import styling from './Authentication.module.scss';
 import constants from './constants';
 
 const Authentication = () => {
+    // Store
+    const store = useStore();
+
+
     // State
     const [state, setState] = useState({
         email: '',
         password: '',
     });
-
-
-    // Store
-    const store = useStore();
 
 
     // Hooks
@@ -38,7 +38,7 @@ const Authentication = () => {
     /**
      * Sets the input field changes in the state.
      */
-    const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
 
         setState((prevState) => ({
@@ -51,7 +51,7 @@ const Authentication = () => {
     /**
      * Sets the "accessToken" in the global state on login and register.
      */
-    const onSubmit = async (event: React.FormEvent) => {
+    const onSubmit = async (event: FormEvent) => {
         try {
             event.preventDefault();
 
@@ -59,12 +59,16 @@ const Authentication = () => {
 
             const response = await submitFn(state);
 
-            const payload = {
-                payload: response.accessToken,
-                type: actions.authentication.change_access_token
+            const dispatchPayload = {
+                payload: {
+                    accessToken: response.accessToken,
+                    email: response.email,
+                    id: response.id
+                },
+                type: actions.user.change_user
             }
 
-            store.dispatch(payload)
+            store.dispatch(dispatchPayload);
 
         } catch (error) {
             console.error(error);
@@ -73,14 +77,13 @@ const Authentication = () => {
 
 
    /**
-    * Navigate to root when an "accessToken" is set.
+    * Navigate to root when an "accessToken" is set and valid.
     */
    useEffect(() => {
-        if (store.authentication.accessToken && utils.jwt.isValid(store.authentication.accessToken)) {
+        if (store.user.accessToken && utils.jwt.isValid(store.user.accessToken)) {
             navigate(config.routes.root);
         }
-    }, [store.authentication.accessToken]);
-
+    }, [navigate, store.user.accessToken]);
 
 
     // Headings, labels and route

@@ -1,13 +1,13 @@
 .container {
     width: fit-content;
-    margin: 0 auto;
+    margin: var(--gap) auto;
 }
 
 .form {
-    width: var(--form-max-width);
+    width: 50rem;
 
     > :not(:last-child) {
-        margin-bottom: var(--gap);
+        margin-bottom: var(--gap-large);
     }
 }
 

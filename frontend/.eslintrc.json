@@ -15,7 +15,12 @@
   "env": {
     "browser": true
   },
-  "plugins": ["simple-import-sort", "unicorn", "eslint-plugin-css-modules"],
+  "plugins": [
+    "simple-import-sort",
+    "unicorn",
+    "eslint-plugin-css-modules",
+    "react-hooks"
+  ],
   "rules": {
     "react/react-in-jsx-scope": "off",
     "css-modules/no-unused-class": "warn",
@@ -50,7 +55,9 @@
           ["^.+\\.json$"]
         ]
       }
-    ]
+    ],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   },
   "overrides": [
     {

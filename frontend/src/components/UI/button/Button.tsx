@@ -2,22 +2,16 @@ import styling from './Button.module.scss';
 
 import { Props } from './Button.types';
 
-const Button = ({ children, type, onClick, disabled, addTopMargin }: Props) => {
-    let className = styling.button;
-
-    if (addTopMargin) {
-        className = `${className} ${styling.marginTop}`;
-    }
-
-
+const Button = ({ children, type, onClick, disabled, hidden, isLoading }: Props) => {
     return (
         <button
-            className={className}
+            className={styling.button}
             type={type}
-            onClick={onClick}
+            onClick={isLoading ? undefined : onClick}
             disabled={disabled}
+            hidden={hidden}
         >
-            {children}
+            {isLoading ? <div>Spinner</div> : children}
         </button>
     );
 };

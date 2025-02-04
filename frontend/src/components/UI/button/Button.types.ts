@@ -5,5 +5,6 @@ export type Props = {
     onClick?: MouseEventHandler<HTMLButtonElement>;
     type?: 'button' | 'submit' | 'reset';
     disabled?: boolean;
-    addTopMargin?: boolean;
+    hidden?: boolean;
+    isLoading?: boolean;
 }

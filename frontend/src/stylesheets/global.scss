@@ -4,11 +4,13 @@
     --color-border: #c7c7c7;
     --color-bg-primary: #fafafa;
     --color-bg-primary-hover: #f1f1f1;
+    --color-bg-contrast-light: #eaeaea;
     --color-text-primary: #1a1919;
     --color-text-secondary: #423f3f;
     --color-button-label: #f5f5f5;
 
     --gap-large: 4rem;
+    --gap-medium: 3rem;
     --gap: 2rem;
     --gap-small: 1rem;
 
@@ -19,7 +21,7 @@
     --container-max-width: 150rem;
     --ui-element-height: 4.5rem;
 
-    --shadow-light: rgb(199 205 215 / 45%) 0px 2px 4px 0px, rgb(199 205 215 / 15%) 0px 4px 12px 0px;
+    --shadow-light: 0 2px 6px 0 rgb(0 0 0 / 7%);
 }
 
 html {
@@ -58,6 +60,10 @@ input {
     -webkit-appearance: none;
 }
 
+dialog {
+    border: none;
+}
+
 button {
     cursor: pointer;
 }
@@ -77,4 +83,8 @@ button:disabled {
 *::before,
 *::after {
     box-sizing: inherit;
+}
+
+[hidden] {
+    display: none !important;
 }

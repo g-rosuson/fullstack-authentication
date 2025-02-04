@@ -19,8 +19,17 @@ const isValid = (token: string) => {
     }
 };
 
+/**
+ * Decodes the given JWT.
+ */
+const decode = (token: string) => {
+    return jwtDecode(token);
+}
+
+
 const jwt = {
-    isValid
+    isValid,
+    decode
 };
 
 export default jwt;

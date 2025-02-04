@@ -116,7 +116,7 @@ const Authentication = () => {
                     onChange={onInputChange}
                 />
 
-                <Button type="submit" addTopMargin>
+                <Button type="submit">
                     {buttonLabel}
                 </Button>
             </form>

@@ -1,5 +1,5 @@
 import { type KeyboardEvent, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import Avatar from '../../UI/avatar/Avatar';
 import Dropdown from '../../UI/dropdown/Dropdown';
@@ -17,6 +17,9 @@ const TopBar = () => {
 
     // State
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // Hooks
+    const navigate = useNavigate();
 
 
     /**
@@ -39,6 +42,8 @@ const TopBar = () => {
 
             // Reset the user store object
             store.dispatch({ type: actions.user.clear_user });
+
+            navigate(config.routes.login);
 
         } catch (error) {
             console.error((error as Error).message);

@@ -1,5 +1,7 @@
 import { jwtDecode } from 'jwt-decode';
 
+import logging from 'services/logging';
+
 /**
  * Determines whether the given JWT is valid.
  */
@@ -14,7 +16,7 @@ const isValid = (token: string) => {
         return decoded.exp ? decoded.exp > currentTime : false;
 
     } catch (error) {
-        console.error('JWT invalid', error);
+        logging.error(error as Error);
         return false;
     }
 };
@@ -23,7 +25,13 @@ const isValid = (token: string) => {
  * Decodes the given JWT.
  */
 const decode = (token: string) => {
-    return jwtDecode(token);
+    try {
+        return jwtDecode(token);
+
+    } catch (error) {
+        logging.error(error as Error);
+        return null;
+    }
 }
 
 

@@ -9,7 +9,6 @@ const _fetch = async (path: string , httpOptions: HttpOptions) => {
 
     const { method, body, headers } = httpOptions;
 
-
     const tmpHeaders = {
         'Content-Type': 'application/json',
         ...headers

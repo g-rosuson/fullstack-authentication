@@ -6,6 +6,7 @@ import Input from '../../UI/input/Input';
 
 import api from 'api';
 import config from 'config';
+import logging from 'services/logging';
 import { actions, useStore } from 'store';
 import utils from 'utils';
 
@@ -71,7 +72,7 @@ const Authentication = () => {
             store.dispatch(dispatchPayload);
 
         } catch (error) {
-            console.error(error);
+            logging.error(error as Error);
         }
     };
 

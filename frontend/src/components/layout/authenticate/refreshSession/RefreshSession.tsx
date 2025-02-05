@@ -6,6 +6,7 @@ import Modal from 'components/UI/modal/Modal';
 
 import api from 'api';
 import config from 'config';
+import logging from 'services/logging';
 import { actions, useStore } from 'store';
 
 import styling from './RefreshSession.module.scss';
@@ -77,7 +78,7 @@ const RefreshSession = ({ open, close }: Props) => {
             onClose();
 
         } catch (error) {
-            console.error(error);
+            logging.error(error as Error);
 
             // When the "refreshAccessToken" endpoint throws an error,
             // reset the "accessToken" in the store and navigate to
@@ -109,7 +110,7 @@ const RefreshSession = ({ open, close }: Props) => {
             navigate(config.routes.login);
 
         } catch (error) {
-            console.error((error as Error).message);
+            logging.error(error as Error);
 
             setIsSubmitting(false);
         }

@@ -7,6 +7,7 @@ import RefreshSessionModal from 'components/layout/authenticate/refreshSession/R
 
 import api from 'api';
 import config from 'config';
+import logging from 'services/logging';
 import { actions, useStore } from 'store';
 import utils from 'utils';
 
@@ -63,7 +64,7 @@ const Authenticate = () => {
             setIsLoading(false);
 
         } catch (error) {
-            console.error(error);
+            logging.error(error as Error);
 
             // When the "refreshAccessToken" endpoint
             // throws an error, navigate to login page
@@ -91,7 +92,7 @@ const Authenticate = () => {
         const currentTime = Date.now();
 
         // JWT expiry time in ms
-        const jwtExpiry = (decoded.exp || 0) * 1000;
+        const jwtExpiry = (decoded?.exp || 0) * 1000;
 
         // Deduct the expiry token date from the current time,
         // to create the setTimout duration

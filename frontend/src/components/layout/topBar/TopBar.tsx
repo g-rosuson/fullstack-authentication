@@ -6,6 +6,7 @@ import Dropdown from '../../UI/dropdown/Dropdown';
 
 import api from 'api';
 import config from 'config';
+import logging from 'services/logging';
 import { actions, useStore } from 'store';
 
 import styling from './TopBar.module.scss';
@@ -46,7 +47,7 @@ const TopBar = () => {
             navigate(config.routes.login);
 
         } catch (error) {
-            console.error((error as Error).message);
+            logging.error(error as Error);
         }
     };
 

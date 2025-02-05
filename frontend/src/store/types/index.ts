@@ -6,7 +6,6 @@ import { UserState } from '../reducers/user/user.types';
 type State = {
     ui: UserInterfaceState;
     user: UserState;
-    // eslint-disable-next-line no-unused-vars
     dispatch: (action: DispatchAction) => void;
 }
 

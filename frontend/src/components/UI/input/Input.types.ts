@@ -8,7 +8,6 @@ export type Props =  {
     name: string;
     placeholder: string;
     type: InputType;
-    // eslint-disable-next-line no-unused-vars
     onChange: (event: ChangeEvent<HTMLInputElement>) => void;
     disabled?: boolean;
 }

@@ -42,7 +42,7 @@ const RefreshSession = ({ open, close }: Props) => {
             countdownTimeoutId.current = null;
             hasRefreshedSession.current = false;
             setCountdown(constants.time.logoutTimeout);
-        }, 700);
+        }, constants.time.resetStateTimeout);
 
         close?.();
     };
@@ -132,7 +132,7 @@ const RefreshSession = ({ open, close }: Props) => {
         if (open && !hasRefreshedSession.current) {
             countdownTimeoutId.current = setTimeout(() => {
                 setCountdown(prevState => prevState - 1);
-            }, constants.time.timoutDuration);
+            }, constants.time.timeoutDuration);
         }
 
         return () => {
@@ -148,16 +148,16 @@ const RefreshSession = ({ open, close }: Props) => {
             open={open}
             close={close}
             size="s"
-            primaryLabel="Refresh session"
+            primaryLabel={constants.labels.refreshSessionModal.confirmBtn}
             primaryAction={renewSession}
             isLoading={isSubmitting}
         >
             <Heading level={2} size="l">
-                Refresh session
+                {constants.labels.refreshSessionModal.title}
             </Heading>
 
             <span className={styling.caption}>
-                Your session has expired, please refresh it within <b>90</b> seconds to avoid being logged out.
+                Your session has expired, please refresh it within <b>{constants.time.logoutTimeout}</b> seconds to avoid being logged out.
             </span>
 
             <span className={styling.countdown}>You will be automatically logged out in: <b>{countdown}</b> seconds</span>

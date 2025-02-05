@@ -35,7 +35,6 @@ const Authentication = () => {
     const isLoginActive = location.pathname === config.routes.login;
 
 
-
     /**
      * Sets the input field changes in the state.
      */

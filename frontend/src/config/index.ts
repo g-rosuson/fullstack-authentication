@@ -1,9 +1,9 @@
+import connect from './connect.config';
+import routes from './routes.config';
+
 const config = {
-    routes: {
-        login: '/login',
-        register: '/register',
-        root: '/'
-    }
-}
+    connect,
+    routes
+};
 
 export default config;

@@ -15,19 +15,20 @@ const Modal = (props: Props): React.ReactPortal => {
     // Deconstruct props
     const {
         open,
+        close,
         children,
+        formRef,
         size,
+        dataAttributes,
         primaryAction,
         primaryLabel,
         secondaryAction,
         secondaryLabel,
-        close,
         enableForm,
         isLoading,
         disabled,
-        formRef,
-        dataAttributes,
         disableEscape = false,
+        disableClose = false
     } = props;
 
 
@@ -149,8 +150,8 @@ const Modal = (props: Props): React.ReactPortal => {
             <div role="dialog" className={modalStyle} data-id="modal" ref={modal}>
                 <button
                     className={styling.close}
-                    onClick={close}
-                    hidden={!close}
+                    onClick={disableClose ? undefined : close}
+                    hidden={disableClose}
                 >
                     <Cross thick/>
                 </button>

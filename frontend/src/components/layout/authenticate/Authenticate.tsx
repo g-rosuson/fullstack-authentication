@@ -3,7 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 
 import Spinner from '../../UI/spinner/Spinner';
 import TopBar from '../topBar/TopBar';
-import RefreshSessionModal from 'components/layout/authenticate/refreshSession/RefreshSession';
+import RefreshSessionModal from './refreshSession/RefreshSession';
 
 import api from 'api';
 import config from 'config';
@@ -19,7 +19,7 @@ const Authenticate = () => {
 
     // State
     const [isRenewSessionModalOpen, setIsRefreshSessionModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
 
     // Refs
@@ -44,8 +44,6 @@ const Authenticate = () => {
      */
     const renewAccessToken = useCallback(async () => {
         try {
-            setIsLoading(true);
-
             const response = await api.service.resources.authentication.refreshAccessToken();
 
             const payload = {
@@ -84,7 +82,9 @@ const Authenticate = () => {
             return;
         }
 
-        setIsLoading(true);
+        if (!isLoading) {
+            setIsLoading(true);
+        }
 
         const decoded =  utils.jwt.decode(store.user.accessToken);
 

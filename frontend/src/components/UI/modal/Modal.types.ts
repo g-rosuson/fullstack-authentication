@@ -8,7 +8,9 @@ export type Props = {
     open: boolean;
     close?: () => void;
     children: ReactNode;
+    formRef?: RefObject<HTMLFormElement>;
     size?: 's' | 'm' | 'l' | 'xl';
+    dataAttributes?: DataAttributes;
     primaryAction?: ClickHandler;
     primaryLabel?: string;
     secondaryAction?: ClickHandler;
@@ -16,9 +18,6 @@ export type Props = {
     enableForm?: boolean;
     isLoading?: boolean;
     disabled?: boolean;
-    hideOverflow?: boolean;
     disableEscape?: boolean;
-    formRef?: RefObject<HTMLFormElement>;
-    className?: string;
-    dataAttributes?: DataAttributes;
+    disableClose?: boolean;
 }

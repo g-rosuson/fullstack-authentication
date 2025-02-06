@@ -151,6 +151,7 @@ const RefreshSession = ({ open, close }: Props) => {
             primaryLabel={constants.labels.refreshSessionModal.confirmBtn}
             primaryAction={renewSession}
             isLoading={isSubmitting}
+            disableClose
         >
             <Heading level={2} size="l">
                 {constants.labels.refreshSessionModal.title}

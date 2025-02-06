@@ -2,9 +2,9 @@
  * Logs an error to the console when developing.
  */
 const error = (error: Error) => {
-    const isLocal = window.location.hostname === 'localhost';
+    const isDeveloping = window.location.hostname === 'localhost';
 
-    if (isLocal) {
+    if (isDeveloping) {
         console.error(error);
     }
 };

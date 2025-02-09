@@ -1,8 +1,8 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 
-import controllers from 'controllers';
-import middleware from 'middleware';
+import controllers from 'api/controllers';
+import middleware from 'api/middleware';
 
 import config from './config';
 

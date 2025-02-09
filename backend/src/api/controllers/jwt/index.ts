@@ -6,13 +6,14 @@ import { IPartialUser } from 'schemas/types/authentication';
 import db from 'db';
 import services from 'services';
 import config from 'config';
+import { genericResponse } from 'api/response';
+
 
 const renewAccessToken = async (req: Request, res: Response) => {
     const cookies = req.cookies;
 
     if (!cookies?.refreshToken) {
-        res.status(401).json({ message: 'No refresh token' });
-        return;
+        return genericResponse.badRequest(res, 'token not present');
     }
 
     const refreshToken = cookies.refreshToken;
@@ -20,8 +21,7 @@ const renewAccessToken = async (req: Request, res: Response) => {
     const userDocument = await db.service.queries.users.getByField('refreshToken', refreshToken);
 
     if (!userDocument) {
-        res.status(403).json({ message: 'User not found' });
-        return;
+        return genericResponse.notFound(res, 'user not found');
     }
 
     verify(
@@ -29,8 +29,7 @@ const renewAccessToken = async (req: Request, res: Response) => {
         config.refreshTokenSecret,
         (error: VerifyErrors | null, decoded: JwtPayload | string | undefined) => {
             if (error) {
-                res.status(401).json({ message: 'Unauthorized' });
-                return;
+                return genericResponse.notAuthorised(res);
             }
 
             const { accessToken } = services.jwt.createTokens(decoded as IPartialUser);
@@ -41,9 +40,7 @@ const renewAccessToken = async (req: Request, res: Response) => {
                 id: userDocument.id,
             };
 
-            // TODO/NOTE: Also send a new httpOnly refresh token cookie
-            //  and elongate the expiry date?
-            res.status(200).json(userData);
+            genericResponse.success(res, userData);
         }
     );
 };

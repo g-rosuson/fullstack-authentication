@@ -4,21 +4,20 @@ import { verify } from 'jsonwebtoken';
 import { IPartialUserRequest } from 'schemas/types/authentication';
 
 import config from 'config';
+import { genericResponse } from 'api/response';
 
 const validateJwt =  async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers?.['authorization'] || 'no';
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({
-            message: 'Authorization header not properly formatted'
-        });
+        return genericResponse.badRequest(res, 'Authorization header not properly formatted');
     }
 
     const token = authHeader.split(' ')[1];
 
     verify(token, config.accessTokenSecret, (error, decoded) => {
         if (error) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            return genericResponse.notAuthorised(res);
         }
 
         // Check if decoded is of type JwtPayload

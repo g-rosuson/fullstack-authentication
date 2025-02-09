@@ -1,0 +1,4 @@
+# We need to update git's index since Prettier might
+# have altered and added some files during pre-commit
+# @see https://prettier.io/docs/en/precommit.html#option-5-shell-script
+git update-index -g

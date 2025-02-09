@@ -1,0 +1,108 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Emojis
+CROSS_MARK='\xE2\x9D\x8C'
+
+##################################################
+##################################################
+##              General validation              ##
+##################################################
+##################################################
+
+# Make sure that Node.js 20 is enabled to prevent mismatching
+# package-lock.json files
+MAJOR_VERSION=$(node --version | cut -d'.' -f1 | sed 's/v//')
+
+if [ "$MAJOR_VERSION" -lt 20 ]; then
+  printf "\n${RED}Node.js 20 is required but version ${MAJOR_VERSION} was found${NC}"
+  printf "\n│"
+  printf "\n├── Switch to Node.js version 20 with the command \"nvm use 20\""
+  printf "\n╰── Tip: Make Node.js 20 the default version with \"nvm alias default 20\"\n\n"
+  exit 1
+fi
+
+# Make sure necessary validation flow packages are installed
+if [ ! -d "./frontend/node_modules/eslint" ]; then
+  printf "\n${CROSS_MARK} ${RED}The Frontend dependency [ESLint] is not installed. Please run ${GREEN}npm i${RED} in the frontend folder and try again${NC}\n\n"
+  exit 1
+fi
+
+if [ ! -d "./node_modules/prettier" ]; then
+  printf "\n${CROSS_MARK} ${RED}The Frontend dependency [Prettier] is not installed. Please run ${GREEN}npm i${RED} in the frontend folder and try again${NC}\n\n"
+  exit 1
+fi
+
+##################################################
+##################################################
+##             Backend validation               ##
+##################################################
+##################################################
+
+printf "\n\n${YELLOW}Starting backend validation${NC}\n"
+
+if ! git diff --cached --exit-code --quiet -- backend/; then
+  # Step 1: Run Prettier only on changed files
+  # @see: https://prettier.io/docs/en/precommit.html#option-5-shell-script
+  echo "│"
+  printf "├── ${YELLOW}Formatting changed .ts || .js files in ./backend. Please wait...${NC}\n"
+  FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed -n '/^backend.*\.ts$/p')
+  echo "$FILES" | xargs ./node_modules/.bin/prettier --ignore-unknown --write
+  echo "$FILES" | xargs git add
+  printf "├── ${GREEN}✔ Formatting ./backend complete.${NC}"
+
+  # Step 2: Ensure there are no TypeScript compiling issues
+  echo "\n│\n│"
+  printf "├── ${YELLOW}Check TypeScript types. Please wait...${NC}\n"
+  cd backend && npm run type-check --silent
+  cd ..
+  printf "├── ${GREEN}✔ No TypeScript type issues found.${NC}"
+
+  # Step 3: Run ESLint
+  echo "\n│\n│"
+  printf "├── ${YELLOW}Running ESLint in ./backend. Please wait...${NC}\n"
+  cd backend && npm run lint --silent
+  cd ..
+  printf "╰── ${GREEN}✔ Linting in ./backend complete.${NC}\n\n"
+else
+  printf "╰── ${GREEN}✔ No backend changes detected. Skip validation...${NC}\n\n"
+fi
+
+##################################################
+##################################################
+##              Frontend validation             ##
+##################################################
+##################################################
+
+printf "\n${YELLOW}Starting frontend validation${NC}\n"
+
+if ! git diff --cached --exit-code --quiet -- frontend/; then
+  # Step 1: Check if app compiles
+  echo "\n│\n│"
+  printf "├── ${YELLOW}Perform type checking. Please wait...${NC}\n"
+  cd frontend && npm run type-check --silent
+  cd ..
+  printf "├── ${GREEN}✔ Type checking complete.${NC}"
+
+  # Step 2: Run ESLint
+  echo "\n│\n│"
+  printf "├── ${YELLOW}Validating frontend ESLint rules. Please wait...${NC}\n"
+  cd frontend && npm run lint --silent
+  cd ..
+  printf "├── ${GREEN}✔ ESLint validation complete.${NC}"
+
+  # Step 3: Run Stylelint
+  echo "\n│\n│"
+  printf "├── ${YELLOW}Validating frontend Stylelint rules. Please wait...${NC}\n"
+  cd frontend && npm run lint-styling --silent
+  cd ..
+  printf "╰── ${GREEN}✔ Stylelint validation complete.${NC}\n\n"
+else
+  printf "╰── ${GREEN}✔ No frontend changes detected. Skip validation...${NC}\n\n"
+fi

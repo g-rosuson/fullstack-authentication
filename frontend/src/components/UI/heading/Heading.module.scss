@@ -1,0 +1,32 @@
+.heading {
+    line-height: 1;
+    margin-top: 0;
+    margin-bottom: var(--gap-large);
+    font-size: 3rem;
+    font-weight: 900;
+}
+
+[data-remove-margin="true"].heading {
+    margin-bottom: 0;
+}
+
+.large {
+    @extend .heading;
+    margin-bottom: var(--gap);
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.medium {
+    @extend .heading;
+    margin-bottom: var(--gap-small);
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.small {
+    @extend .heading;
+    margin-bottom: var(--gap-small);
+    font-size: 1.4rem;
+    font-weight: 700;
+}

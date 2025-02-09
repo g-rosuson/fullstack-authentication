@@ -1,0 +1,37 @@
+@keyframes fade-in {
+    to {
+        background-color: rgb(65 78 105 / 80%);
+    }
+}
+
+@keyframes fade-in-from-top {
+    0% {
+        transform: translateY(2rem);
+        opacity: 0;
+    }
+
+    80% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out-from-bottom {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(2rem);
+        opacity: 0;
+    }
+}

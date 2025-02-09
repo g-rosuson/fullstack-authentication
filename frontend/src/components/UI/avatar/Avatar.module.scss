@@ -1,0 +1,21 @@
+.avatar {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+
+    &:focus,
+    &:focus-visible {
+        outline-offset: 0.25rem;
+        outline: var(--color-primary) solid 1px;
+    }
+}
+
+.label {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-button-label);
+}

@@ -1,0 +1,13 @@
+# Dependencies
+node_modules
+
+# Environment variables
+.env
+
+# Editor directories and files
+.idea
+.DS_Store
+dist
+
+# Cached resources
+.eslintcache

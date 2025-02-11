@@ -2,15 +2,13 @@ import { Request, Response } from 'express';
 import { v4 as generateId } from 'uuid';
 import bcrypt from 'bcrypt';
 
-import { IRegisterUserRequest } from 'schemas/types/authentication';
-
 import db from 'db';
 import services from 'services';
 import { authenticationResponse, genericResponse } from 'api/response';
 
 const register = async (req: Request, res: Response) => {
     try {
-        const { email, password } = (req as IRegisterUserRequest).credentials;
+        const { email, password } = req.body;
 
         const userDocument = await db.service.queries.users.getByField('email', email);
 
@@ -45,9 +43,8 @@ const register = async (req: Request, res: Response) => {
 
         // Set refresh token as a cookie and send user data to front-end
         authenticationResponse.success(res, userPayload);
-
     } catch (error) {
-        genericResponse.internalError(res)
+        genericResponse.internalError(res);
     }
 };
 
@@ -91,9 +88,8 @@ const login = async (req: Request, res: Response) => {
 
         // Set refresh token as a cookie and send user data to front-end
         authenticationResponse.success(res, userPayload);
-
     } catch (error) {
-        genericResponse.internalError(res)
+        genericResponse.internalError(res);
     }
 };
 
@@ -101,10 +97,10 @@ const signOut = async (req: Request, res: Response) => {
     const cookies = req.cookies;
 
     if (!cookies?.refreshToken) {
-        return genericResponse.badRequest(res, 'logged out without token')
+        return genericResponse.badRequest(res, 'logged out without token');
     }
 
-    authenticationResponse.logout(res)
+    authenticationResponse.logout(res);
 };
 
 const authentication = {

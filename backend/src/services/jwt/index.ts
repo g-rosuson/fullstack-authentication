@@ -3,34 +3,29 @@ import { sign } from 'jsonwebtoken';
 import config from 'config';
 
 import { TokenExpiration } from 'schemas/enums/tokens';
-import { IPartialUser } from 'schemas/types/authentication';
 
-const _signAccessToken = (payload: { email: string; userId: string; }) => {
+const _signAccessToken = (payload: { id: string; email: string }) => {
     return sign(payload, config.accessTokenSecret, { expiresIn: TokenExpiration.Access });
 };
 
-const _signRefreshToken = (payload: { userId: string }) => {
+const _signRefreshToken = (payload: { id: string; email: string }) => {
     return sign(payload, config.refreshTokenSecret, { expiresIn: TokenExpiration.Refresh });
 };
 
-const createTokens = (userData: IPartialUser) => {
-    const accessTokenPayload = {
-        userId: userData.id,
-        email: userData.email
-    }
+const createTokens = (userData: { id: string; email: string }) => {
+    const tokenPayload = {
+        id: userData.id,
+        email: userData.email,
+    };
 
-    const refreshTokenPayload = {
-        userId: userData.id,
-    }
+    const accessToken = _signAccessToken(tokenPayload);
+    const refreshToken = _signRefreshToken(tokenPayload);
 
-    const accessToken = _signAccessToken(accessTokenPayload)
-    const refreshToken = _signRefreshToken(refreshTokenPayload)
-
-    return { accessToken, refreshToken }
-}
+    return { accessToken, refreshToken };
+};
 
 const jwt = {
-    createTokens
+    createTokens,
 };
 
 export default jwt;

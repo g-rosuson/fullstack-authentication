@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
-import { IPartialUserRequest } from 'schemas/types/authentication';
+import { isJwtPayloadValid } from 'api/shared/validators';
 
 import config from 'config';
 import { genericResponse } from 'api/response';
 
-const validateJwt =  async (req: Request, res: Response, next: NextFunction) => {
+const validateJwt = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers?.['authorization'] || 'no';
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return genericResponse.badRequest(res, 'Authorization header not properly formatted');
+        return genericResponse.badRequest(res, 'authorization header malformed');
     }
 
     const token = authHeader.split(' ')[1];
@@ -20,22 +20,23 @@ const validateJwt =  async (req: Request, res: Response, next: NextFunction) => 
             return genericResponse.notAuthorised(res);
         }
 
-        // Check if decoded is of type JwtPayload
-        if (decoded && typeof decoded !== 'string') {
-            (req as IPartialUserRequest).userData = {
-                userId: decoded.userId as string,
-                email: decoded.email as string,
-            };
+        if (!isJwtPayloadValid(decoded)) {
+            const message = 'token payload structure invalid';
+            return genericResponse.internalError(res, message);
         }
 
-        res.status(200);
+        // Attach user data to request
+        req.user = {
+            id: decoded.id,
+            email: decoded.email,
+        };
 
         next();
     });
-}
+};
 
 const jwt = {
-    validateJwt
-}
+    validateJwt,
+};
 
 export default jwt;

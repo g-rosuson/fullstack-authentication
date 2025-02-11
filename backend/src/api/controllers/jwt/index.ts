@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
-import { verify, JwtPayload, VerifyErrors } from 'jsonwebtoken';
-
-import { IPartialUser } from 'schemas/types/authentication';
+import { verify, type VerifyErrors, type JwtPayload } from 'jsonwebtoken';
 
 import db from 'db';
 import services from 'services';
 import config from 'config';
-import { genericResponse } from 'api/response';
 
+import { isJwtPayloadValid } from 'api/shared/validators';
+import { genericResponse } from 'api/response';
 
 const renewAccessToken = async (req: Request, res: Response) => {
     const cookies = req.cookies;
@@ -24,25 +23,26 @@ const renewAccessToken = async (req: Request, res: Response) => {
         return genericResponse.notFound(res, 'user not found');
     }
 
-    verify(
-        refreshToken,
-        config.refreshTokenSecret,
-        (error: VerifyErrors | null, decoded: JwtPayload | string | undefined) => {
-            if (error) {
-                return genericResponse.notAuthorised(res);
-            }
-
-            const { accessToken } = services.jwt.createTokens(decoded as IPartialUser);
-
-            const userData = {
-                accessToken,
-                email: userDocument.email,
-                id: userDocument.id,
-            };
-
-            genericResponse.success(res, userData);
+    verify(refreshToken, config.refreshTokenSecret, (error: VerifyErrors | null, decoded?: JwtPayload | string) => {
+        if (error) {
+            return genericResponse.notAuthorised(res);
         }
-    );
+
+        if (!isJwtPayloadValid(decoded)) {
+            const message = 'token payload structure invalid';
+            return genericResponse.internalError(res, message);
+        }
+
+        const { accessToken } = services.jwt.createTokens(decoded);
+
+        const userData = {
+            accessToken,
+            email: userDocument.email,
+            id: userDocument.id,
+        };
+
+        genericResponse.success(res, userData);
+    });
 };
 
 const jwt = {

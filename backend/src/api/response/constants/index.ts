@@ -6,9 +6,9 @@ import config from 'config';
 
 export const REFRESH_COOKIE_OPTIONS: CookieOptions = {
     httpOnly: true,
-    secure: config.isProduction,
+    secure: !config.isDeveloping,
     sameSite: 'strict',
-    domain: config.isProduction ? config.baseDomain : undefined,
+    domain: config.domain,
     path: '/',
-    maxAge: TokenExpiration.Refresh * 1000
+    maxAge: TokenExpiration.Refresh * 1000,
 };

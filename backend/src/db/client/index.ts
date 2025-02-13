@@ -4,13 +4,13 @@ import config from 'config';
 
 const DB_NAME = config.mongoDBName;
 
-const client = new MongoClient(config.mongoURL, {
+const client = new MongoClient(config.mongoURI, {
     serverApi: {
         version: ServerApiVersion.v1,
         strict: true,
         deprecationErrors: true,
     },
-    maxPoolSize: 10
+    maxPoolSize: 10,
 });
 
 const connect = async () => {
@@ -19,17 +19,15 @@ const connect = async () => {
 
         await client.db(DB_NAME).command({ ping: 1 });
         console.log('Pinged your deployment. You successfully connected to MongoDB!');
-
-    } catch(err) {
+    } catch (err) {
         console.error(err);
     }
-}
+};
 
 const disconnect = async () => {
     try {
         await client.close();
         console.log('Disconnected from MongoDB');
-
     } catch (err) {
         console.error('Error disconnecting from MongoDB:', err);
     }
@@ -41,6 +39,6 @@ const getDatabase = () => {
     }
 
     throw Error('Could not access DB');
-}
+};
 
-export { getDatabase, connect, disconnect }
+export { getDatabase, connect, disconnect };

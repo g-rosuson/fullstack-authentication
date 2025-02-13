@@ -1,5 +1,7 @@
 import { getDatabase } from 'db/client';
 
+import { logger } from 'services/logging';
+
 const COLLECTION_NAME = 'users';
 
 const getByField = async (fieldName: string, fieldValue: string) => {
@@ -7,14 +9,13 @@ const getByField = async (fieldName: string, fieldValue: string) => {
         const db = getDatabase();
 
         return await db.collection(COLLECTION_NAME).findOne({ [fieldName]: fieldValue });
-
     } catch (error) {
-        console.error((error as Error).message);
+        logger.error(`Error while getting item from collection: "${COLLECTION_NAME}"`, error as Error);
     }
-}
+};
 
 const index = {
-    getByField
-}
+    getByField,
+};
 
 export default index;

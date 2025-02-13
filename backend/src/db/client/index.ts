@@ -1,5 +1,7 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
+import { logger } from 'services/logging';
+
 import config from 'config';
 
 const DB_NAME = config.mongoDBName;
@@ -18,18 +20,18 @@ const connect = async () => {
         await client.connect();
 
         await client.db(DB_NAME).command({ ping: 1 });
-        console.log('Pinged your deployment. You successfully connected to MongoDB!');
-    } catch (err) {
-        console.error(err);
+        logger.info('Pinged your deployment. You successfully connected to MongoDB!');
+    } catch (error) {
+        logger.error('Error connecting to MongoDB:', error as Error);
     }
 };
 
 const disconnect = async () => {
     try {
         await client.close();
-        console.log('Disconnected from MongoDB');
-    } catch (err) {
-        console.error('Error disconnecting from MongoDB:', err);
+        logger.info('Disconnected from MongoDB');
+    } catch (error) {
+        logger.error('Error disconnecting from MongoDB:', error as Error);
     }
 };
 

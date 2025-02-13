@@ -7,6 +7,7 @@ import db from 'db';
 import config from 'config';
 
 import { shutdown } from 'server.utils';
+import { logger } from 'services/logging';
 
 const server = express();
 
@@ -27,7 +28,7 @@ server.use('/api', AuthRoutes);
 
 const serverInstance = server.listen(1000, async () => {
     await db.connect();
-    console.log(`Listening on port ${1000}`);
+    logger.info(`Listening on port ${1000}`);
 });
 
 process.on('SIGTERM', () => shutdown(serverInstance, db.disconnect));

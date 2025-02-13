@@ -1,20 +1,13 @@
-import cookieParser from 'cookie-parser'
+import cookieParser from 'cookie-parser';
 import express from 'express';
-import cors from 'cors'
+import cors from 'cors';
 
-import AuthRoutes from 'routes/authentication';
-
+import AuthRoutes from 'api/routes/authentication';
 import db from 'db';
-
 import config from 'config';
 
-// TODO: Add custom error handling and go over status codes
-// TODO: Add logger
-// TODO: Validate typing
-// TODO: Should we be exiting the process when the server is closed?
-// TODO: Should have logic that ensures only one process is running?
-// TODO: Go over folder structure
-// TODO: Create tests
+import { shutdown } from 'server.utils';
+import { logger } from 'services/logging';
 
 const server = express();
 
@@ -33,20 +26,10 @@ server.use(express.json({ limit: '1kb' }));
 // Authentication routes
 server.use('/api', AuthRoutes);
 
-// TODO: Add validateJwt (remember to call next()) in front of protected routes
-// Protected routes
-
-server.listen(1000, async () => {
+const serverInstance = server.listen(1000, async () => {
     await db.connect();
-    console.log(`Listening on port ${1000}`);
+    logger.info(`Listening on port ${1000}`);
 });
 
-process.on('SIGINT', async () => {
-    await db.disconnect();
-    process.exit(0);
-});
-
-process.on('SIGTERM', async () => {
-    await db.disconnect();
-    process.exit(0);
-});
+process.on('SIGTERM', () => shutdown(serverInstance, db.disconnect));
+process.on('SIGINT', () => shutdown(serverInstance, db.disconnect));

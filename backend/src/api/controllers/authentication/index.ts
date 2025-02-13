@@ -1,29 +1,20 @@
-import { CookieOptions, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { v4 as generateId } from 'uuid';
 import bcrypt from 'bcrypt';
 
-import { TokenExpiration } from 'schemas/enums/tokens';
-import { IRegisterUserRequest } from 'schemas/types/authentication';
-
 import db from 'db';
 import services from 'services';
-import config from 'config';
-
-// Convert the cookie max age to ms
-const MAX_AGE = TokenExpiration.Refresh * 1000;
-
-const REFRESH_COOKIE_OPTIONS: CookieOptions = {
-    httpOnly: true,
-    secure: config.isProduction,
-    sameSite: 'strict',
-    domain: config.isProduction ? config.baseDomain : undefined,
-    path: '/',
-    maxAge: MAX_AGE,
-};
+import { authenticationResponse, genericResponse } from 'api/response';
 
 const register = async (req: Request, res: Response) => {
     try {
-        const { email, password } = (req as IRegisterUserRequest).credentials;
+        const { email, password } = req.body;
+
+        const userDocument = await db.service.queries.users.getByField('email', email);
+
+        if (userDocument) {
+            return genericResponse.conflict(res);
+        }
 
         const tokenPayload = {
             email,
@@ -43,16 +34,17 @@ const register = async (req: Request, res: Response) => {
         await db.service.mutations.users.create(newUser);
 
         // Determine user data to send to the front-end
-        const userData = {
+        const userPayload = {
+            refreshToken,
             accessToken,
             email,
             id: tokenPayload.id,
         };
 
         // Set refresh token as a cookie and send user data to front-end
-        res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS).status(201).json(userData);
+        authenticationResponse.success(res, userPayload);
     } catch (error) {
-        res.status(500).json({ message: (error as Error).message });
+        genericResponse.internalError(res);
     }
 };
 
@@ -65,14 +57,14 @@ const login = async (req: Request, res: Response) => {
 
         // Validate if user exists
         if (!userDocument) {
-            return res.status(404).json({ message: 'Email or password are invalid' });
+            return genericResponse.notFound(res, 'email or password are invalid');
         }
 
         // Validate if password is correct
         const isPasswordValid = await bcrypt.compare(password, userDocument.password);
 
         if (!isPasswordValid) {
-            return res.status(400).json({ message: 'Email or password are invalid' });
+            return genericResponse.notFound(res, 'email or password are invalid');
         }
 
         // Create JWT tokens
@@ -87,16 +79,17 @@ const login = async (req: Request, res: Response) => {
         await db.service.mutations.users.update(userDocument.id, 'refreshToken', refreshToken);
 
         // Determine user data to send to the front-end
-        const userData = {
+        const userPayload = {
+            refreshToken,
             accessToken,
             email,
             id: tokenPayload.id,
         };
 
         // Set refresh token as a cookie and send user data to front-end
-        res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS).status(200).json(userData);
+        authenticationResponse.success(res, userPayload);
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error', error });
+        genericResponse.internalError(res);
     }
 };
 
@@ -104,15 +97,10 @@ const signOut = async (req: Request, res: Response) => {
     const cookies = req.cookies;
 
     if (!cookies?.refreshToken) {
-        return res.status(400).json({ message: 'No refresh token present' });
+        return genericResponse.badRequest(res, 'logged out without token');
     }
 
-    res.clearCookie('refreshToken', {
-        httpOnly: REFRESH_COOKIE_OPTIONS.httpOnly,
-        secure: REFRESH_COOKIE_OPTIONS.secure,
-    });
-
-    res.status(200).json({ message: 'User successfully logged out' });
+    authenticationResponse.logout(res);
 };
 
 const authentication = {

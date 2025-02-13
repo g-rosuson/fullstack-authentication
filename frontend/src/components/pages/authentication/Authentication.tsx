@@ -61,9 +61,9 @@ const Authentication = () => {
 
             const dispatchPayload = {
                 payload: {
-                    accessToken: response.accessToken,
-                    email: response.email,
-                    id: response.id
+                    accessToken: response.data.accessToken,
+                    email: response.data.email,
+                    id: response.data.id
                 },
                 type: actions.user.change_user
             }

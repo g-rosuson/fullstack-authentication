@@ -25,8 +25,9 @@ const _fetch = async (path: string , httpOptions: HttpOptions) => {
 
     // Handle non-2xx HTTP responses
     if (!response.ok) {
-        const responseErrorBody = await response.json();
-        const loggingMessage = `[API]: "${method}" request to "${url}" path, failed with message: \n ${responseErrorBody.message}`;
+        const jsonResponse = await response.json();
+
+        const loggingMessage = `[API]: "${method}" request to "${url}" path, failed with message: \n "${jsonResponse.error.message}"`;
 
         throw new Error(loggingMessage);
     }

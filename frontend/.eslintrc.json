@@ -61,7 +61,7 @@
   },
   "overrides": [
     {
-      "files": ["vite-env.d.ts"],
+      "files": ["vite-env.d.ts", "test/vitest.setup.ts"],
       "rules": {
         "unicorn/filename-case": "off"
       }

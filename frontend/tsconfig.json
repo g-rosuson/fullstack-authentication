@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -33,7 +34,7 @@
     }
   },
 
-  "include": ["src", "vite.config.ts", "global.d.ts"],
+  "include": ["src", "vite.config.ts", "test/vitest.setup.ts", "global.d.ts"],
   "exclude": ["node_modules", "build", "dist"],
   "references": [{"path": "./tsconfig.node.json"}]
 }

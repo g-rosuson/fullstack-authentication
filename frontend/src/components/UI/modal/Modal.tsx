@@ -1,4 +1,4 @@
-import React, { type FormEvent, useEffect, useRef } from 'react';
+import { type FormEvent, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 import Button from '../button/Button';
@@ -11,7 +11,7 @@ import styling from './Modal.module.scss';
 
 const modalRoot = document.getElementById('modal');
 
-const Modal = (props: Props): React.ReactPortal => {
+const Modal = (props: Props) => {
     // Deconstruct props
     const {
         open,
@@ -39,7 +39,8 @@ const Modal = (props: Props): React.ReactPortal => {
 
 
     /**
-     * Closes the modal with an animation if it's mounted;
+     * Adds animation CSS classes to the backdrop and modal when the modal is closed.
+     * And removes the modal from the DOM after the animation has completed.
      */
     const exit = (): void => {
         if (element.current.parentElement !== modalRoot || !modalRoot || !backdrop.current || !modal.current) {
@@ -56,23 +57,28 @@ const Modal = (props: Props): React.ReactPortal => {
 
 
     /**
-     * Handles form submits if the content of the modal is
-     * rendered in a form. By this, we can use HTML
-     * form validation.
+     * Handles form submission when "enableForm" is true. By preventing
+     * the form being reset on submission and calling the "primaryAction"
+     * callback function.
      */
-    const submitHandler = (event: FormEvent) => {
+    const onFormSubmit = (event: FormEvent) => {
         event.preventDefault();
         primaryAction?.();
     };
 
 
     /**
-     * Closes the modal if the escape key is pressed, and it
-     * is currently visible.
+     * Adds a "keydown" event listener, that calls the "close" callback
+     * function when "Escape" is pressed. With the expection of either
+     * "disableClose" or "disableEscape" props being true.
      */
     useEffect(() => {
         const eventHandler = ({ key }: KeyboardEvent) => {
-            if (key === 'Escape' && open && !disableEscape) {
+            const pressedEscape = key === 'Escape';
+
+            const isEscapeDisabled = disableClose || disableEscape;
+
+            if (open && pressedEscape && !isEscapeDisabled) {
                 close?.();
             }
         };
@@ -82,11 +88,13 @@ const Modal = (props: Props): React.ReactPortal => {
         return () => {
             window.removeEventListener('keydown', eventHandler);
         };
-    }, [close, open, disableEscape]);
+    }, [open, close, disableEscape, disableClose]);
 
 
     /**
-     * Opens and closes the modal according to the open prop.
+     * Removes the "fadeout" class from the backdrop element and the "disappear"
+     * class from the modal element when the modal is open. And adds the modal 
+     * to the DOM when the modal is open.
      */
     useEffect(() => {
         if (open) {
@@ -104,50 +112,59 @@ const Modal = (props: Props): React.ReactPortal => {
     let modalStyle = styling[size || 'm'];
 
 
-    // Content of the modal
+    // Determine button container
+    const buttonContainer = (
+        <div 
+            className={styling.buttonRow}
+            data-testid="button-container"
+            hidden={!primaryAction && !secondaryAction}
+        >
+            <Button onClick={secondaryAction} hidden={!secondaryAction}>
+                {secondaryLabel}
+            </Button>
+
+            <Button
+                // When "enableForm" is true, set the button type to "submit" 
+                type={enableForm ? 'submit' : undefined}
+                // When "enableForm" is false, pass the "primaryAction" callback function to the onClick
+                onClick={enableForm ? undefined : primaryAction}
+                isLoading={isLoading}
+                disabled={disabled}
+            >
+                {primaryLabel}
+            </Button>
+        </div>
+    )
+
+
+    // Determine modal content without a form
     let content = (
         <>
             {children}
-
-            <div className={styling.buttonRow} hidden={!primaryAction && !secondaryAction}>
-                <Button onClick={secondaryAction} hidden={!secondaryAction}>
-                    {secondaryLabel}
-                </Button>
-
-                <Button onClick={primaryAction} isLoading={isLoading} disabled={disabled}>
-                    {primaryLabel}
-                </Button>
-            </div>
+            {buttonContainer}
         </>
     );
 
 
-    // If the enableForm prop is true, the modal content
-    // is wrapped in a form element to utilize HTML form
-    // validation.
+    // Determine a modal wrapped in a form tag and enable HTML form validation
     if (enableForm) {
         content = (
-            <form ref={formRef} onSubmit={submitHandler}>
+            <form ref={formRef} onSubmit={onFormSubmit}>
                 {children}
-
-                <div className={styling.buttonRow} hidden={!primaryAction && !secondaryAction}>
-                    <Button onClick={secondaryAction} hidden={!secondaryAction}>
-                        {secondaryLabel}
-                    </Button>
-
-                    <Button type="submit" isLoading={isLoading} disabled={disabled}>
-                        {primaryLabel}
-                    </Button>
-                </div>
+                {buttonContainer}
             </form>
         );
     }
 
 
-    // Component
     const component = (
         <div className={styling.backdrop} {...dataAttributes} ref={backdrop}>
-            <div role="dialog" className={modalStyle} data-id="modal" ref={modal}>
+            <div
+                role="dialog"
+                className={modalStyle}
+                data-id="modal"
+                ref={modal}
+            >
                 <button
                     className={styling.close}
                     onClick={disableClose ? undefined : close}

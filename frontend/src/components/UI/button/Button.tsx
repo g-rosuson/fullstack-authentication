@@ -2,9 +2,10 @@ import styling from './Button.module.scss';
 
 import { Props } from './Button.types';
 
-const Button = ({ children, type, onClick, disabled, hidden, isLoading }: Props) => {
+const Button = ({ children, type, onClick, disabled, hidden, isLoading, testId }: Props) => {
     return (
         <button
+            data-testid={testId}
             className={styling.button}
             type={type}
             onClick={isLoading ? undefined : onClick}

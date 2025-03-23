@@ -7,7 +7,7 @@ const Avatar = ({ email, onClick }: Props) => {
 
 
     return (
-        <button className={styling.avatar} onClick={onClick}>
+        <button className={styling.avatar} data-testid="avatar" onClick={onClick}>
             <span className={styling.label}>
                 {firstLetter}
             </span>

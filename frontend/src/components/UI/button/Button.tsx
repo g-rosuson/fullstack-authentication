@@ -1,3 +1,5 @@
+import Spinner from '../spinner/Spinner';
+
 import styling from './Button.module.scss';
 
 import { Props } from './Button.types';
@@ -11,8 +13,11 @@ const Button = ({ children, type, onClick, disabled, hidden, isLoading, testId }
             onClick={isLoading ? undefined : onClick}
             disabled={disabled}
             hidden={hidden}
+            aria-disabled={disabled || isLoading}
+            aria-hidden={hidden}
+            aria-busy={isLoading}
         >
-            {isLoading ? <div>Spinner</div> : children}
+            {isLoading ? <Spinner/> : children}
         </button>
     );
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Modal from './Modal';
@@ -33,21 +34,21 @@ describe('Modal Component', () => {
     });
 
     // Test "close" callback function
-    it('"close" callback function is invoked when "Escape" key is pressed', () => {
+    it('"close" callback function is invoked when "Escape" key is pressed', async () => {
         setupModal({ close: closeMock });
-        fireEvent.keyDown(window, { key: 'Escape' });
+        await userEvent.keyboard('[Escape]');
         expect(closeMock).toHaveBeenCalledTimes(1);
     });
 
     it('skips invoking the "close" callback function when "Escape" is pressed and "disableEscape" is true', () => {
         setupModal({ close: closeMock, disableEscape: true });
-        fireEvent.keyDown(window, { key: 'Escape' });
+        userEvent.keyboard('[Escape]');
         expect(closeMock).not.toHaveBeenCalled();
     });
 
     it('skips invoking the "close" callback function when "Escape" is pressed and "disableClose" is true', () => {
         setupModal({ close: closeMock, disableClose: true });
-        fireEvent.keyDown(window, { key: 'Escape' });
+        userEvent.keyboard('[Escape]');
         expect(closeMock).not.toHaveBeenCalled();
     });
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Input from './Input';
@@ -12,7 +13,6 @@ const setupControlledInput = () => {
     const ControlledInputComponent = () => {
         // State
         const [value, setValue] = useState('');
-
 
         /**
          * Sets the new value of the input element in the state.
@@ -150,10 +150,10 @@ describe('Input component', () => {
         expect(inputElement).toHaveProperty('type', 'password');
     });
 
-    it('input element receives the correct "value" from parent component', () => {
+    it('input receives the correct value from parent component', async () => {
         setupControlledInput();
         const input = screen.getByTestId('input');
-        fireEvent.change(input, { target: { value: 'new value' } });
+        await userEvent.type(input, 'new value');
         expect(input).toHaveValue('new value');
     });
 
@@ -173,9 +173,8 @@ describe('Input component', () => {
 
     it('label element is correctly associated with the input', () => {
         setupInput(props);
-        const container = screen.getByTestId('input-container');
-        const labelElement = container.querySelector('label');
-        const inputElement = container.querySelector('input');
-        expect(labelElement).toHaveAttribute('for', inputElement?.id);
+        const inputElement = screen.getByTestId('input');
+        const labelElement = screen.getByTestId('label');
+        expect(labelElement).toHaveAttribute('for', inputElement.id);
     });
 });

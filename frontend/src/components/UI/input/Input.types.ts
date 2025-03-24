@@ -10,4 +10,5 @@ export type Props =  {
     type: InputType;
     onChange: (event: ChangeEvent<HTMLInputElement>) => void;
     disabled?: boolean;
+    required?: boolean;
 }

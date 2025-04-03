@@ -2,6 +2,7 @@ import { type ChangeEvent, type FormEvent, useEffect,useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import Button from '../../UI/button/Button';
+import Heading from '../../UI/heading/Heading';
 import Input from '../../UI/input/Input';
 
 import api from 'api';
@@ -23,6 +24,7 @@ const Authentication = () => {
     const [state, setState] = useState({
         email: '',
         password: '',
+        isLoading: false,
     });
 
 
@@ -55,9 +57,14 @@ const Authentication = () => {
         try {
             event.preventDefault();
 
+            setState((prevState) => ({ ...prevState, isLoading: true }));
+
             const submitFn = isLoginActive ? api.service.resources.authentication.login : api.service.resources.authentication.register;
 
-            const response = await submitFn(state);
+            const response = await submitFn({
+                email: state.email,
+                password: state.password,
+            });
 
             const dispatchPayload = {
                 payload: {
@@ -67,11 +74,14 @@ const Authentication = () => {
                 },
                 type: actions.user.change_user
             }
-
+            
             store.dispatch(dispatchPayload);
 
         } catch (error) {
             logging.error(error as Error);
+            
+        } finally {
+            setState((prevState) => ({ ...prevState, isLoading: false }));
         }
     };
 
@@ -95,9 +105,11 @@ const Authentication = () => {
 
     return (
         <div className={styling.container}>
-            <h2>{heading}</h2>
+            <Heading level={2}>
+                {heading}
+            </Heading>
 
-            <form className={styling.form} onSubmit={onSubmit}>
+            <form className={styling.form} data-testid="auth-form" onSubmit={onSubmit}>
                 <Input
                     label={constants.labels.input.email.label}
                     type="email"
@@ -105,6 +117,8 @@ const Authentication = () => {
                     value={state.email}
                     placeholder={constants.labels.input.email.placeholder}
                     onChange={onInputChange}
+                    testId='email-input'
+                    required
                 />
 
                 <Input
@@ -114,9 +128,11 @@ const Authentication = () => {
                     value={state.password}
                     placeholder={constants.labels.input.password.placeholder}
                     onChange={onInputChange}
+                    testId='password-input'
+                    required
                 />
 
-                <Button type="submit">
+                <Button type="submit" isLoading={state.isLoading} testId='auth-submit-button'>
                     {buttonLabel}
                 </Button>
             </form>

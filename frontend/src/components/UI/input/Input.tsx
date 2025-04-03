@@ -4,7 +4,7 @@ import styling from './Input.module.scss';
 
 import { Props } from './Input.types';
 
-const Input: React.FC<Props> = ({ value, label, name, placeholder, type, onChange, disabled, required }) => {
+const Input: React.FC<Props> = ({ value, label, name, placeholder, type, onChange, testId, disabled, required }) => {
     const id = `${label}_${Date.now()}`;
 
 
@@ -21,7 +21,7 @@ const Input: React.FC<Props> = ({ value, label, name, placeholder, type, onChang
                 type={type}
                 name={name}
                 placeholder={placeholder}
-                data-testid="input"
+                data-testid={testId} 
                 onChange={onChange}
                 disabled={disabled}
                 required={required}

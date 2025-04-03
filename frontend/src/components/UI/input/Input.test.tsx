@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import Input from './Input';
 import { Props } from './Input.types';
@@ -29,6 +29,7 @@ const setupControlledInput = () => {
                 placeholder="Test"
                 type="text"
                 onChange={changeHandler}
+                testId="input"
             />
         );
     };
@@ -51,6 +52,7 @@ const setupInput = (props: Props) => {
             onChange={props.onChange}
             disabled={props.disabled}
             required={props.required}
+            testId="input"
         />
     ));
 };
@@ -61,7 +63,7 @@ const setupInput = (props: Props) => {
 describe('Input component', () => {
     let props: Props;
 
-    beforeEach(() => {
+    beforeAll(() => {
         props = {
             value: 'test',
             label: 'Test',
@@ -71,10 +73,6 @@ describe('Input component', () => {
             onChange: () => null,
             disabled: false,
         };
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
     });
 
     // Test input element

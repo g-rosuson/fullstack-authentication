@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeAll, describe, expect, it } from 'vitest';
 
 import Input from './Input';
 import { Props } from './Input.types';

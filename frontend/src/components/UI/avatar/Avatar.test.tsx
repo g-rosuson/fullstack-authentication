@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import Avatar from './Avatar';
 import { Props } from './Avatar.types';
@@ -11,6 +12,7 @@ const setupAvatar = ({ email, onClick }: Props) => {
 };
 
 describe('Avatar component', () => {
+    const mockEmail = 'email@domain.com';
     let onClickMock: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
@@ -22,22 +24,24 @@ describe('Avatar component', () => {
     });
 
     it('its a HTML button element', () => {
-        setupAvatar({ email: 'email@domain.com', onClick: onClickMock });
-        const avatarContainer = screen.getByTestId('avatar');
-        expect(avatarContainer).toBeInstanceOf(HTMLButtonElement);
+        const { getByRole } = setupAvatar({ email: mockEmail, onClick: onClickMock });
+        expect(getByRole('button')).toBeInstanceOf(HTMLButtonElement);
+    });
+
+    it('its has an appropriate aria-label', () => {
+        const { getByRole } = setupAvatar({ email: mockEmail, onClick: onClickMock });
+        const button = getByRole('button');
+        expect(button).toHaveAttribute('aria-label', 'user avatar');
     });
 
     it('renders and capitalizes the first letter of the email', () => {
-        setupAvatar({ email: 'email@domain.com', onClick: onClickMock });
-        const avatarContainer = screen.getByTestId('avatar');
-        const letter = within(avatarContainer).getByText('E');
-        expect(letter).toHaveTextContent('E');
+        const { getByRole } = setupAvatar({ email: mockEmail, onClick: onClickMock });
+        expect(getByRole('button')).toHaveTextContent('E');
     });
 
-    it('invokes the "onClick" callback function when clicked', () => {
-        setupAvatar({ email: 'email@domain.com', onClick: onClickMock });
-        const avatarContainer = screen.getByTestId('avatar');
-        fireEvent.click(avatarContainer);
+    it('invokes the "onClick" callback function when clicked', async () => {
+        const { getByRole } = setupAvatar({ email: mockEmail, onClick: onClickMock });
+        await userEvent.click(getByRole('button'));
         expect(onClickMock).toHaveBeenCalledTimes(1);
     })
 });

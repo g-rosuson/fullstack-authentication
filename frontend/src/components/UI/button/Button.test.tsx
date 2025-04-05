@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import Button from './Button';
 import { Props } from './Button.types';
@@ -26,109 +27,130 @@ describe('Button component', () => {
     });
 
     it('its a HTML button element', () => {
-        setupButton();
-        const button = screen.getByTestId('button');
-        expect(button).toBeInstanceOf(HTMLButtonElement);
+        const { getByRole } = setupButton();
+        expect(getByRole('button')).toBeInstanceOf(HTMLButtonElement);
+    });
+
+    // Test the "aria-disabled" attribute
+    it('sets "aria-disabled" to true when the disabled prop is true', () => {
+        const { getByRole } = setupButton({ disabled: true });
+        expect(getByRole('button')).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('sets "aria-disabled" to true when the isLoading prop is true', () => {
+        const { getByRole } = setupButton({ isLoading: true });
+        expect(getByRole('button')).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    // Test the "aria-busy" attribute
+    it('sets "aria-busy" to true when the isLoading prop is true', () => {
+        const { getByRole } = setupButton({ isLoading: true });
+        expect(getByRole('button')).toHaveAttribute('aria-busy', 'true');
+    });
+
+    it('sets "aria-busy" to false when the isLoading prop is false', () => {
+        const { getByRole } = setupButton({ isLoading: false });
+        expect(getByRole('button')).toHaveAttribute('aria-busy', 'false');
+    });
+
+    // Test the "aria-hidden" attribute
+    it('sets "aria-hidden" to true when the hidden prop is true', () => {
+        const { container } = setupButton({ hidden: true });
+        const button = container.querySelector('button');
+        expect(button).toHaveAttribute('aria-hidden', 'true');
+    });
+
+    it('sets "aria-hidden" to false when the hidden prop is false', () => {
+        const { getByRole } = setupButton({ hidden: false });
+        expect(getByRole('button')).toHaveAttribute('aria-hidden', 'false');
     });
 
     // Test the "children" prop
     it('renders its children', () => {
-        setupButton();
-        const button = screen.getByTestId('button');
+        const { getByRole } = setupButton();
+        const button = getByRole('button');
         const children = within(button).getByText('Children');
         expect(children).toHaveTextContent('Children');
     });
 
     // Test the "disabled" prop
     it('is disabled when "disabled" is true', () => {
-        setupButton({ disabled: true });
-        const button = screen.getByTestId('button');
-        expect(button).toBeDisabled();
+        const { getByRole } = setupButton({ disabled: true });
+        expect(getByRole('button')).toBeDisabled();
     });
 
     it('is enabled when "disabled" is false', () => {
-        setupButton({ disabled: false });
-        const button = screen.getByTestId('button');
-        expect(button).not.toBeDisabled();
+        const { getByRole } = setupButton({ disabled: false });
+        expect(getByRole('button')).not.toBeDisabled();
     });
 
     it('is enabled when "disabled" is undefined', () => {
-        setupButton();
-        const button = screen.getByTestId('button');
-        expect(button).not.toBeDisabled();
+        const { getByRole } = setupButton();
+        expect(getByRole('button')).not.toBeDisabled();
     });
 
     // Test the "hidden" prop
     it('is hidden when "hidden" is true', () => {
-        setupButton({ hidden: true });
-        const button = screen.getByTestId('button');
-        expect(button).not.toBeVisible();
+        const { queryByRole } = setupButton({ hidden: true });
+        expect(queryByRole('button')).toBeNull();
     });
 
     it('is visible when "hidden" is false', () => {
-        setupButton({ hidden: false });
-        const button = screen.getByTestId('button');
-        expect(button).toBeVisible();
+        const { getByRole } = setupButton({ hidden: false });
+        expect(getByRole('button')).toBeVisible();
     });
 
     it('is visible when "hidden" is undefined', () => {
-        setupButton();
-        const button = screen.getByTestId('button');
-        expect(button).toBeVisible();
+        const { getByRole } = setupButton();
+        expect(getByRole('button')).toBeVisible();
     });
 
     // Test the "isLoading" prop
     it('shows spinner when "isLoading" is true', () => {
-        setupButton({ isLoading: true });
-        const spinner = screen.getByTestId('spinner');
+        const { container } = setupButton({ isLoading: true });
+        const spinner = within(container).getByTestId('spinner');
         expect(spinner).toBeInTheDocument();
     });
 
     it('does not render children when "isLoading" is true', () => {
-        setupButton({ isLoading: true });
-        const button = screen.getByTestId('button');
-        expect(within(button).queryByText('Children')).not.toBeInTheDocument();
+        const { container } = setupButton({ isLoading: true });
+        expect(within(container).queryByText('Children')).toBeNull();
     });
 
-    it('does not invoke the "onClick" callback function when "isLoading" is true', () => {
-        setupButton({ isLoading: true, onClick: onClickMock });
-        const button = screen.getByTestId('button');
-        fireEvent.click(button);
+    it('does not invoke the "onClick" callback function when "isLoading" is true', async () => {
+        const { getByRole } = setupButton({ isLoading: true, onClick: onClickMock });
+        await userEvent.click(getByRole('button'));
         expect(onClickMock).not.toHaveBeenCalled();
     });
 
-    it('invokes the "onClick" callback function when "isLoading" is false', () => {
-        setupButton({ isLoading: false, onClick: onClickMock });
-        const button = screen.getByTestId('button');
-        fireEvent.click(button);
+    it('invokes the "onClick" callback function when "isLoading" is false', async () => {
+        const { getByRole } = setupButton({ isLoading: false, onClick: onClickMock });
+        await userEvent.click(getByRole('button'));
         expect(onClickMock).toHaveBeenCalledTimes(1);
     });
 
-    it('invokes the "onClick" callback function when "isLoading" is undefined', () => {
-        setupButton({ onClick: onClickMock });
-        const button = screen.getByTestId('button');
-        fireEvent.click(button);
+    it('invokes the "onClick" callback function when "isLoading" is undefined', async () => {
+        const { getByRole } = setupButton({ onClick: onClickMock });
+        await userEvent.click(getByRole('button'));
         expect(onClickMock).toHaveBeenCalledTimes(1);
     });
 
     // Test the "type" prop
     it('applies the "type" prop correctly', () => {
-        setupButton({ type: 'submit' });
-        const button = screen.getByTestId('button');
-        expect(button).toHaveProperty('type', 'submit');
+        const { getByRole } = setupButton({ type: 'reset' });
+        expect(getByRole('button')).toHaveProperty('type', 'reset');
     });
 
-    it('submits the form when type="submit"', () => {
+    it('submits the form when type="submit"', async () => {
         const handleSubmitMock = vi.fn();
 
         render(
             <form onSubmit={handleSubmitMock}>
-                <Button type="submit" testId="button">Submit</Button>
+                <Button type="submit">Submit</Button>
             </form>
         );
 
-        const button = screen.getByTestId('button');
-        fireEvent.click(button);
+        await userEvent.click(screen.getByRole('button'));
         expect(handleSubmitMock).toHaveBeenCalledTimes(1);
     });
 });

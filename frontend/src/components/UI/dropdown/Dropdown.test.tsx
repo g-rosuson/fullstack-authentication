@@ -2,92 +2,99 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import Dropdown from './Dropdown';
-import { Props } from './Dropdown.types';
 
 /**
- * Renders the dropdown with the given props into the JS-DOM and returns the props.
+ * Renders the dropdown with the given props into the JS-DOM and returns testing utilities.
  */
-const setupDropdown = (props: Partial<Props> = {}) => {
-  const tmpProps: Props = {
-    open: false,
-    close: vi.fn(),
-    actions: [
-      { label: 'Action 1', onClick: vi.fn(), onKeyDown: vi.fn() },
-      { label: 'Action 2', onClick: vi.fn(), onKeyDown: vi.fn() },
-    ],
-    controller: <button>Open Menu</button>,
-    ...props,
-  };
+const setupDropdown = (isOpen = true) => {
+    const props = {
+        open: isOpen,
+        close: vi.fn(),
+        actions: [
+            { label: 'Action 1', action: vi.fn() },
+            { label: 'Action 2', action: vi.fn() },
+        ],
+        controller: <button>Open Menu</button>,
+    };
 
-  render(<Dropdown {...tmpProps} />);
-  return tmpProps;
+    render(<Dropdown {...props} />);
+
+    return {
+        close: props.close,
+        actions: props.actions,
+    };
 };
 
-
 describe('Dropdown component', () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
+    afterEach(() => {
+        vi.clearAllMocks();
+    });
 
-  it('renders the dropdown when open is true', () => {
-    setupDropdown({ open: true });
-    expect(screen.getByRole('menu')).toBeVisible();
-  });
+    it('is visible when open is true', () => {
+        setupDropdown();
+        expect(screen.getByRole('menu')).toBeVisible();
+    });
 
-  it('hides the dropdown when open is false', () => {
-    setupDropdown({ open: false });
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
-  });
+    it('is hidden when "open" is false', () => {
+        setupDropdown(false);
+        expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    });
 
-  it('calls the close function when clicking outside the dropdown', async () => {
-    const props = setupDropdown({ open: true });
+    it('closes when clicking outside the dropdown', async () => {
+        const { close } = setupDropdown();
 
-    // Simulate clicking outside
-    await userEvent.click(document.body);
+        await userEvent.click(document.body);
 
-    expect(props.close).toHaveBeenCalledTimes(1);
-  });
+        expect(close).toHaveBeenCalledTimes(1);
+    });
 
-  it('does not call the close function when clicking inside the dropdown', async () => {
-    const props = setupDropdown({ open: true });
+    it('does not close when clicking inside the dropdown', async () => {
+        const { close } = setupDropdown();
 
-    // Simulate clicking the controller or menu
-    await userEvent.click(screen.getByRole('menu'));
+        await userEvent.click(screen.getByRole('menu'));
 
-    expect(props.close).not.toHaveBeenCalled();
-  });
+        expect(close).not.toHaveBeenCalled();
+    });
 
-  it('triggers the correct action on click', async () => {
-    const props = setupDropdown({ open: true });
+    it('triggers the correct action on click', async () => {
+        const { actions } = setupDropdown();
 
-    // Simulate click on first action
-    await userEvent.click(screen.getByText('Action 1'));
-    expect(props.actions[0].onClick).toHaveBeenCalledTimes(1);
+        await userEvent.click(screen.getByText('Action 1'));
 
-    // Simulate click on second action
-    await userEvent.click(screen.getByText('Action 2'));
-    expect(props.actions[1].onClick).toHaveBeenCalledTimes(1);
-  });
+        expect(actions[0].action).toHaveBeenCalledTimes(1);
+        expect(actions[1].action).not.toHaveBeenCalled();
+    });
 
-  it('supports keyboard navigation using Enter and Space', async () => {
-    const props = setupDropdown({ open: true });
+    it('supports keyboard navigation using Enter', async () => {
+        const { actions } = setupDropdown();
 
-    const firstItem = screen.getByText('Action 1');
-    firstItem.focus();
+        // Set focus on the first item
+        const firstAction = screen.getByText('Action 1');
+        firstAction.focus();
 
-    // Simulate Enter key
-    await userEvent.keyboard('{Enter}');
-    expect(props.actions[0].onKeyDown).toHaveBeenCalledTimes(1);
+        await userEvent.keyboard('{Enter}');
 
-    // Simulate Space key
-    await userEvent.keyboard('{ }');
-    expect(props.actions[0].onKeyDown).toHaveBeenCalledTimes(2);
-  });
+        expect(actions[0].action).toHaveBeenCalledTimes(1);
+    });
 
-  it('has correct accessibility attributes', () => {
-    setupDropdown({ open: true });
-    const menu = screen.getByRole('menu');
-    expect(menu).toHaveAttribute('aria-expanded', 'true');
-    expect(menu).toHaveAttribute('aria-label', 'User menu');
-  });
+    it('supports keyboard navigation using Space', async () => {
+        const { actions } = setupDropdown();
+
+        // Set focus on the first item
+        const firstAction = screen.getByText('Action 1');
+        firstAction.focus();
+
+        await userEvent.keyboard('{ }');
+
+        expect(actions[0].action).toHaveBeenCalledTimes(1);
+    });
+
+    it('has correct accessibility attributes', () => {
+        setupDropdown();
+
+        const menu = screen.getByRole('menu');
+
+        expect(menu).toHaveAttribute('aria-expanded', 'true');
+        expect(menu).toHaveAttribute('aria-label', 'User menu');
+    });
 });

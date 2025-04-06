@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { type KeyboardEvent, useEffect, useRef } from 'react';
 
 import styling from './Dropdown.module.scss';
 
@@ -7,6 +7,18 @@ import { Props } from './Dropdown.types';
 const Dropdown = ({ open, close, actions, controller }: Props) => {
     // Refs
     const menuRef = useRef<HTMLDivElement>(null);
+
+
+    /**
+     * Invokes a menu item action when the user presses Enter or Space.
+     */
+    const keyboardHandler = (event: KeyboardEvent<HTMLLIElement>, action: Function) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            // Prevent scrolling when the space key is pressed
+            event.preventDefault();
+            action();
+        }
+    };
 
 
     /**
@@ -40,25 +52,27 @@ const Dropdown = ({ open, close, actions, controller }: Props) => {
            <ul
                className={open ? styling.dropdown : styling.hidden}
                role="menu"
+               hidden={!open}
                aria-expanded={open}
                aria-label="User menu"
-               hidden={!open}
+               aria-hidden={!open}
            >
-               {actions.map(({ label, onClick, onKeyDown }) => (
+               {actions.map(({ label, action }) => (
                    <li
                        key={label}
                        className={styling.item}
                        role="menuitem"
                        tabIndex={open ? 0 : -1}
-                       onClick={onClick}
-                       onKeyDown={onKeyDown}
+                       onClick={action}
+                       onKeyDown={(event) => keyboardHandler(event, action)}
+                       aria-label={label}
                    >
                        {label}
                    </li>
                ))}
-           </ul>
+           </ul>    
        </div>
     );
-};
+}; 
 
 export default Dropdown;

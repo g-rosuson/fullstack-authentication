@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import Modal from './Modal';
@@ -39,56 +39,56 @@ describe('Modal Component', () => {
         expect(closeMock).toHaveBeenCalledTimes(1);
     });
 
-    it('skips invoking the "close" callback function when "Escape" is pressed and "disableEscape" is true', () => {
+    it('skips invoking the "close" callback function when "Escape" is pressed and "disableEscape" is true', async () => {
         setupModal({ close: closeMock, disableEscape: true });
-        userEvent.keyboard('[Escape]');
+        await userEvent.keyboard('[Escape]');
         expect(closeMock).not.toHaveBeenCalled();
     });
 
-    it('skips invoking the "close" callback function when "Escape" is pressed and "disableClose" is true', () => {
+    it('skips invoking the "close" callback function when "Escape" is pressed and "disableClose" is true', async () => {
         setupModal({ close: closeMock, disableClose: true });
-        userEvent.keyboard('[Escape]');
+        await userEvent.keyboard('[Escape]');
         expect(closeMock).not.toHaveBeenCalled();
     });
 
-    it('skips invoking the "close" callback function when "disableClose" is true', () => {
+    it('skips invoking the "close" callback function when "disableClose" is true', async () => {
         setupModal({ close: closeMock, disableClose: true });
         const modalContainer = screen.getByTestId('modal');
         const button = within(modalContainer).getByTestId('secondary-button');
-        fireEvent.click(button);
+        await userEvent.click(button);
         expect(closeMock).not.toHaveBeenCalled();
     });
 
-    it('"close" callback function is invoked when the "X" close button is pressed', () => {
+    it('"close" callback function is invoked when the "X" close button is pressed', async () => {
         setupModal({ close: closeMock });
         const modalContainer = screen.getByTestId('modal');
         const button = within(modalContainer).getByTestId('close-button');
-        fireEvent.click(button);
+        await userEvent.click(button);
         expect(closeMock).toHaveBeenCalledTimes(1);
     });
 
-    it('skips invoking the "close" callback function with the "X" close button when "disableClose" is true', () => {
+    it('skips invoking the "close" callback function with the "X" close button when "disableClose" is true', async () => {
         setupModal({ close: closeMock, disableClose: true });
         const modalContainer = screen.getByTestId('modal');
         const button = within(modalContainer).getByTestId('close-button');
-        fireEvent.click(button);
+        await userEvent.click(button);
         expect(closeMock).not.toHaveBeenCalled();
     });
 
     // Test "primaryAction" & "secondaryAction" callback functions
-    it('"primaryAction" callback function is invoked when its defined', () => {
+    it('"primaryAction" callback function is invoked when its defined', async () => {
         setupModal({ primaryAction: primaryActionMock });
         const modalContainer = screen.getByTestId('modal');
         const button = within(modalContainer).getByTestId('primary-button');
-        fireEvent.click(button);
+        await userEvent.click(button);
         expect(primaryActionMock).toHaveBeenCalledTimes(1);
     });
 
-    it('"secondaryAction" callback function is invoked when its defined', () => {
+    it('"secondaryAction" callback function is invoked when its defined', async () => {
         setupModal({ secondaryAction: secondaryActionMock });
         const modalContainer = screen.getByTestId('modal');
         const button = within(modalContainer).getByTestId('secondary-button');
-        fireEvent.click(button);
+        await userEvent.click(button);
         expect(secondaryActionMock).toHaveBeenCalledTimes(1);
     });
 
@@ -195,11 +195,11 @@ describe('Modal Component', () => {
     });
 
     // Test primary button
-    it('"primaryButton" invokes "onClick" callback function when "enableForm" is false and "primaryAction" is defined', () => {
+    it('"primaryButton" invokes "onClick" callback function when "enableForm" is false and "primaryAction" is defined', async () => {
         setupModal({ primaryAction: primaryActionMock, enableForm: false });
         const modalContainer = screen.getByTestId('modal');
         const button = within(modalContainer).getByTestId('primary-button');
-        fireEvent.click(button);
+        await userEvent.click(button);
         expect(primaryActionMock).toHaveBeenCalledTimes(1);
     });
 

@@ -9,8 +9,9 @@ const Input: React.FC<Props> = ({ value, label, name, placeholder, type, onChang
 
 
     return (
-        <div className={styling.container} data-testid="input-container">
-            <label htmlFor={id} className={styling.label} data-testid="label">
+        <div className={styling.container}>
+            <label htmlFor={id} className={styling.label}
+            >
                 {label}
             </label>
 
@@ -25,7 +26,8 @@ const Input: React.FC<Props> = ({ value, label, name, placeholder, type, onChang
                 onChange={onChange}
                 disabled={disabled}
                 required={required}
-                aria-label={label}
+                aria-disabled={disabled}
+                aria-required={required}
             />
         </div>
     );

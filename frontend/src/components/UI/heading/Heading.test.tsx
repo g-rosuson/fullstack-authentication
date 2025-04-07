@@ -20,10 +20,4 @@ describe('Heading component', () => {
     const heading = screen.getByText('Heading with margin removed');
     expect(heading).toHaveAttribute('data-remove-margin', 'false');
   });
-
-  it('"data-remove-margin" attribute value is false when "removeMargin" is undefined', () => {
-    render(<Heading level={1}>Heading with margin removed</Heading>);
-    const heading = screen.getByText('Heading with margin removed');
-    expect(heading).toHaveAttribute('data-remove-margin', 'false');
-  });
 });

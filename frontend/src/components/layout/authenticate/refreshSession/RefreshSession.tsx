@@ -27,6 +27,7 @@ const RefreshSession = ({ open, close }: Props) => {
     // Refs
     const hasRefreshedSession = useRef(false);
     const countdownTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const resetCountdownTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 
     // Router
@@ -38,7 +39,7 @@ const RefreshSession = ({ open, close }: Props) => {
      * Resets "countdown" with a delay to prevent content flash.
      */
     const onClose = () => {
-        setTimeout(() => {
+        resetCountdownTimeoutId.current = setTimeout(() => {
             countdownTimeoutId.current = null;
             hasRefreshedSession.current = false;
             setCountdown(constants.time.logoutTimeout);
@@ -138,6 +139,10 @@ const RefreshSession = ({ open, close }: Props) => {
         return () => {
             if (typeof countdownTimeoutId.current === 'number') {
                 clearTimeout(countdownTimeoutId.current);
+            }
+
+            if (typeof resetCountdownTimeoutId.current === 'number') {
+                clearTimeout(resetCountdownTimeoutId.current);
             }
         };
     }, [countdown, logout, open]);

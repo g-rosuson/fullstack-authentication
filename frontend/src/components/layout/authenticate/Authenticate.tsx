@@ -18,7 +18,7 @@ const Authenticate = () => {
 
 
     // State
-    const [isRenewSessionModalOpen, setIsRefreshSessionModalOpen] = useState(false);
+    const [isRefreshSessionModalOpen, setIsRefreshSessionModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
 
@@ -129,7 +129,7 @@ const Authenticate = () => {
             <TopBar/>
             <Outlet/>
             <RefreshSessionModal
-                open={isRenewSessionModalOpen}
+                open={isRefreshSessionModalOpen}
                 close={toggleRefreshSessionModal}
             />
         </>

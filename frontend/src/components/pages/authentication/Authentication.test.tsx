@@ -33,7 +33,7 @@ describe('Authentication component: authentication', () => {
         })),
         actions: {
             user: {
-                change_user: 'CHANGE_USER',
+                change_user: 'user/change_user',
             }
         }
     }));
@@ -154,7 +154,7 @@ describe('Authentication component: authentication', () => {
                     email: mockEmail,
                     id: mockId
                 },
-                type: 'CHANGE_USER'
+                type: 'user/change_user'
             });
         });
     });

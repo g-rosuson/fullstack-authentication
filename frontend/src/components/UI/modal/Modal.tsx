@@ -9,8 +9,6 @@ import type { Props } from './Modal.types';
 // eslint-disable-next-line css-modules/no-unused-class
 import styling from './Modal.module.scss';
 
-const modalRoot = document.getElementById('modal');
-
 const Modal = (props: Props) => {
     // Deconstruct props
     const {
@@ -33,6 +31,7 @@ const Modal = (props: Props) => {
 
 
     // Refs
+    const modalRoot = useRef<HTMLElement | null>(null);
     const element = useRef(document.createElement('div'));
     const backdrop = useRef<HTMLDivElement | null>(null);
     const modal = useRef<HTMLDivElement | null>(null);
@@ -43,7 +42,7 @@ const Modal = (props: Props) => {
      * And removes the modal from the DOM after the animation has completed.
      */
     const exit = (): void => {
-        if (element.current.parentElement !== modalRoot || !modalRoot || !backdrop.current || !modal.current) {
+        if (element.current.parentElement !== modalRoot.current || !modalRoot.current || !backdrop.current || !modal.current) {
             return;
         }
 
@@ -51,7 +50,7 @@ const Modal = (props: Props) => {
         modal.current?.classList.add(styling.disappear);
 
         setTimeout(() => {
-            (element.current.parentElement === modalRoot) && modalRoot.removeChild(element.current);
+            (element.current.parentElement === modalRoot.current) && modalRoot.current?.removeChild(element.current);
         }, 700);
     };
 
@@ -98,9 +97,10 @@ const Modal = (props: Props) => {
      */
     useEffect(() => {
         if (open) {
+            modalRoot.current = document.getElementById('modal');
             backdrop.current?.classList.remove(styling.fadeout);
             modal.current?.classList.remove(styling.disappear);
-            modalRoot?.appendChild(element.current);
+            modalRoot.current?.appendChild(element.current);
         }
 
         return () => exit();

@@ -4,17 +4,14 @@ import styling from './Input.module.scss';
 
 import { Props } from './Input.types';
 
-const Input: React.FC<Props> = ({ value, label, name, placeholder, type, onChange, disabled }) => {
-    // Replaces spaces with hyphens and converts the label to lowercase
-    const convertedLabel = label.replace(/\s+/g, '_').toLowerCase();
-
-    // Create an id with the converted label and a timestamp
-    const id = `${convertedLabel}_${Date.now()}`;
+const Input: React.FC<Props> = ({ value, label, name, placeholder, type, onChange, testId, disabled, required }) => {
+    const id = `${label}_${Date.now()}`;
 
 
     return (
         <div className={styling.container}>
-            <label htmlFor={id} className={styling.label}>
+            <label htmlFor={id} className={styling.label}
+            >
                 {label}
             </label>
 
@@ -25,9 +22,12 @@ const Input: React.FC<Props> = ({ value, label, name, placeholder, type, onChang
                 type={type}
                 name={name}
                 placeholder={placeholder}
+                data-testid={testId} 
                 onChange={onChange}
                 disabled={disabled}
-                required
+                required={required}
+                aria-disabled={disabled}
+                aria-required={required}
             />
         </div>
     );

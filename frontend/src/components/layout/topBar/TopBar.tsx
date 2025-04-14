@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import Avatar from '../../UI/avatar/Avatar';
@@ -18,6 +18,7 @@ const TopBar = () => {
 
     // State
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
 
     // Hooks
     const navigate = useNavigate();
@@ -52,24 +53,11 @@ const TopBar = () => {
     };
 
 
-    /**
-     * Invokes actions for each user menu item.
-     */
-    const keyboardHandler = async (event: KeyboardEvent, action: 'logout') => {
-        const wasEnterPressed = event.key === 'Enter';
-
-        if (isMenuOpen && wasEnterPressed && action === 'logout') {
-            await onLogout();
-        }
-    }
-
-
     // Determine user menu actions
     const userMenuActions = [
         {
             label: 'Logout',
-            onClick: onLogout,
-            onKeyDown: (e: KeyboardEvent) => keyboardHandler(e, 'logout')
+            action: onLogout
         }
     ];
 

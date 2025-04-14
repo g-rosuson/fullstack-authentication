@@ -15,6 +15,15 @@
   "env": {
     "browser": true
   },
+  "globals": {
+    "vi": "readonly",
+    "it": "readonly",
+    "expect": "readonly",
+    "describe": "readonly",
+    "beforeEach": "readonly",
+    "afterEach": "readonly",
+    "beforeAll": "readonly"
+  },
   "plugins": [
     "simple-import-sort",
     "unicorn",

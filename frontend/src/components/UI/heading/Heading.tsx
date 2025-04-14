@@ -27,7 +27,7 @@ const Heading = ({ size, level, children, removeMargin }: Props) => {
 
 
     return (
-        <Tag className={className} data-remove-margin={!!removeMargin}>
+        <Tag className={className} data-remove-margin={removeMargin}>
             {children}
         </Tag>
     );

@@ -9,8 +9,6 @@ import type { Props } from './Modal.types';
 // eslint-disable-next-line css-modules/no-unused-class
 import styling from './Modal.module.scss';
 
-const modalRoot = document.getElementById('modal');
-
 const Modal = (props: Props) => {
     // Deconstruct props
     const {
@@ -33,6 +31,7 @@ const Modal = (props: Props) => {
 
 
     // Refs
+    const modalRoot = useRef<HTMLElement | null>(null);
     const element = useRef(document.createElement('div'));
     const backdrop = useRef<HTMLDivElement | null>(null);
     const modal = useRef<HTMLDivElement | null>(null);
@@ -43,7 +42,7 @@ const Modal = (props: Props) => {
      * And removes the modal from the DOM after the animation has completed.
      */
     const exit = (): void => {
-        if (element.current.parentElement !== modalRoot || !modalRoot || !backdrop.current || !modal.current) {
+        if (element.current.parentElement !== modalRoot.current || !modalRoot.current || !backdrop.current || !modal.current) {
             return;
         }
 
@@ -51,7 +50,7 @@ const Modal = (props: Props) => {
         modal.current?.classList.add(styling.disappear);
 
         setTimeout(() => {
-            (element.current.parentElement === modalRoot) && modalRoot.removeChild(element.current);
+            (element.current.parentElement === modalRoot.current) && modalRoot.current?.removeChild(element.current);
         }, 700);
     };
 
@@ -98,9 +97,10 @@ const Modal = (props: Props) => {
      */
     useEffect(() => {
         if (open) {
+            modalRoot.current = document.getElementById('modal');
             backdrop.current?.classList.remove(styling.fadeout);
             modal.current?.classList.remove(styling.disappear);
-            modalRoot?.appendChild(element.current);
+            modalRoot.current?.appendChild(element.current);
         }
 
         return () => exit();
@@ -119,22 +119,27 @@ const Modal = (props: Props) => {
             data-testid="button-container"
             hidden={!primaryAction && !secondaryAction}
         >
-            <Button onClick={secondaryAction} hidden={!secondaryAction}>
+            <Button 
+                onClick={secondaryAction} 
+                hidden={!secondaryAction}
+                testId='secondary-button'
+            >
                 {secondaryLabel}
             </Button>
 
             <Button
-                // When "enableForm" is true, set the button type to "submit" 
+                // Set the button type to "submit" when the form is enabled
                 type={enableForm ? 'submit' : undefined}
-                // When "enableForm" is false, pass the "primaryAction" callback function to the onClick
+                testId='primary-button'
+                // Pass the "primaryAction" callback to the onClick when not using the form
                 onClick={enableForm ? undefined : primaryAction}
                 isLoading={isLoading}
-                disabled={disabled}
+                disabled={disabled || !primaryAction}
             >
                 {primaryLabel}
             </Button>
         </div>
-    )
+    );
 
 
     // Determine modal content without a form
@@ -149,7 +154,7 @@ const Modal = (props: Props) => {
     // Determine a modal wrapped in a form tag and enable HTML form validation
     if (enableForm) {
         content = (
-            <form ref={formRef} onSubmit={onFormSubmit}>
+            <form ref={formRef} data-testid="form" onSubmit={onFormSubmit}>
                 {children}
                 {buttonContainer}
             </form>
@@ -162,11 +167,13 @@ const Modal = (props: Props) => {
             <div
                 role="dialog"
                 className={modalStyle}
+                data-testid="modal"
                 data-id="modal"
                 ref={modal}
             >
                 <button
                     className={styling.close}
+                    data-testid="close-button"
                     onClick={disableClose ? undefined : close}
                     hidden={disableClose}
                 >

@@ -9,5 +9,7 @@ export type Props =  {
     placeholder: string;
     type: InputType;
     onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    testId?: string;
     disabled?: boolean;
+    required?: boolean;
 }

@@ -1,9 +1,8 @@
-import { KeyboardEvent, ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 type Action = {
     label: string;
-    onClick: () => Promise<void> | void;
-    onKeyDown: (event: KeyboardEvent) => Promise<void> | void;
+    action: () => Promise<void> | void;
 }
 
 type Props = {

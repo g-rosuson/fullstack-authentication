@@ -6,9 +6,12 @@ const Spinner = () => {
             className={styling.spinner}
             role="progressbar"
             aria-busy="true"
-            aria-label="Loading resources..."
+            aria-label="Loading"
+            data-testid="spinner"
         >
-            Loading resources...
+            <span className={styling.dot}/>
+            <span className={styling.dot}/>
+            <span className={styling.dot}/>
         </div>
     );
 };

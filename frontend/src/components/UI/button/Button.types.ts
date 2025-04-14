@@ -7,4 +7,5 @@ export type Props = {
     disabled?: boolean;
     hidden?: boolean;
     isLoading?: boolean;
+    testId?: string;
 }

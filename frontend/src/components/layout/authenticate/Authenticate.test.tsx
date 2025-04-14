@@ -1,6 +1,5 @@
-import { act } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, Mock } from 'vitest'
 
 import api from 'api';
@@ -39,11 +38,7 @@ describe('Authenticate component', () => {
     // Mock store
     vi.mock('../../../store', async () => ({
         useStore: vi.fn(() => ({
-            user: { 
-                accessToken: mockUserStore.accessToken,
-                email: mockUserStore.email,
-                id: mockUserStore.id
-            },
+            user: mockUserStore,
             dispatch: mockDispatch
         })),
         actions: {

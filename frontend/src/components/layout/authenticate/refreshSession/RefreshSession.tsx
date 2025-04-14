@@ -26,13 +26,13 @@ const RefreshSession = ({ open, close }: Props) => {
 
     // Refs
     const hasRefreshedSession = useRef(false);
+    const isLoggingOut = useRef(false);
     const countdownTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
     const resetCountdownTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 
     // Router
     const navigate = useNavigate();
-
 
 
     /**
@@ -42,6 +42,7 @@ const RefreshSession = ({ open, close }: Props) => {
         resetCountdownTimeoutId.current = setTimeout(() => {
             countdownTimeoutId.current = null;
             hasRefreshedSession.current = false;
+            isLoggingOut.current = false;
             setCountdown(constants.time.logoutTimeout);
         }, constants.time.resetStateTimeout);
 
@@ -91,31 +92,25 @@ const RefreshSession = ({ open, close }: Props) => {
 
 
     /**
-     * Note: Returns early when this function is invoked the second time after
-     * logging out and setting the state.
-     * - Logs the user out and resets the user object in the store.
-     * - And navigates to the login page when successful.
+     * Calls the "logout" endpoint when an "accessToken" is set in the store,
+     * and clears the user object in the store and navigates to the login route
      */
     const logout = useCallback(async () => {
         try {
-            if (!store.user.accessToken) {
-                return;
-            }
-
             setIsSubmitting(true);
 
-            await api.service.resources.authentication.logout();
-
-            store.dispatch({ type: actions.user.clear_user });
-
-            navigate(config.routes.login);
+            if (store.user.accessToken) {
+                await api.service.resources.authentication.logout();
+            }
 
         } catch (error) {
             logging.error(error as Error);
 
-            setIsSubmitting(false);
+        } finally {
+            store.dispatch({ type: actions.user.clear_user });
+            navigate(config.routes.login);
         }
-    }, [navigate, store])
+    }, [navigate, store]);
 
 
     /**
@@ -125,12 +120,21 @@ const RefreshSession = ({ open, close }: Props) => {
      * - Clears the interval when the component unmounts or when the countdown stops.
      */
     useEffect(() => {
-        if (open && countdown === 0) {
+        // Log the user out when:
+        // - The modal is open
+        // - The countdown reaches zero
+        // - The user is not already being logged out
+        if (open && countdown === 0 && !isLoggingOut.current) {
+            isLoggingOut.current = true;
             logout();
             return;
         }
 
-        if (open && !hasRefreshedSession.current) {
+        // Decrement the countdown when:
+        // - The modal is open
+        // - The countdown is greater than zero
+        // - The session is not being refreshed
+        if (open && countdown > 0 && !hasRefreshedSession.current) {
             countdownTimeoutId.current = setTimeout(() => {
                 setCountdown(prevState => prevState - 1);
             }, constants.time.timeoutDuration);
@@ -166,7 +170,7 @@ const RefreshSession = ({ open, close }: Props) => {
                 Your session has expired, please refresh it within <b>{constants.time.logoutTimeout}</b> seconds to avoid being logged out.
             </span>
 
-            <span className={styling.countdown}>You will be automatically logged out in: <b>{countdown}</b> seconds</span>
+            <span className={styling.countdown}>You will be automatically logged out in: <b data-testid="countdown">{countdown}</b> seconds</span>
         </Modal>
     );
 };

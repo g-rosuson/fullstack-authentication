@@ -4,24 +4,15 @@ import config from 'config';
 
 import { TokenExpiration } from 'schemas/enums/tokens';
 
-const _signAccessToken = (payload: { id: string; email: string }) => {
-    return sign(payload, config.accessTokenSecret, { expiresIn: TokenExpiration.Access });
-};
+const _signToken = (payload: { id: string; email: string }, signAccessToken = true) => {
+    const tokenSecret = signAccessToken ? config.accessTokenSecret : config.refreshTokenSecret;
+    const expiresIn = signAccessToken ? TokenExpiration.Access : TokenExpiration.Refresh;
 
-const _signRefreshToken = (payload: { id: string; email: string }) => {
-    return sign(payload, config.refreshTokenSecret, { expiresIn: TokenExpiration.Refresh });
+    return sign(payload, tokenSecret, { expiresIn });
 };
 
 const createTokens = (userData: { id: string; email: string }) => {
-    const tokenPayload = {
-        id: userData.id,
-        email: userData.email,
-    };
-
-    const accessToken = _signAccessToken(tokenPayload);
-    const refreshToken = _signRefreshToken(tokenPayload);
-
-    return { accessToken, refreshToken };
+    return { accessToken: _signToken(userData), refreshToken: _signToken(userData, false) };
 };
 
 const jwt = {

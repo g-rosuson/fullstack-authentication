@@ -9,6 +9,8 @@
     "paths": {
       "*": ["src/*"]
     },
+    // Tells TypeScript where to look for global type declarations
+    "typeRoots": ["src/types"]
   },
-  "include": ["src/**/*.ts", "src/**/*.json", ".eslintrc.js"]
+  "include": ["src/**/*.ts", "src/**/*.json", ".eslintrc.js"],
 }

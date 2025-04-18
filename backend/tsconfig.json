@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "resolveJsonModule": true,
-    "target": "es5",
+    "moduleResolution": "node", 
+    "target": "es2022",
     "strict": true,
     "esModuleInterop": true,
     "composite": true,
@@ -10,7 +10,7 @@
       "*": ["src/*"]
     },
     // Tells TypeScript where to look for global type declarations
-    "typeRoots": ["src/types"]
+    "typeRoots": ["src/global.d.ts"]
   },
   "include": ["src/**/*.ts", "src/**/*.json", ".eslintrc.js"],
 }

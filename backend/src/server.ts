@@ -2,9 +2,9 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import cors from 'cors';
 
-import AuthRoutes from 'api/routes/authentication';
+import authenticationRoutes from 'modules/auth/auth.routes';
+import config from 'config/config';
 import db from 'db';
-import config from 'config';
 
 import { shutdown } from 'server.utils';
 import { logger } from 'services/logging';
@@ -24,7 +24,7 @@ server.use(express.urlencoded({ extended: true, limit: '1kb' }));
 server.use(express.json({ limit: '1kb' }));
 
 // Authentication routes
-server.use('/api', AuthRoutes);
+server.use('/api', authenticationRoutes);
 
 const serverInstance = server.listen(1000, async () => {
     await db.connect();

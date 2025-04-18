@@ -1,27 +1,21 @@
 import { getDatabase } from 'db/client';
 import { logger } from 'services/logging';
 
-const COLLECTION_NAME = 'users';
-const db = getDatabase();
+import config from 'db/config/config';
 
-const create = async (userData: { email: string; password: string; refreshToken: string }) => {
+const db = getDatabase();
+const COLLECTION_NAME = config.db.collection.users.name;
+
+const create = async (userData: { email: string; password: string }) => {
     try {
         return await db.collection(COLLECTION_NAME).insertOne(userData);
     } catch (error) {
         logger.error(`Error while adding item to collection: "${COLLECTION_NAME}"`, error as Error);
-    }
-};
-
-const update = async (userId: string, fieldName: string, fieldValue: string) => {
-    try {
-        return await db.collection(COLLECTION_NAME).updateOne({ id: userId }, { $set: { [fieldName]: fieldValue } });
-    } catch (error) {
-        logger.error(`Error while updating item in collection: "${COLLECTION_NAME}"`, error as Error);
+        throw error; // Forward error to controller
     }
 };
 
 const mutations = {
-    update,
     create,
 };
 

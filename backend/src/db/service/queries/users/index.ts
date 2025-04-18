@@ -2,20 +2,22 @@ import { getDatabase } from 'db/client';
 
 import { logger } from 'services/logging';
 
-const COLLECTION_NAME = 'users';
+import config from 'db/config/config';
 
-const getByField = async (fieldName: string, fieldValue: string) => {
+const COLLECTION_NAME = config.db.collection.users.name;
+
+const getByEmail = async (email: string) => {
     try {
         const db = getDatabase();
 
-        return await db.collection(COLLECTION_NAME).findOne({ [fieldName]: fieldValue });
+        return await db.collection(COLLECTION_NAME).findOne({ email });
     } catch (error) {
         logger.error(`Error while getting item from collection: "${COLLECTION_NAME}"`, error as Error);
     }
 };
 
 const index = {
-    getByField,
+    getByEmail,
 };
 
 export default index;

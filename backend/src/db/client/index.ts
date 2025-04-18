@@ -2,11 +2,13 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 
 import { logger } from 'services/logging';
 
-import config from 'config';
+import config from '../config/config';
 
-const DB_NAME = config.mongoDBName;
+import setup from '../setup';
 
-const client = new MongoClient(config.mongoURI, {
+const DB_NAME = config.db.name;
+
+const client = new MongoClient(config.db.uri, {
     serverApi: {
         version: ServerApiVersion.v1,
         strict: true,
@@ -18,9 +20,10 @@ const client = new MongoClient(config.mongoURI, {
 const connect = async () => {
     try {
         await client.connect();
+        const db = client.db(DB_NAME);
 
-        await client.db(DB_NAME).command({ ping: 1 });
-        logger.info('Pinged your deployment. You successfully connected to MongoDB!');
+        await setup.pingDatabase(db);
+        await setup.indexCollections(db);
     } catch (error) {
         logger.error('Error connecting to MongoDB:', error as Error);
     }

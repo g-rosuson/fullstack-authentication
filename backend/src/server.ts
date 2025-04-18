@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 
 import authenticationRoutes from 'modules/auth/auth.routes';
-import config from 'config/config';
+import config from 'config';
 import db from 'db';
 
 import { shutdown } from 'server.utils';

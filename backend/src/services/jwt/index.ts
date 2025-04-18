@@ -2,7 +2,7 @@ import { sign } from 'jsonwebtoken';
 
 import { TokenExpiration } from 'shared/enums';
 
-import config from 'config/config';
+import config from 'config';
 
 const _signToken = (payload: { id: string; email: string }, signAccessToken = true) => {
     const tokenSecret = signAccessToken ? config.accessTokenSecret : config.refreshTokenSecret;

@@ -2,7 +2,7 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 
 import { logger } from 'services/logging';
 
-import config from '../config/config';
+import config from '../config';
 
 import setup from '../setup';
 

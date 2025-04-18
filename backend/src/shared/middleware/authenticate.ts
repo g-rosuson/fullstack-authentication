@@ -3,7 +3,7 @@ import { verify } from 'jsonwebtoken';
 
 import { parseSchema } from 'lib/validation';
 import { response } from 'response';
-import config from 'config/config';
+import config from 'config';
 
 import schema, { JWTPayload } from 'shared/schemas';
 

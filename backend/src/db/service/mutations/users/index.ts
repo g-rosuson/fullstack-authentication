@@ -1,7 +1,7 @@
 import { getDatabase } from 'db/client';
 import { logger } from 'services/logging';
 
-import config from 'db/config/config';
+import config from 'db/config';
 
 const db = getDatabase();
 const COLLECTION_NAME = config.db.collection.users.name;

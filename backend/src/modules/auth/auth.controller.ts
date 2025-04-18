@@ -7,7 +7,7 @@ import { verify } from 'jsonwebtoken';
 import { authenticationResponse, response } from 'response';
 import { parseSchema } from 'lib/validation';
 import jwtService from 'services/jwt';
-import config from 'config/config';
+import config from 'config';
 import db from 'db';
 
 import { type AuthenticationPayload } from './auth.schemas';

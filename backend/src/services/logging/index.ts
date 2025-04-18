@@ -1,4 +1,4 @@
-import config from 'config/config';
+import config from 'config';
 
 class Logger {
     private log(level: 'debug' | 'info' | 'warn' | 'error', message: string, meta?: object) {

@@ -1,13 +1,13 @@
 import { type NextFunction, type Request, type Response } from 'express';
 
-import schema, { type AuthenticationPayload } from './auth.schemas';
+import schema, { type AuthenticationInputDto } from './dto/input';
 
-import { response } from 'response';
+import response from 'response';
 
 import { parseSchema } from 'lib/validation';
 
 const validate = async (req: Request, res: Response, next: NextFunction) => {
-    const result = parseSchema<AuthenticationPayload>(schema.authentication, req.body);
+    const result = parseSchema<AuthenticationInputDto>(schema.authenticationInputDto, req.body);
 
     if (!result.success) {
         return response.badRequest(res, { issues: result.issues });

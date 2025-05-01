@@ -2,8 +2,6 @@ import { Response } from 'express';
 
 import { Error } from './types';
 
-import { REFRESH_COOKIE_OPTIONS, REFRESH_COOKIE_NAME } from './constants';
-
 const response = {
     // Successful responses
     // 200 OK: The request was successful, and the server is returning the requested data
@@ -61,21 +59,4 @@ const response = {
     },
 };
 
-const authenticationResponse = {
-    success: (res: Response, payload: { refreshToken: string; accessToken: string; email: string; id: string }) => {
-        res.cookie(REFRESH_COOKIE_NAME, payload.refreshToken, REFRESH_COOKIE_OPTIONS());
-
-        return response.success(res, {
-            id: payload.id,
-            email: payload.email,
-            accessToken: payload.accessToken,
-        });
-    },
-    logout: (res: Response) => {
-        res.clearCookie(REFRESH_COOKIE_NAME, REFRESH_COOKIE_OPTIONS(false));
-
-        return response.success(res, { loggedOut: true });
-    },
-};
-
-export { authenticationResponse, response };
+export default response;

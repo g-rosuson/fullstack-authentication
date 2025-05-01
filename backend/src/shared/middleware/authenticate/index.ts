@@ -2,10 +2,13 @@ import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
 import { parseSchema } from 'lib/validation';
-import { response } from 'response';
+import response from 'response';
 import config from 'config';
 
-import schema, { JWTPayload } from 'shared/schemas';
+import schema, { JWTInputDto } from './dto/input';
+
+const MALFORMED_AUTHORIZATION_HEADER_MSG = 'authorization header malformed';
+const INVALID_TOKEN_STRUCTURE_MSG = 'token payload structure invalid';
 
 /**
  * Verifies the access-token from the "authorization" header before forwarding
@@ -19,7 +22,7 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
         const isHeaderInvalid = !authHeader || !authHeader.startsWith('Bearer ');
 
         if (isHeaderInvalid) {
-            return response.badRequest(res, { message: 'authorization header malformed' });
+            return response.badRequest(res, { message: MALFORMED_AUTHORIZATION_HEADER_MSG });
         }
 
         // Extract the access-token
@@ -30,10 +33,10 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
         const decoded = verify(accessToken, config.accessTokenSecret);
 
         // Validate the refresh JWT structure
-        const result = parseSchema<JWTPayload>(schema.jwt, decoded);
+        const result = parseSchema<JWTInputDto>(schema.jwtInputDto, decoded);
 
         if (!result.success) {
-            return response.internalError(res, 'token payload structure invalid');
+            return response.internalError(res, INVALID_TOKEN_STRUCTURE_MSG);
         }
 
         req.user = result.data;

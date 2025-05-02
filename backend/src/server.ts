@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 
 import authenticationRoutes from 'modules/auth/auth.routing';
+import documentationRoute from 'modules/docs/docs.routing';
 import config from 'config';
 import db from 'db';
 
@@ -23,8 +24,11 @@ server.use(cookieParser());
 server.use(express.urlencoded({ extended: true, limit: '1kb' }));
 server.use(express.json({ limit: '1kb' }));
 
+// Documentation route
+server.use(config.basePath, documentationRoute);
+
 // Authentication routes
-server.use('/api', authenticationRoutes);
+server.use(config.basePath, authenticationRoutes);
 
 const serverInstance = server.listen(1000, async () => {
     await db.connect();

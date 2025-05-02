@@ -1,7 +1,7 @@
 import users from './users';
 
 const mutations = {
-    users
-}
+    users,
+};
 
 export default mutations;

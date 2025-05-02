@@ -1,6 +1,6 @@
 import { Server } from 'http';
 
-import { logger } from 'services/logging';
+import { logger } from 'aop/logging';
 
 export const shutdown = async (httpServer: Server, disconnect: () => Promise<void>) => {
     logger.info('Received shutdown signal, starting graceful shutdown...');

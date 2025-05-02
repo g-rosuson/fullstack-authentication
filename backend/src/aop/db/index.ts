@@ -5,7 +5,7 @@ const db = {
     service,
     getDatabase,
     disconnect,
-    connect
-}
+    connect,
+};
 
 export default db;

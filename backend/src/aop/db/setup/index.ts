@@ -1,6 +1,6 @@
 import { Db } from 'mongodb';
 
-import { logger } from 'services/logging';
+import { logger } from 'aop/logging';
 
 import config from '../config';
 

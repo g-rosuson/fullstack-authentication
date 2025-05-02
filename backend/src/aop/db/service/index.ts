@@ -3,7 +3,7 @@ import queries from './queries';
 
 const service = {
     mutations,
-    queries
-}
+    queries,
+};
 
 export default service;

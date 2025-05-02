@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
 import { parseSchema } from 'lib/validation';
-import response from 'response';
-import config from 'config';
+import response from 'api/response';
+import config from 'aop/config';
 
 import schema, { JWTInputDto } from './dto/input';
 

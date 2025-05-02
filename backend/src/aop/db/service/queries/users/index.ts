@@ -1,8 +1,8 @@
-import { getDatabase } from 'db/client';
+import { getDatabase } from 'aop/db/client';
 
-import { logger } from 'services/logging';
+import { logger } from 'aop/logging';
 
-import config from 'db/config';
+import config from 'aop/db/config';
 
 const COLLECTION_NAME = config.db.collection.users.name;
 

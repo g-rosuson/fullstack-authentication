@@ -2,7 +2,7 @@ import { CookieOptions } from 'express';
 
 import { TokenExpiration } from 'shared/enums';
 
-import config from 'config';
+import config from 'aop/config';
 
 const REFRESH_COOKIE_OPTIONS = (includeMaxAge = true): CookieOptions => ({
     httpOnly: true,

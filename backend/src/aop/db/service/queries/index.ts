@@ -1,7 +1,7 @@
 import users from './users';
 
 const queries = {
-    users
-}
+    users,
+};
 
 export default queries;

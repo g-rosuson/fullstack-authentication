@@ -4,11 +4,11 @@ import cors from 'cors';
 
 import authenticationRoutes from 'modules/auth/auth.routing';
 import documentationRoute from 'modules/docs/docs.routing';
-import config from 'config';
-import db from 'db';
+import config from 'aop/config';
+import db from 'aop/db';
 
 import { shutdown } from 'server.utils';
-import { logger } from 'services/logging';
+import { logger } from 'aop/logging';
 
 const server = express();
 

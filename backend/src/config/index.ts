@@ -17,6 +17,8 @@ const config = {
 
     mongoURI: process.env.MONGO_URI!,
     mongoDBName: process.env.MONGODB_DB!,
+
+    basePath: process.env.BASE_ROUTE_PATH!,
 };
 
 export default config;

@@ -4,14 +4,14 @@ import { v4 as generateId } from 'uuid';
 import bcrypt from 'bcrypt';
 import { verify } from 'jsonwebtoken';
 
-import response from 'response';
+import response from 'api/response';
 import { parseSchema } from 'lib/validation';
 import jwtService from 'services/jwt';
-import config from 'config';
-import db from 'db';
+import config from 'aop/config';
+import db from 'aop/db';
 
-import inputSchema, { type RegisterInputDto, type LoginInputDto, type JWTInputDto } from './dto/input';
-import outputSchema, { type AuthenticationOutputDto, type LogoutOutputDto } from './dto/output';
+import inputSchema, { type RegisterInputDto, type LoginInputDto, type JWTInputDto } from './dto/auth.input-dto';
+import outputSchema, { type AuthenticationOutputDto, type LogoutOutputDto } from './dto/auth.output-dto';
 
 import constants from './auth.constant';
 

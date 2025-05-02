@@ -1,9 +1,9 @@
 import { type NextFunction, type Request, type Response } from 'express';
 
 import { parseSchema } from 'lib/validation';
-import response from 'response';
+import response from 'api/response';
 
-import inputSchema from './dto/input';
+import inputSchema from './dto/auth.input-dto';
 import config from './auth.config';
 
 const validate = async (req: Request, res: Response, next: NextFunction) => {

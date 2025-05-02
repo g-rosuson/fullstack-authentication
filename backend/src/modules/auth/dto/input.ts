@@ -1,12 +1,27 @@
 import { z } from 'zod';
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 
-// Login/register
-const authenticationInputDto = z.object({
-    password: z.string().min(8),
-    email: z.string().email(),
-});
+extendZodWithOpenApi(z);
 
-type AuthenticationInputDto = z.infer<typeof authenticationInputDto>;
+// Register
+const registerInputDto = z
+    .object({
+        password: z.string().min(8),
+        email: z.string().email(),
+    })
+    .openapi('RegisterInputDto');
+
+type RegisterInputDto = z.infer<typeof registerInputDto>;
+
+// Login
+const loginInputDto = z
+    .object({
+        password: z.string().min(8),
+        email: z.string().email(),
+    })
+    .openapi('LoginInputDto');
+
+type LoginInputDto = z.infer<typeof loginInputDto>;
 
 // JWT
 const jwtInputDto = z.object({
@@ -17,9 +32,10 @@ const jwtInputDto = z.object({
 type JWTInputDto = z.infer<typeof jwtInputDto>;
 
 const schema = {
-    authenticationInputDto,
+    registerInputDto,
+    loginInputDto,
     jwtInputDto,
 };
 
-export type { AuthenticationInputDto, JWTInputDto };
+export type { RegisterInputDto, LoginInputDto, JWTInputDto };
 export default schema;

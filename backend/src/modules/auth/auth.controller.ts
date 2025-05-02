@@ -10,8 +10,8 @@ import jwtService from 'services/jwt';
 import config from 'config';
 import db from 'db';
 
-import inputSchema, { type AuthenticationInputDto, type JWTInputDto } from './dto/input';
-import outputSchema, { type AuthenticationOutputDto } from './dto/output';
+import inputSchema, { type RegisterInputDto, type LoginInputDto, type JWTInputDto } from './dto/input';
+import outputSchema, { type AuthenticationOutputDto, type LogoutOutputDto } from './dto/output';
 
 import constants from './auth.constant';
 
@@ -20,7 +20,7 @@ import constants from './auth.constant';
  * If the email is already registered, responds with a 409 Conflict.
  * On success, returns user payload and sets an httpOnly refresh-token cookie.
  */
-const register = async (req: Request<unknown, unknown, AuthenticationInputDto>, res: Response) => {
+const register = async (req: Request<unknown, unknown, RegisterInputDto>, res: Response) => {
     try {
         const { email, password } = req.body;
 
@@ -71,7 +71,7 @@ const register = async (req: Request<unknown, unknown, AuthenticationInputDto>, 
 /**
  * Validates the login details and sends the user payload and a httpOnly refresh-token cookie to the browser.
  */
-const login = async (req: Request<unknown, unknown, AuthenticationInputDto>, res: Response) => {
+const login = async (req: Request<unknown, unknown, LoginInputDto>, res: Response) => {
     try {
         const { email, password } = req.body;
 
@@ -131,7 +131,7 @@ const logout = async (req: Request, res: Response) => {
 
     res.clearCookie(constants.REFRESH_COOKIE_NAME, constants.REFRESH_COOKIE_OPTIONS(false));
 
-    response.success(res, { loggedOut: true });
+    response.success<LogoutOutputDto>(res, { loggedOut: true });
 };
 
 /**

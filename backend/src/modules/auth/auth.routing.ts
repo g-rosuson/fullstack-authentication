@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router } from 'express';
 
 import { loginLimiter, registerLimiter, refreshLimiter } from 'shared/middleware/rate-limiter';
 import { login, logout, register, renewAccessToken } from './auth.controller';
@@ -7,7 +7,7 @@ import validate from './auth.middleware';
 import config from './auth.config';
 
 // Determine router
-const router = express.Router();
+const router = Router();
 
 // Determine routes
 router.post(config.route.login, loginLimiter, validate, login);

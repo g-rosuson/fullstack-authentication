@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { openApiDocument } from 'openapi/generate-spec';
+import { openApiDocument } from 'services/openapi/generate-spec';
 
 import config from './docs.config';
 

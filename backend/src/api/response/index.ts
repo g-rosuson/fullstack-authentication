@@ -1,23 +1,25 @@
 import { Response } from 'express';
 
-import { REFRESH_COOKIE_OPTIONS } from './constants';
+import { Error } from './types';
 
-const genericResponse = {
+const response = {
     // Successful responses
     // 200 OK: The request was successful, and the server is returning the requested data
-    success: <T>(res: Response, data: T) =>
+    success: <TData>(res: Response, data: TData) =>
         res.status(200).json({
             success: true,
             data,
             meta: { timestamp: Date.now() },
         }),
-
     // Un-successful responses
     // 400 Bad Request: The server cannot process the request due to a client-side error
-    badRequest: (res: Response, message: string) =>
+    badRequest: (res: Response, error: Error) =>
         res.status(400).json({
             success: false,
-            error: { code: 'BAD_REQUEST', message },
+            error: {
+                code: 'BAD_REQUEST',
+                ...error,
+            },
             meta: { timestamp: Date.now() },
         }),
     // 401 Unauthorized: Lacks valid authentication credentials for the requested resource
@@ -57,21 +59,4 @@ const genericResponse = {
     },
 };
 
-const authenticationResponse = {
-    success: (res: Response, payload: { refreshToken: string; accessToken: string; email: string; id: string }) => {
-        res.cookie('refreshToken', payload.refreshToken, REFRESH_COOKIE_OPTIONS);
-
-        return genericResponse.success(res, {
-            id: payload.id,
-            email: payload.email,
-            accessToken: payload.accessToken,
-        });
-    },
-    logout: (res: Response) => {
-        res.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS);
-
-        return genericResponse.success(res, { loggedOut: true });
-    },
-};
-
-export { authenticationResponse, genericResponse };
+export default response;

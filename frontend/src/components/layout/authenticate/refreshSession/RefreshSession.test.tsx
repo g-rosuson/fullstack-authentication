@@ -135,8 +135,17 @@ describe('RefreshSession modal component', () => {
 
     it('executes the logout flow when countdown reaches 0', async () => {
         vi.useFakeTimers();
+
+        // Determine mock response and spy
+        const mockResponse = {
+            success: true,
+            data: undefined,
+            meta: {
+                timestamp: new Date()
+            }
+        };
     
-        const logoutSpy = vi.spyOn(api.service.resources.authentication, 'logout').mockResolvedValue(null);
+        const logoutSpy = vi.spyOn(api.service.resources.authentication, 'logout').mockResolvedValue(mockResponse);
 
         // Mock a truthy access token so the logout flow is executed
         mockUserStore.accessToken = 'access.token';
@@ -170,10 +179,14 @@ describe('RefreshSession modal component', () => {
 
         // Determine mock response and spy
         const mockResponse = {
+            success: true,
             data: {
                 accessToken: 'access.token',
                 email: 'email@example.com',
                 id: '1234'
+            },
+            meta: {
+                timestamp: new Date()
             }
         };
 

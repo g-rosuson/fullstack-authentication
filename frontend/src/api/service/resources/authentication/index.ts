@@ -1,3 +1,6 @@
+import { AuthenticationOutputDto, LoginInputDto, RegisterInputDto } from '_types/_gen';
+import { ApiResponse } from '_types/infrastructure';
+
 import client from '../../client';
 import config from './config';
 
@@ -6,23 +9,23 @@ import config from './config';
  * refresh token cookie is sent to the backend end-point.
  */
 const refreshAccessToken = async () => {
-    return await client.get(config.path.refresh);
+    return await client.get<ApiResponse<AuthenticationOutputDto>>(config.path.refresh);
 }
 
 /**
  * Creates a new user and retrieves an access-token when valid credentials
  * are sent to the register backend endpoint.
  */
-const register = async (credentials: { email: string, password: string}) => {
-    return await client.post(config.path.register, credentials);
+const register = async (credentials: RegisterInputDto) => {
+    return await client.post<ApiResponse<AuthenticationOutputDto>, RegisterInputDto>(config.path.register, credentials);
 }
 
 /**
  * Retrieves a new access-token when valid credentials are sent
  * to the login backend endpoint.
  */
-const login = async (credentials: { email: string, password: string }) => {
-    return await client.post(config.path.login, credentials);
+const login = async (credentials: LoginInputDto) => {
+    return await client.post<ApiResponse<AuthenticationOutputDto>, LoginInputDto>(config.path.login, credentials);
 }
 
 /**
@@ -30,7 +33,7 @@ const login = async (credentials: { email: string, password: string }) => {
  * to the logout backend endpoint.
  */
 const logout = async () => {
-    return await client.post(config.path.logout);
+    return await client.post<ApiResponse>(config.path.logout);
 }
 
 const resources = {

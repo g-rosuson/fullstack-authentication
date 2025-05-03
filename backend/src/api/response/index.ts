@@ -5,7 +5,7 @@ import { Error } from './types';
 const response = {
     // Successful responses
     // 200 OK: The request was successful, and the server is returning the requested data
-    success: <TData>(res: Response, data?: TData) =>
+    success: <TData>(res: Response, data: TData) =>
         res.status(200).json({
             success: true,
             data,

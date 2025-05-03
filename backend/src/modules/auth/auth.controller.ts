@@ -131,7 +131,7 @@ const logout = async (req: Request, res: Response) => {
 
     res.clearCookie(constants.REFRESH_COOKIE_NAME, constants.REFRESH_COOKIE_OPTIONS(false));
 
-    response.success(res);
+    response.success(res, undefined);
 };
 
 /**

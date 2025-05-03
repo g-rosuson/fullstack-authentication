@@ -7,5 +7,4 @@
 
 export * from './authenticationOutputDto';
 export * from './loginInputDto';
-export * from './logoutOutputDto';
 export * from './registerInputDto';

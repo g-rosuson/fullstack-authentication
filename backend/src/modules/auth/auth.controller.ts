@@ -11,7 +11,7 @@ import config from 'aop/config';
 import db from 'aop/db';
 
 import inputSchema, { type RegisterInputDto, type LoginInputDto, type JWTInputDto } from './dto/auth.input-dto';
-import outputSchema, { type AuthenticationOutputDto, type LogoutOutputDto } from './dto/auth.output-dto';
+import outputSchema, { type AuthenticationOutputDto } from './dto/auth.output-dto';
 
 import constants from './auth.constant';
 
@@ -131,7 +131,7 @@ const logout = async (req: Request, res: Response) => {
 
     res.clearCookie(constants.REFRESH_COOKIE_NAME, constants.REFRESH_COOKIE_OPTIONS(false));
 
-    response.success<LogoutOutputDto>(res, { loggedOut: true });
+    response.success(res);
 };
 
 /**

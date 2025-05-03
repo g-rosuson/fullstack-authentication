@@ -11,19 +11,11 @@ const authenticationOutputDto = z
     })
     .openapi('AuthenticationOutputDto');
 
-const logoutOutputDto = z
-    .object({
-        loggedOut: z.boolean(),
-    })
-    .openapi('LogoutOutputDto');
-
 type AuthenticationOutputDto = z.infer<typeof authenticationOutputDto>;
-type LogoutOutputDto = z.infer<typeof logoutOutputDto>;
 
 const schema = {
     authenticationOutputDto,
-    logoutOutputDto,
 };
 
-export type { AuthenticationOutputDto, LogoutOutputDto };
+export type { AuthenticationOutputDto };
 export default schema;

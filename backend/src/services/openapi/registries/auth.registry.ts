@@ -8,13 +8,6 @@ import config from 'modules/auth/auth.config';
 // Determine registry
 const registry = new OpenAPIRegistry();
 
-// Register schemas
-registry.register('RegisterInputDto', authInputDtoSchema.registerInputDto);
-registry.register('LoginInputDto', authInputDtoSchema.loginInputDto);
-
-registry.register('AuthenticationOutputDto', authOutputDtoSchema.authenticationOutputDto);
-registry.register('LogoutOutputDto', authOutputDtoSchema.logoutOutputDto);
-
 // Register paths
 registry.registerPath({
     method: 'post',

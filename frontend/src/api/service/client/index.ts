@@ -1,13 +1,13 @@
-import { type HttpOptions, type Payload } from './types';
+import { type FetchOptions } from './types';
 
 /**
  * Makes an HTTP request to the given path and options.
  * And handles errors for non-2xx HTTP responses.
  */
-const _fetch = async (path: string , httpOptions: HttpOptions) => {
+const _fetch = async (path: string , fetchOptions: FetchOptions) => {
     const url = `${window.metadata.backendRootUrl}/api/${path}`;
 
-    const { method, body, headers } = httpOptions;
+    const { method, body, headers } = fetchOptions;
 
     const tmpHeaders = {
         'Content-Type': 'application/json',
@@ -38,15 +38,15 @@ const _fetch = async (path: string , httpOptions: HttpOptions) => {
 /**
  * Makes a GET request to the given API path.
  */
-const get = async (path: string) => {
+const get = async <TResp>(path: string): Promise<TResp> => {
     return await _fetch(path, { method: 'GET' })
 };
 
 /**
  * Makes a POST request to the given API path with the given payload.
  */
-const post = async (path: string, payload: Payload = undefined) => {
-    return await _fetch(path, { method: 'POST', body: payload })
+const post = async <TResp, TBody = undefined>(path: string, body?: TBody): Promise<TResp> => {
+    return await _fetch(path, { method: 'POST', body });
 };
 
 const client = {

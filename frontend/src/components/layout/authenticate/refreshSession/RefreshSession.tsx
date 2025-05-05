@@ -7,7 +7,7 @@ import Modal from 'components/UI/modal/Modal';
 import api from 'api';
 import config from 'config';
 import logging from 'services/logging';
-import { actions, useStore } from 'store';
+import { useStore } from 'store';
 
 import styling from './RefreshSession.module.scss';
 
@@ -62,16 +62,7 @@ const RefreshSession = ({ open, close }: Props) => {
 
             const response = await api.service.resources.authentication.refreshAccessToken();
 
-            const payload = {
-                payload: {
-                    accessToken: response.data.accessToken,
-                    email: response.data.email,
-                    id: response.data.id
-                },
-                type: actions.user.change_user
-            }
-
-            store.dispatch(payload);
+            store.user.changeUser({ ...response.data });
 
             hasRefreshedSession.current = true;
 
@@ -85,7 +76,7 @@ const RefreshSession = ({ open, close }: Props) => {
             // When the "refreshAccessToken" endpoint throws an error,
             // reset the "accessToken" in the store and navigate to
             // login page
-            store.dispatch({ type: actions.user.clear_user });
+            store.user.clearUser();
             navigate(config.routes.login);
         }
     }
@@ -107,7 +98,7 @@ const RefreshSession = ({ open, close }: Props) => {
             logging.error(error as Error);
 
         } finally {
-            store.dispatch({ type: actions.user.clear_user });
+            store.user.clearUser();
             navigate(config.routes.login);
         }
     }, [navigate, store]);

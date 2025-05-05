@@ -8,7 +8,7 @@ import Input from '../../UI/input/Input';
 import api from 'api';
 import config from 'config';
 import logging from 'services/logging';
-import { actions, useStore } from 'store';
+import { useStore } from 'store';
 import utils from 'utils';
 
 import styling from './Authentication.module.scss';
@@ -66,16 +66,7 @@ const Authentication = () => {
                 password: state.password,
             });
 
-            const dispatchPayload = {
-                payload: {
-                    accessToken: response.data.accessToken,
-                    email: response.data.email,
-                    id: response.data.id
-                },
-                type: actions.user.change_user
-            }
-            
-            store.dispatch(dispatchPayload);
+            store.user.changeUser({ ...response.data });
 
         } catch (error) {
             logging.error(error as Error);

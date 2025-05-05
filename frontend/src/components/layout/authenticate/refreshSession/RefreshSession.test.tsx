@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { UserState } from 'store/reducers/user/user.types';
 import { afterAll, afterEach, beforeAll } from 'vitest'
 
 import api from 'api';
 import config from 'config';
 
+import { User } from '../../../../store/slices/user/user.types';
 import constants from './constants';
 import RefreshSession from './RefreshSession';
 
@@ -44,28 +44,24 @@ const renderComponent = () => {
 }
 
 describe('RefreshSession modal component', () => {
-    // Mock store
-    const mockUserStore = vi.hoisted<UserState>(() => ({ 
+    // Hoist mock variables since vi.mock is hoisted under the hood
+    const mockUser = vi.hoisted<User>(() => ({
         accessToken: null,
-        email: '',
-        id: ''
+        email: null,
+        id: null,
     }));
+    const mockChangeUser = vi.hoisted(() => vi.fn());
+    const mockClearUser = vi.hoisted(() => vi.fn());
 
-    const mockClearUserAction = vi.hoisted(() => 'user/clear_user');
-    const mockChangeUserAction = vi.hoisted(() => 'user/change_user');
-    const mockDispatch = vi.hoisted(() => vi.fn());
-
+    // Mock store
      vi.mock('../../../../store', async () => ({
         useStore: vi.fn(() => ({
-            user: mockUserStore,
-            dispatch: mockDispatch
-        })),
-        actions: {
             user: {
-                clear_user: mockClearUserAction,
-                change_user: mockChangeUserAction
-            }
-        }
+                ...mockUser,
+                changeUser: mockChangeUser, 
+                clearUser: mockClearUser
+            },
+        }))
     }));
 
     // Mock logout timeout duration
@@ -148,7 +144,7 @@ describe('RefreshSession modal component', () => {
         const logoutSpy = vi.spyOn(api.service.resources.authentication, 'logout').mockResolvedValue(mockResponse);
 
         // Mock a truthy access token so the logout flow is executed
-        mockUserStore.accessToken = 'access.token';
+        mockUser.accessToken = 'access.token';
     
         renderComponent();
     
@@ -163,8 +159,8 @@ describe('RefreshSession modal component', () => {
         // Assert logout was called
         expect(logoutSpy).toHaveBeenCalledOnce();
 
-        // Assert that the dispatch function was called with the correct action
-        expect(mockDispatch).toHaveBeenCalledWith({ type: mockClearUserAction });
+        // Assert that the store.user.clearUser function was called without a payload
+        expect(mockClearUser).toHaveBeenCalledWith();
 
         // Assert the user was redirected to the login page
         expect(screen.getByText('Login page')).toBeInTheDocument();
@@ -199,10 +195,11 @@ describe('RefreshSession modal component', () => {
         // Assert logout was called
         expect(refreshSessionSpy).toHaveBeenCalledOnce();
 
-        // Assert store.dispatch function was called with the correct payload
-        expect(mockDispatch).toHaveBeenCalledWith({
-            payload: mockResponse.data,
-            type: mockChangeUserAction
+        // Assert store.user,changeUser function was called with the correct payload
+        expect(mockChangeUser).toHaveBeenCalledWith({
+            accessToken: mockResponse.data.accessToken,
+            email: mockResponse.data.email,
+            id: mockResponse.data.id,
         });
 
         waitFor(() => {
@@ -227,8 +224,8 @@ describe('RefreshSession modal component', () => {
         // Assert logout was called
         expect(refreshSessionSpy).toHaveBeenCalledOnce();
 
-        // Assert store.dispatch function was called with the correct payload
-        expect(mockDispatch).toHaveBeenCalledWith({ type: mockClearUserAction });
+        // Assert store.user.clearUser function was called without payload
+        expect(mockClearUser).toHaveBeenCalledWith();
 
         // Assert the user was redirected to the login page
         expect(screen.getByText('Login page')).toBeInTheDocument();

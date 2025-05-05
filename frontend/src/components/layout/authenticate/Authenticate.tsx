@@ -8,7 +8,7 @@ import RefreshSessionModal from './refreshSession/RefreshSession';
 import api from 'api';
 import config from 'config';
 import logging from 'services/logging';
-import { actions, useStore } from 'store';
+import { useStore } from 'store';
 import utils from 'utils';
 
 
@@ -25,7 +25,7 @@ const Authenticate = () => {
     // Refs
     const hasMountedRef = useRef(false);
 
-
+    
     // Hooks
     const navigate = useNavigate();
 
@@ -46,16 +46,7 @@ const Authenticate = () => {
         try {
             const response = await api.service.resources.authentication.refreshAccessToken();
 
-            const payload = {
-                payload: {
-                    accessToken: response.data.accessToken,
-                    email: response.data.email,
-                    id: response.data.id
-                },
-                type: actions.user.change_user
-            }
-
-            store.dispatch(payload);
+            store.user.changeUser({ ...response.data });
 
             hasMountedRef.current = true;
 

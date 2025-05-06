@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { useUserSelection } from 'store/selectors/user';
 
 import Spinner from '../../UI/spinner/Spinner';
 import TopBar from '../topBar/TopBar';
@@ -8,14 +9,13 @@ import RefreshSessionModal from './refreshSession/RefreshSession';
 import api from 'api';
 import config from 'config';
 import logging from 'services/logging';
-import { useStore } from 'store';
 import utils from 'utils';
 
 
 const Authenticate = () => {
-    // Store
-    const store = useStore();
-
+    // Store selectors
+    const userSelectors = useUserSelection();
+    
 
     // State
     const [isRefreshSessionModalOpen, setIsRefreshSessionModalOpen] = useState(false);
@@ -45,9 +45,9 @@ const Authenticate = () => {
     const renewAccessToken = useCallback(async () => {
         try {
             const response = await api.service.resources.authentication.refreshAccessToken();
-
-            store.user.changeUser({ ...response.data });
-
+            
+            userSelectors.changeUser(response.data);
+           
             hasMountedRef.current = true;
 
             setIsLoading(false);
@@ -59,7 +59,7 @@ const Authenticate = () => {
             // throws an error, navigate to login page
             navigate(config.routes.login);
         }
-    }, [store, navigate]);
+    }, [navigate, userSelectors]);
 
 
     /**
@@ -69,7 +69,7 @@ const Authenticate = () => {
      *   the user is logged out.
      */
     useEffect(() => {
-        if (!store.user.accessToken) {
+        if (!userSelectors.accessToken) {
             return;
         }
 
@@ -77,7 +77,7 @@ const Authenticate = () => {
             setIsLoading(true);
         }
 
-        const decoded =  utils.jwt.decode(store.user.accessToken);
+        const decoded =  utils.jwt.decode(userSelectors.accessToken);
 
         // Current time in ms
         const currentTime = Date.now();
@@ -100,7 +100,7 @@ const Authenticate = () => {
         return () => {
             clearTimeout(renewSessionTimeout);
         };
-    }, [isLoading, store.user.accessToken, toggleRefreshSessionModal]);
+    }, [isLoading, userSelectors.accessToken, toggleRefreshSessionModal]);
 
 
     /**
@@ -108,10 +108,10 @@ const Authenticate = () => {
      *   set and the component has not mounted.
      */
     useEffect(() => {
-        if (!store.user.accessToken && !hasMountedRef.current) {
+        if (!userSelectors.accessToken && !hasMountedRef.current) {
             renewAccessToken();
         }
-    }, [renewAccessToken, store.user.accessToken]);
+    }, [renewAccessToken, userSelectors.accessToken]);
 
 
     // Determine authenticated component

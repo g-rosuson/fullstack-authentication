@@ -54,13 +54,11 @@ describe('RefreshSession modal component', () => {
     const mockClearUser = vi.hoisted(() => vi.fn());
 
     // Mock store
-     vi.mock('../../../../store', async () => ({
-        useStore: vi.fn(() => ({
-            user: {
-                ...mockUser,
-                changeUser: mockChangeUser, 
-                clearUser: mockClearUser
-            },
+     vi.mock('../../../../store/selectors/user', async () => ({
+        useUserSelection: vi.fn(() => ({
+            ...mockUser,
+            changeUser: mockChangeUser, 
+            clearUser: mockClearUser
         }))
     }));
 

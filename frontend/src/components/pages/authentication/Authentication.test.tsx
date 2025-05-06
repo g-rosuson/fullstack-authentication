@@ -30,15 +30,12 @@ describe('Authentication component: authentication', () => {
     }));
     const mockChangeUser = vi.hoisted(() => vi.fn());
     const mockClearUser = vi.hoisted(() => vi.fn());
-    const mockErrorLogging = vi.hoisted(() => vi.fn());
 
-    vi.mock('../../../store', async () => ({
-        useStore: vi.fn(() => ({
-            user: { 
-                ...mockUser,
-                changeUser: mockChangeUser, 
-                clearUser: mockClearUser
-             }
+    vi.mock('../../../store/selectors/user', async () => ({
+        useUserSelection: vi.fn(() => ({
+            ...mockUser,
+            changeUser: mockChangeUser,
+            clearUser: mockClearUser
         }))
     }));
 
@@ -67,6 +64,8 @@ describe('Authentication component: authentication', () => {
     }));
 
     // Mock logging service
+    const mockErrorLogging = vi.hoisted(() => vi.fn());
+
     vi.mock('../../../services/logging', () => ({
         default: {
             error: mockErrorLogging

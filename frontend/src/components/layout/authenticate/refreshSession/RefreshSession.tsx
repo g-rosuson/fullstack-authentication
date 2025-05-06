@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUserSelection } from 'store/selectors/user';
 
 import Heading from 'components/UI/heading/Heading';
 import Modal from 'components/UI/modal/Modal';
@@ -7,7 +8,6 @@ import Modal from 'components/UI/modal/Modal';
 import api from 'api';
 import config from 'config';
 import logging from 'services/logging';
-import { useStore } from 'store';
 
 import styling from './RefreshSession.module.scss';
 
@@ -15,10 +15,10 @@ import constants from './constants';
 import { Props } from './RefreshSession.types';
 
 const RefreshSession = ({ open, close }: Props) => {
-    // Store
-    const store = useStore();
+     // Store selectors
+     const userSelectors = useUserSelection();
 
-
+     
     // State
     const [countdown, setCountdown] = useState(constants.time.logoutTimeout);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,7 +62,7 @@ const RefreshSession = ({ open, close }: Props) => {
 
             const response = await api.service.resources.authentication.refreshAccessToken();
 
-            store.user.changeUser({ ...response.data });
+            userSelectors.changeUser({ ...response.data });
 
             hasRefreshedSession.current = true;
 
@@ -76,7 +76,7 @@ const RefreshSession = ({ open, close }: Props) => {
             // When the "refreshAccessToken" endpoint throws an error,
             // reset the "accessToken" in the store and navigate to
             // login page
-            store.user.clearUser();
+            userSelectors.clearUser();
             navigate(config.routes.login);
         }
     }
@@ -90,7 +90,7 @@ const RefreshSession = ({ open, close }: Props) => {
         try {
             setIsSubmitting(true);
 
-            if (store.user.accessToken) {
+            if (userSelectors.accessToken) {
                 await api.service.resources.authentication.logout();
             }
 
@@ -98,10 +98,10 @@ const RefreshSession = ({ open, close }: Props) => {
             logging.error(error as Error);
 
         } finally {
-            store.user.clearUser();
+            userSelectors.clearUser();
             navigate(config.routes.login);
         }
-    }, [navigate, store]);
+    }, [navigate, userSelectors]);
 
 
     /**

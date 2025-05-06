@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUserSelection } from 'store/selectors/user';
 
 import Avatar from '../../UI/avatar/Avatar';
 import Dropdown from '../../UI/dropdown/Dropdown';
@@ -7,13 +8,12 @@ import Dropdown from '../../UI/dropdown/Dropdown';
 import api from 'api';
 import config from 'config';
 import logging from 'services/logging';
-import { useStore } from 'store';
 
 import styling from './TopBar.module.scss';
 
 const TopBar = () => {
-    // Store
-    const store = useStore();
+    // Store selectors
+    const userSelectors = useUserSelection();
 
 
     // State
@@ -43,7 +43,7 @@ const TopBar = () => {
             await api.service.resources.authentication.logout();
 
             // Reset the user store object
-            store.user.clearUser();
+            userSelectors.clearUser();
 
             navigate(config.routes.login);
 
@@ -65,7 +65,7 @@ const TopBar = () => {
     // Determine menu controller
     const menuController = (
         <div className={styling.avatar}>
-            <Avatar email={store.user.email || ''} onClick={toggleMenu}/>
+            <Avatar email={userSelectors.email || ''} onClick={toggleMenu}/>
         </div>
     );
 

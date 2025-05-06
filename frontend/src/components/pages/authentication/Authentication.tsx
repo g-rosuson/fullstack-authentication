@@ -1,5 +1,6 @@
 import { type ChangeEvent, type FormEvent, useEffect,useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useUserSelection } from 'store/selectors/user';
 
 import Button from '../../UI/button/Button';
 import Heading from '../../UI/heading/Heading';
@@ -8,7 +9,6 @@ import Input from '../../UI/input/Input';
 import api from 'api';
 import config from 'config';
 import logging from 'services/logging';
-import { useStore } from 'store';
 import utils from 'utils';
 
 import styling from './Authentication.module.scss';
@@ -16,10 +16,10 @@ import styling from './Authentication.module.scss';
 import constants from './constants';
 
 const Authentication = () => {
-    // Store
-    const store = useStore();
+    // Store selectors
+    const userSelectors = useUserSelection();
 
-
+    
     // State
     const [state, setState] = useState({
         email: '',
@@ -66,7 +66,7 @@ const Authentication = () => {
                 password: state.password,
             });
 
-            store.user.changeUser({ ...response.data });
+            userSelectors.changeUser({ ...response.data });
 
         } catch (error) {
             logging.error(error as Error);
@@ -81,10 +81,10 @@ const Authentication = () => {
     * Navigate to root when an "accessToken" is set and valid.
     */
    useEffect(() => {
-        if (store.user.accessToken && utils.jwt.isValid(store.user.accessToken)) {
+        if (userSelectors.accessToken && utils.jwt.isValid(userSelectors.accessToken)) {
             navigate(config.routes.root);
         }
-    }, [navigate, store.user.accessToken]);
+    }, [navigate, userSelectors.accessToken]);
 
 
     // Headings, labels and route

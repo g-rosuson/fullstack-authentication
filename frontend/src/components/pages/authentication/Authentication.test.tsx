@@ -6,6 +6,7 @@ import { afterEach, Mock } from 'vitest'
 import api from 'api';
 import config from 'config';
 
+import { UserStore } from '../../../shared/types/store/store.user.types';
 import Authentication from './Authentication';
 
 /**
@@ -22,20 +23,20 @@ const renderComponent = (path: string) => {
 
 describe('Authentication component: authentication', () => {
     // Mock user store and hoist variables since vi.mock is hoisted by default
-    const mockUserStore = vi.hoisted<{ accessToken: string | null }>(() => ({ accessToken: null }));
-    const mockDispatch = vi.hoisted(() => vi.fn());
-    const mockErrorLogging = vi.hoisted(() => vi.fn());
+     const mockUser = vi.hoisted<UserStore>(() => ({
+        accessToken: null,
+        email: null,
+        id: null,
+    }));
+    const mockChangeUser = vi.hoisted(() => vi.fn());
+    const mockClearUser = vi.hoisted(() => vi.fn());
 
-    vi.mock('../../../store', async () => ({
-        useStore: vi.fn(() => ({
-            user: { accessToken: mockUserStore.accessToken },
-            dispatch: mockDispatch
-        })),
-        actions: {
-            user: {
-                change_user: 'user/change_user',
-            }
-        }
+    vi.mock('../../../store/selectors/user', async () => ({
+        useUserSelection: vi.fn(() => ({
+            ...mockUser,
+            changeUser: mockChangeUser,
+            clearUser: mockClearUser
+        }))
     }));
 
     // Mock api
@@ -63,6 +64,8 @@ describe('Authentication component: authentication', () => {
     }));
 
     // Mock logging service
+    const mockErrorLogging = vi.hoisted(() => vi.fn());
+
     vi.mock('../../../services/logging', () => ({
         default: {
             error: mockErrorLogging
@@ -77,7 +80,7 @@ describe('Authentication component: authentication', () => {
 
     afterEach(() => {
         vi.clearAllMocks();
-        mockUserStore.accessToken = null;
+        mockUser.accessToken = null;
     });
 
     // Test dynamic login and register endpoint invocations
@@ -127,9 +130,8 @@ describe('Authentication component: authentication', () => {
         });
     });
 
-    // Test that the dispatch function is called with the correct payload
-    //  Note: With stricter store typing, this test may not be necessary.
-    it('store.dispatch is called with correct arguments during authentication', async () => {
+    // Test that the changeUser function is called with the correct payload
+    it('store.user.changeUser is called with correct arguments during authentication', async () => {
         renderComponent(config.routes.login);
 
         // Determine the mock response from the login function in the <Authentication/> component
@@ -148,13 +150,10 @@ describe('Authentication component: authentication', () => {
 
         // Assert that the dispatch function was called with the correct payload
         await waitFor(() => {
-            expect(mockDispatch).toHaveBeenCalledWith({
-                payload: {
-                    accessToken: mockAccessToken,
-                    email: mockEmail,
-                    id: mockId
-                },
-                type: 'user/change_user'
+            expect(mockChangeUser).toHaveBeenCalledWith({
+                accessToken: mockAccessToken,
+                email: mockEmail,
+                id: mockId
             });
         });
     });
@@ -174,7 +173,7 @@ describe('Authentication component: authentication', () => {
         renderWithRoutes();
 
         // Simulate a valid token being set
-        mockUserStore.accessToken = 'valid-token';
+        mockUser.accessToken = 'valid-token';
 
         // Re-render to trigger useEffect with the new token
         renderWithRoutes();
@@ -204,7 +203,7 @@ describe('Authentication component: authentication', () => {
         await waitFor(() => {
             expect(mockErrorLogging).toHaveBeenCalledWith(mockError);
             expect(screen.getByRole('heading')).toHaveTextContent(/login/i);
-            expect(mockDispatch).not.toHaveBeenCalled();
+            expect(mockChangeUser).not.toHaveBeenCalled();
         });
     });
 
@@ -227,7 +226,7 @@ describe('Authentication component: authentication', () => {
         await waitFor(() => {
             expect(mockErrorLogging).toHaveBeenCalledWith(mockError);
             expect(screen.getByRole('heading')).toHaveTextContent(/register/i);
-            expect(mockDispatch).not.toHaveBeenCalled();
+            expect(mockChangeUser).not.toHaveBeenCalled();
         });
     });
 });

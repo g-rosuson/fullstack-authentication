@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, Mock } from 'vitest'
 import api from 'api';
 import config from 'config';
 
-import { UserState } from '../../../store/reducers/user/user.types';
+import { UserStore } from '../../../shared/types/store/store.user.types';
 import Authenticate from './Authenticate';
 
 /**
@@ -27,25 +27,19 @@ const renderComponent = () => {
 
 describe('Authenticate component', () => {
     // Hoist mock variables since vi.mock is hoisted under the hood
-    const mockUserStore = vi.hoisted<UserState>(() => ({ 
+    const mockUser = vi.hoisted<UserStore>(() => ({
         accessToken: null,
-        email: '',
-        id: ''
+        email: null,
+        id: null,
     }));
-    const mockDispatch = vi.hoisted(() => vi.fn());
-    const mockErrorLogging = vi.hoisted(() => vi.fn());
+    const mockChangeUser = vi.hoisted(() => vi.fn());
 
     // Mock store
-    vi.mock('../../../store', async () => ({
-        useStore: vi.fn(() => ({
-            user: mockUserStore,
-            dispatch: mockDispatch
-        })),
-        actions: {
-            user: {
-                change_user: 'user/change_user',
-            }
-        }
+     vi.mock('../../../store/selectors/user', async () => ({
+        useUserSelection: vi.fn(() => ({
+            ...mockUser,
+            changeUser: mockChangeUser
+        }))
     }));
 
     // Mock api
@@ -64,6 +58,8 @@ describe('Authenticate component', () => {
     }));
 
     // Mock logging service
+    const mockErrorLogging = vi.hoisted(() => vi.fn());
+
     vi.mock('../../../services/logging', () => ({
         default: {
             error: mockErrorLogging
@@ -94,9 +90,9 @@ describe('Authenticate component', () => {
      */
     afterEach(() => {
         vi.clearAllMocks();
-        mockUserStore.accessToken = null;   
-        mockUserStore.email = '';
-        mockUserStore.id = '';
+        mockUser.accessToken = null;   
+        mockUser.email = null;
+        mockUser.id = null;
     });
 
     /**
@@ -125,20 +121,17 @@ describe('Authenticate component', () => {
         renderComponent();
     
         // Assert that:
-        // - The store.dispatch function was called with the correct payload
+        // - The store.user.changeUser function was called with the correct payload
         // - The user was redirected to the protected route
         await waitFor(() => {
-            expect(mockDispatch).toHaveBeenCalledWith({
-                payload: mockUserResponseData,
-                type: 'user/change_user'
-            });
+            expect(mockChangeUser).toHaveBeenCalledWith(mockUserResponseData);
 
             expect(screen.getByText('Protected route')).toBeInTheDocument();
         });
     });
 
     it('does not call "refreshAccessToken" endpoint when accessToken is set', async () => {
-        mockUserStore.accessToken = 'valid.jwt.token';
+        mockUser.accessToken = 'valid.jwt.token';
     
         renderComponent();
     
@@ -169,7 +162,7 @@ describe('Authenticate component', () => {
         vi.useFakeTimers();
 
         // Mock a truthy access token so the useEffect hook runs
-        mockUserStore.accessToken = 'access.token';
+        mockUser.accessToken = 'access.token';
       
         renderComponent();
        

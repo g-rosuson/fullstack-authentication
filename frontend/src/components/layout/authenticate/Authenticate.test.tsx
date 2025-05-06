@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, Mock } from 'vitest'
 import api from 'api';
 import config from 'config';
 
-import { User } from '../../../store/slices/user/user.types';
+import { UserStore } from '../../../shared/types/store/store.user.types';
 import Authenticate from './Authenticate';
 
 /**
@@ -27,7 +27,7 @@ const renderComponent = () => {
 
 describe('Authenticate component', () => {
     // Hoist mock variables since vi.mock is hoisted under the hood
-    const mockUser = vi.hoisted<User>(() => ({
+    const mockUser = vi.hoisted<UserStore>(() => ({
         accessToken: null,
         email: null,
         id: null,

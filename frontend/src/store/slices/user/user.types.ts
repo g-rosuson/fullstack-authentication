@@ -1,12 +1,8 @@
-type User = {
-    accessToken: string | null;
-    email: string | null;
-    id: string | null;
-}
+import { UserStore } from 'shared/types/store/store.user.types';
 
-interface UserSlice extends User {
-    changeUser: (user: User) => void;
+interface UserSlice extends UserStore {
+    changeUser: (user: UserStore) => void;
     clearUser: () => void;
 }
 
-export type { User, UserSlice }
+export type { UserSlice };

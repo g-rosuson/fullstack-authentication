@@ -7,7 +7,7 @@ import { afterAll, afterEach, beforeAll } from 'vitest'
 import api from 'api';
 import config from 'config';
 
-import { User } from '../../../../store/slices/user/user.types';
+import { UserStore } from '../../../../shared/types/store/store.user.types';
 import constants from './constants';
 import RefreshSession from './RefreshSession';
 
@@ -45,7 +45,7 @@ const renderComponent = () => {
 
 describe('RefreshSession modal component', () => {
     // Hoist mock variables since vi.mock is hoisted under the hood
-    const mockUser = vi.hoisted<User>(() => ({
+    const mockUser = vi.hoisted<UserStore>(() => ({
         accessToken: null,
         email: null,
         id: null,

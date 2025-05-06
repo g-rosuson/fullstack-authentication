@@ -6,7 +6,7 @@ import { afterEach, Mock } from 'vitest'
 import api from 'api';
 import config from 'config';
 
-import { User } from '../../../store/slices/user/user.types';
+import { UserStore } from '../../../shared/types/store/store.user.types';
 import Authentication from './Authentication';
 
 /**
@@ -23,7 +23,7 @@ const renderComponent = (path: string) => {
 
 describe('Authentication component: authentication', () => {
     // Mock user store and hoist variables since vi.mock is hoisted by default
-     const mockUser = vi.hoisted<User>(() => ({
+     const mockUser = vi.hoisted<UserStore>(() => ({
         accessToken: null,
         email: null,
         id: null,

@@ -7,7 +7,7 @@ import { Store } from './store.types';
 
 export const useStore = create<Store>()(
     devtools((set, get, store) => ({
-        user: createUserSlice(set, get, store),
-        ui: createUserInterfaceSlice(set, get, store),
+        ...createUserSlice(set, get, store),
+        ...createUserInterfaceSlice(set, get, store),
     })
 ));

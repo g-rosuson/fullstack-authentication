@@ -8,7 +8,11 @@ const AppSetup = ({ children }: { children: ReactNode}) => {
     // 1. Add the relevant backend url to the window object
     const backendRootUrl = isDeveloping ? config.connect.backend.dev.url : config.connect.backend.prod.url;
 
-    window.metadata = window.metadata ?? {};
+    // 2. Determine metadata
+    window.metadata = window.metadata ?? {
+        isDeveloping
+    };
+
     window.metadata.backendRootUrl = backendRootUrl;
 
     return children;

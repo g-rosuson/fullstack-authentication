@@ -66,16 +66,13 @@ const Authentication = () => {
                 password: state.password,
             });
 
-            const dispatchPayload = {
-                payload: {
-                    accessToken: response.data.accessToken,
-                    email: response.data.email,
-                    id: response.data.id
-                },
-                type: actions.user.change_user
+            const payload = {
+                accessToken: response.data.accessToken,
+                email: response.data.email,
+                id: response.data.id
             }
             
-            store.dispatch(dispatchPayload);
+            store.dispatch(actions.user.changeUser(payload));
 
         } catch (error) {
             logging.error(error as Error);

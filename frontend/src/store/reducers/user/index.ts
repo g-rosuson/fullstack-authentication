@@ -1,22 +1,16 @@
-import { ChangeUserReducer, ClearUserReducer } from './user.types';
+import { UserState } from '../../types';
 
-const changeUser: ChangeUserReducer = {
-    type: 'change_user',
-    action: (payload) => payload
-};
+const clearUser = (): UserState  => ({
+    accessToken: null,
+    email: null,
+    id: null
+});
 
-const clearUser: ClearUserReducer = {
-    type: 'clear_user',
-    action: () => ({
-        accessToken: null,
-        email: '',
-        id: ''
-    })
-};
+const changeUser = (payload: UserState): UserState => payload;
 
-const reducers = [
-    changeUser,
-    clearUser
-];
+const reducers = {
+   changeUser,
+   clearUser
+}
 
 export default reducers;

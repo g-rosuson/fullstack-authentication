@@ -1,36 +1,25 @@
-import reducerDomains from '../reducers'
+import constants from '../constants';
+import { Theme, UserState } from '../types';
 
-// Store actions: domain -> (reducer-type -> action-type)
-const actionsMap = new Map<keyof typeof reducerDomains, Map<string, string>>();
-
-// Map each reducer domain to corresponding reducer-types, mapped to action-types
-for (const [domain, resources] of Object.entries(reducerDomains)) {
-    // Map reducer-types to their corresponding action-types
-    const resourceMap = new Map<string, string>();
-
-    for (const resource of resources) {
-        resourceMap.set(resource.type, `${domain}/${resource.type}`);
+const actions = {
+    user: {
+        clearUser: () => ({
+            reducerType: constants.user.reducer.clearUser,
+            domain: constants.user.domain
+        }),
+        changeUser: (payload: UserState) => ({ 
+            reducerType: constants.user.reducer.changeUser,
+            domain: constants.user.domain,
+            payload
+        })
+    },
+    ui: {
+        changeTheme: (payload: Theme) => ({ 
+            reducerType: constants.ui.reducer.changeTheme,
+            domain: constants.ui.domain,
+            payload
+        })
     }
-
-    // Add the domain and its resourceMap to the actionsMap
-    actionsMap.set(domain as keyof typeof reducerDomains, resourceMap);
-}
-
-
-type Actions = {
-    [Domain in keyof typeof reducerDomains]: {
-        [Resource in (typeof reducerDomains[Domain][number])['type']]: `${Domain}/${Resource}`;
-    };
 };
-
-// Convert actionsMap to a plain object
-const actions = Object.fromEntries(
-    // 1: Convert actionsMap to an array of [domain, resourceMap]
-    Array.from(actionsMap.entries()).map(([domain, resourceMap]) => [
-        domain,
-        // 2: Convert each resourceMap entry to a plain object
-        Object.fromEntries(resourceMap)
-    ])
-) as Actions;
 
 export default actions;

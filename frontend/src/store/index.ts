@@ -1,26 +1,23 @@
 import { create } from 'zustand';
 
 import actions from './actions';
-import { resources } from './dispatch';
-import state from './state';
-import { State } from './types';
+import constants from './constants';
+import dispatchAction from './dispatch';
+import { Action, State } from './types';
 
-
-const useStore = create<State>()(set => ({
-    ...state,
-    dispatch: (action) => {
-        set(state => {           
-            const { domain, reducer } = resources(action.type);
-        
-            return {
+const useStore = create<State>()(
+    set => ({
+        ...constants.state,
+        dispatch: (action: Action) => {
+            set(state => ({
                 ...state,
-                 // Fix: Since the action is a union type and the reducer is dynamically determined.
-                 // The compiler complains about the all possible payloads not matching all possible
-                 // arguments.
-                [domain]: reducer.action(action.payload as any, state[domain] as any),
-            };
-        });
-    },
-}));
+                [action.domain]: {
+                    ...state[action.domain],
+                    ...dispatchAction(action)
+                },
+            }));
+        }
+    })
+);
 
 export { useStore, actions };

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { UserState } from 'store/reducers/user/user.types';
+import { UserState } from 'store/types';
 import { afterAll, afterEach, beforeAll } from 'vitest'
 
 import api from 'api';

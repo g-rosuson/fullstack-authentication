@@ -1,15 +1,11 @@
-import { ChangeThemeReducer } from './ui.types';
+import { Theme } from '../../types';
 
-const changeTheme: ChangeThemeReducer = {
-    type: 'change_theme',
-    action: (payload, state) => ({
-        ...state,
-        theme: payload
-    })
-};
+const changeTheme = (payload: Theme) => ({
+    theme: payload
+})
 
-const reducers = [
-    changeTheme
-];
+const reducers = {
+   changeTheme
+}
 
 export default reducers;

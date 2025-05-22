@@ -43,7 +43,7 @@ const TopBar = () => {
             await api.service.resources.authentication.logout();
 
             // Reset the user store object
-            store.dispatch({ type: actions.user.clear_user });
+            store.dispatch(actions.user.clearUser());
 
             navigate(config.routes.login);
 
@@ -65,7 +65,7 @@ const TopBar = () => {
     // Determine menu controller
     const menuController = (
         <div className={styling.avatar}>
-            <Avatar email={store.user.email} onClick={toggleMenu}/>
+            <Avatar email={store.user.email || ''} onClick={toggleMenu}/>
         </div>
     );
 

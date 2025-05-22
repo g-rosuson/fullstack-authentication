@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, Mock } from 'vitest'
 import api from 'api';
 import config from 'config';
 
-import { UserState } from '../../../store/reducers/user/user.types';
+import { UserState } from '../../../store/types';
 import Authenticate from './Authenticate';
 
 /**

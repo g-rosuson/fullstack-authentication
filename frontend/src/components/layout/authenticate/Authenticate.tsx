@@ -46,16 +46,11 @@ const Authenticate = () => {
         try {
             const response = await api.service.resources.authentication.refreshAccessToken();
 
-            const payload = {
-                payload: {
-                    accessToken: response.data.accessToken,
-                    email: response.data.email,
-                    id: response.data.id
-                },
-                type: actions.user.change_user
-            }
-
-            store.dispatch(payload);
+            store.dispatch(actions.user.changeUser({
+                accessToken: response.data.accessToken,
+                email: response.data.email,
+                id: response.data.id,
+            }));
 
             hasMountedRef.current = true;
 

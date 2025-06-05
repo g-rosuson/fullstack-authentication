@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 
 type Action = {
     label: string;
@@ -10,6 +10,7 @@ type Props = {
     close: () => void;
     actions: Action[];
     controller: ReactNode;
+    position?: Pick<React.CSSProperties, 'top' | 'right' | 'bottom' | 'left'>;
 }
 
 export type {

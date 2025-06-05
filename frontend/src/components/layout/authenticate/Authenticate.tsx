@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useUserSelection } from 'store/selectors/user';
 
 import Spinner from '../../UI/spinner/Spinner';
-import TopBar from '../topBar/TopBar';
+import Dashboard from '../dashboard/Dashboard';
 import RefreshSessionModal from './refreshSession/RefreshSession';
 
 import api from 'api';
-import config from 'config';
+import config from 'config';    
 import logging from 'services/logging';
 import utils from 'utils';
-
 
 const Authenticate = () => {
     // Store selectors
@@ -114,11 +113,10 @@ const Authenticate = () => {
     }, [renewAccessToken, userSelectors.accessToken]);
 
 
-    // Determine authenticated component
-    const authenticatedComponent = (
+    const authComponent = (
         <>
-            <TopBar/>
-            <Outlet/>
+            <Dashboard/>
+
             <RefreshSessionModal
                 open={isRefreshSessionModalOpen}
                 close={toggleRefreshSessionModal}
@@ -127,7 +125,7 @@ const Authenticate = () => {
     );
 
 
-    return isLoading ? <Spinner /> : authenticatedComponent;
+    return isLoading ? <Spinner /> : authComponent;
 };
 
 export default Authenticate;

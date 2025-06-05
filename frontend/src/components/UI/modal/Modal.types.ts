@@ -2,7 +2,7 @@ import type { ReactNode, RefObject } from 'react';
 
 type DataAttributes = Record<`data-${string}`, string>
 
-type ClickHandler = () => Promise<void> | void;
+type ClickHandler = (() => Promise<void>) | (() => void);
 
 export type Props = {
     open: boolean;

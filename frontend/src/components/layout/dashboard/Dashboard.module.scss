@@ -1,6 +1,7 @@
 .container {
-    display: flex;
     height: 100vh;
+    display: flex;
+
     // Disable overflow so the "sidebar" is fixed in place
     // when the "outlet" content overflows its container
     // Note: Overflow for the "outlet" is enabled below
@@ -9,7 +10,9 @@
 
 .wrapper {
     flex: 1;
-    overflow-y: auto; // Enable y-axis overflow for the outlet
+
+    // Enable y-axis overflow for the outlet
+    overflow-y: auto;
 }
 
 .outlet {

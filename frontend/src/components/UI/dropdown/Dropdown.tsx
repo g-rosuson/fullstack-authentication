@@ -4,7 +4,7 @@ import styling from './Dropdown.module.scss';
 
 import { Props } from './Dropdown.types';
 
-const Dropdown = ({ open, close, actions, controller }: Props) => {
+const Dropdown = ({ open, close, actions, controller, position }: Props) => {
     // Refs
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -47,30 +47,31 @@ const Dropdown = ({ open, close, actions, controller }: Props) => {
 
     return (
        <div ref={menuRef} className={styling.container}>
-           {controller}
+            {controller}
 
-           <ul
-               className={open ? styling.dropdown : styling.hidden}
-               role="menu"
-               hidden={!open}
-               aria-expanded={open}
-               aria-label="User menu"
-               aria-hidden={!open}
-           >
-               {actions.map(({ label, action }) => (
-                   <li
-                       key={label}
-                       className={styling.item}
-                       role="menuitem"
-                       tabIndex={open ? 0 : -1}
-                       onClick={action}
-                       onKeyDown={(event) => keyboardHandler(event, action)}
-                       aria-label={label}
-                   >
-                       {label}
-                   </li>
-               ))}
-           </ul>    
+            <ul
+                className={open ? styling.dropdown : styling.hidden}
+                style={position}
+                role="menu"
+                hidden={!open}
+                aria-expanded={open}
+                aria-label="User menu"
+                aria-hidden={!open}
+            >
+                {actions.map(({ label, action }) => (
+                    <li
+                        key={label}
+                        className={styling.item}
+                        role="menuitem"
+                        tabIndex={open ? 0 : -1}
+                        onClick={action}
+                        onKeyDown={(event) => keyboardHandler(event, action)}
+                        aria-label={label}
+                    >
+                        {label}
+                    </li>
+                ))}
+            </ul>    
        </div>
     );
 }; 

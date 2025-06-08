@@ -47,12 +47,14 @@ const Sidebar = () => {
 
     return (
         <aside
+            data-testid="sidebar"
             className={isSidebarOpen ? styling.open : styling.close}
             aria-hidden={isSidebarOpen === false}
             aria-label='Sidebar'
         >
             <div className={styling.header}>
                 <Button
+                    testId='close-sidebar-btn'
                     icon={<SidebarClose thick/>}
                     ariaLabel='Close sidebar'
                     onClick={onToggleSidebar}

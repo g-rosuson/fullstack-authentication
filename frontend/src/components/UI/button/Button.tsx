@@ -44,13 +44,13 @@ const Button = (props: Props) => {
      * Returns all added classes as a concatenated
      * string with a whitespace between each class.
      */
-    const getConcatenateClasses = () => classes.join(' ');
+    const getConcatenatedClasses = () => classes.join(' ');
 
 
     return (
         <button
             data-testid={testId}
-            className={getConcatenateClasses()}
+            className={getConcatenatedClasses()}
             type={type}
             onClick={isLoading ? undefined : onClick}
             disabled={disabled || isLoading}

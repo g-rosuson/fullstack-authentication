@@ -1,7 +1,10 @@
 import { type ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { render, screen } from '@testing-library/react';
+import { MemoryRouter, Route,Routes } from 'react-router-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import config from 'config';
 
 import TopBar from './TopBar';
 
@@ -37,13 +40,41 @@ vi.mock('store/selectors/ui', () => ({
     useUserInterfaceSelection: useUserInterfaceSelectionMock
 }));
 
+// === Mock user store selector ===
+const clearUserMock = vi.hoisted(() => vi.fn());
+
+vi.mock('store/selectors/user', () => ({
+    useUserSelection: () => ({
+        email: 'user@example.com',
+        clearUser: clearUserMock
+    })
+}));
+
+// === Mock logout API ===
+const logoutMock = vi.hoisted(() => vi.fn());
+
+vi.mock('api', () => ({
+    default: {
+        service: {
+            resources: {
+                authentication: {
+                    logout: logoutMock
+                }
+            }
+        }
+    }
+}));
+
 /**
  * Renders the "TopBar" component into the JS-DOM.
  */
 const renderTopBar = () => {
     render(
-        <MemoryRouter>
-            <TopBar />
+        <MemoryRouter initialEntries={[config.routes.root]}>
+            <Routes>
+                <Route path={config.routes.root} element={<TopBar />} />
+                <Route path={config.routes.login} element={<h1>Login page</h1>} />
+            </Routes>
         </MemoryRouter>
     );
 };
@@ -76,4 +107,20 @@ describe('TopBar component', () => {
 
         expect(screen.queryByTestId('avatar')).toBeVisible();
     }); 
+
+    it('logs out the user and shows the login screen', async () => {
+        renderTopBar();
+
+        // Open dropdown menu
+        userEvent.click(screen.getByTestId('avatar'));
+
+        // Click Logout option
+        userEvent.click(screen.getByText('Logout'));
+
+        await waitFor(() => {
+            expect(logoutMock).toHaveBeenCalled();
+            expect(clearUserMock).toHaveBeenCalled();
+            expect(screen.getByRole('heading', { name: 'Login page' })).toBeInTheDocument();
+        });
+    });
 });

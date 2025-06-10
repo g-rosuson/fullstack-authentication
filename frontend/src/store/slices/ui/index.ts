@@ -6,5 +6,6 @@ import { Theme, UserInterfaceSlice } from './ui.types';
 
 export const createUserInterfaceSlice: StateCreator<Store, [], [], UserInterfaceSlice> = (set) => ({
     ...ui,
-    changeTheme: (theme: Theme) => set(() => ({ theme }))
+    changeTheme: (theme: Theme) => set(() => ({ theme })),
+    toggleSidebar: (isSidebarOpen: boolean) => set(() => ({ isSidebarOpen }))
 });

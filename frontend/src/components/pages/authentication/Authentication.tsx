@@ -2,9 +2,9 @@ import { type ChangeEvent, type FormEvent, useEffect,useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUserSelection } from 'store/selectors/user';
 
-import Button from '../../UI/button/Button';
-import Heading from '../../UI/heading/Heading';
-import Input from '../../UI/input/Input';
+import Button from 'components/UI/button/Button';
+import Heading from 'components/UI/heading/Heading';
+import Input from 'components/UI/input/Input';
 
 import api from 'api';
 import config from 'config';
@@ -123,9 +123,13 @@ const Authentication = () => {
                     required
                 />
 
-                <Button type="submit" isLoading={state.isLoading} testId='auth-submit-button'>
-                    {buttonLabel}
-                </Button>
+                <Button
+                    testId='auth-submit-button'
+                    type='submit'
+                    label={buttonLabel}
+                    variant='primary'
+                    isLoading={state.isLoading}
+                />
             </form>
 
             <div className={styling.link}>

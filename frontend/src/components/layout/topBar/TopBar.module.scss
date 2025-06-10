@@ -1,13 +1,13 @@
 .header {
-    height: var(--ui-element-height);
+    position: sticky;
+    top: 0;
+    width: 100%;
     display: flex;
     justify-content: space-between;
-}
-
-.links {
-    display: flex;
     align-items: center;
-    gap: var(--gap-small);
+    padding: var(--gap-small);
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-bg-primary);
 }
 
 .avatar {

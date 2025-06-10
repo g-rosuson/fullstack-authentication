@@ -1,18 +1,27 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { Home } from 'components/UI/icons/Icons';
+
 import Button from './Button';
-import { Props } from './Button.types';
+import { BaseProps } from './Button.types';
 
 /**
  * Renders the button with the given props into the JS-DOM and returns testing utilities.
  */
-const setupButton = (props: Partial<Props> = {}) => {
-    return render((
-        <Button testId='button' {...props}>
-            Children
-         </Button>
-    ));
+const renderButton = (baseProps?: Partial<BaseProps>, withIcon = false) => {
+    const iconOrLabelProps = withIcon
+        ? { icon: <Home />, ariaLabel: 'Icon button' }
+        : { label: 'Button label' };
+
+    return render(
+        <Button
+            testId="button"
+            onClick={() => null}
+            {...iconOrLabelProps}
+            {...baseProps}
+        />
+    );
 };
 
 describe('Button component', () => {
@@ -26,118 +35,133 @@ describe('Button component', () => {
         vi.restoreAllMocks();
     });
 
+    // Test if the correct HTML button element is used
     it('its a HTML button element', () => {
-        const { getByRole } = setupButton();
+        const { getByRole } = renderButton();
         expect(getByRole('button')).toBeInstanceOf(HTMLButtonElement);
+    });
+
+    // Test "aria-label" attribute
+    it('sets "aria-label" with the "ariaLabel" prop when using an icon', () => {
+        const { getByRole } = renderButton({}, true);
+        expect(getByRole('button')).toHaveAttribute('aria-label', 'Icon button');
     });
 
     // Test the "aria-disabled" attribute
     it('sets "aria-disabled" to true when the disabled prop is true', () => {
-        const { getByRole } = setupButton({ disabled: true });
+        const { getByRole } = renderButton({ disabled: true });
         expect(getByRole('button')).toHaveAttribute('aria-disabled', 'true');
     });
 
     it('sets "aria-disabled" to true when the isLoading prop is true', () => {
-        const { getByRole } = setupButton({ isLoading: true });
+        const { getByRole } = renderButton({ isLoading: true });
         expect(getByRole('button')).toHaveAttribute('aria-disabled', 'true');
     });
 
     // Test the "aria-busy" attribute
     it('sets "aria-busy" to true when the isLoading prop is true', () => {
-        const { getByRole } = setupButton({ isLoading: true });
+        const { getByRole } = renderButton({ isLoading: true });
         expect(getByRole('button')).toHaveAttribute('aria-busy', 'true');
     });
 
     it('sets "aria-busy" to false when the isLoading prop is false', () => {
-        const { getByRole } = setupButton({ isLoading: false });
+        const { getByRole } = renderButton({ isLoading: false });
         expect(getByRole('button')).toHaveAttribute('aria-busy', 'false');
     });
 
     // Test the "aria-hidden" attribute
     it('sets "aria-hidden" to true when the hidden prop is true', () => {
-        const { container } = setupButton({ hidden: true });
+        const { container } = renderButton({ hidden: true });
         const button = container.querySelector('button');
         expect(button).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('sets "aria-hidden" to false when the hidden prop is false', () => {
-        const { getByRole } = setupButton({ hidden: false });
+        const { getByRole } = renderButton({ hidden: false });
         expect(getByRole('button')).toHaveAttribute('aria-hidden', 'false');
     });
 
-    // Test the "children" prop
-    it('renders its children', () => {
-        const { getByRole } = setupButton();
+    // Test the "label" prop
+    it('renders the label', () => {
+        const { getByRole } = renderButton();
         const button = getByRole('button');
-        const children = within(button).getByText('Children');
-        expect(children).toHaveTextContent('Children');
+        const label = within(button).getByText('Button label');
+        expect(label).toHaveTextContent('Button label');
+    });
+
+     // Test the "icon" prop
+    it('renders the icon when the "icon" prop is provided', () => {
+        const { getByRole } = renderButton({}, true);
+        const button = getByRole('button');
+        const icon = within(button).getByTestId('icon');
+        expect(icon).toBeInTheDocument();
     });
 
     // Test the "disabled" prop
     it('is disabled when "disabled" is true', () => {
-        const { getByRole } = setupButton({ disabled: true });
+        const { getByRole } = renderButton({ disabled: true });
         expect(getByRole('button')).toBeDisabled();
     });
 
     it('is enabled when "disabled" is false', () => {
-        const { getByRole } = setupButton({ disabled: false });
+        const { getByRole } = renderButton({ disabled: false });
         expect(getByRole('button')).not.toBeDisabled();
     });
 
     it('is enabled when "disabled" is undefined', () => {
-        const { getByRole } = setupButton();
+        const { getByRole } = renderButton();
         expect(getByRole('button')).not.toBeDisabled();
     });
 
     // Test the "hidden" prop
     it('is hidden when "hidden" is true', () => {
-        const { queryByRole } = setupButton({ hidden: true });
+        const { queryByRole } = renderButton({ hidden: true });
         expect(queryByRole('button')).toBeNull();
     });
 
     it('is visible when "hidden" is false', () => {
-        const { getByRole } = setupButton({ hidden: false });
+        const { getByRole } = renderButton({ hidden: false });
         expect(getByRole('button')).toBeVisible();
     });
 
     it('is visible when "hidden" is undefined', () => {
-        const { getByRole } = setupButton();
+        const { getByRole } = renderButton();
         expect(getByRole('button')).toBeVisible();
     });
 
     // Test the "isLoading" prop
     it('shows spinner when "isLoading" is true', () => {
-        const { container } = setupButton({ isLoading: true });
+        const { container } = renderButton({ isLoading: true });
         const spinner = within(container).getByTestId('spinner');
         expect(spinner).toBeInTheDocument();
     });
 
     it('does not render children when "isLoading" is true', () => {
-        const { container } = setupButton({ isLoading: true });
+        const { container } = renderButton({ isLoading: true });
         expect(within(container).queryByText('Children')).toBeNull();
     });
 
     it('does not invoke the "onClick" callback function when "isLoading" is true', async () => {
-        const { getByRole } = setupButton({ isLoading: true, onClick: onClickMock });
+        const { getByRole } = renderButton({ isLoading: true, onClick: onClickMock });
         await userEvent.click(getByRole('button'));
         expect(onClickMock).not.toHaveBeenCalled();
     });
 
     it('invokes the "onClick" callback function when "isLoading" is false', async () => {
-        const { getByRole } = setupButton({ isLoading: false, onClick: onClickMock });
+        const { getByRole } = renderButton({ isLoading: false, onClick: onClickMock });
         await userEvent.click(getByRole('button'));
         expect(onClickMock).toHaveBeenCalledTimes(1);
     });
 
     it('invokes the "onClick" callback function when "isLoading" is undefined', async () => {
-        const { getByRole } = setupButton({ onClick: onClickMock });
+        const { getByRole } = renderButton({ onClick: onClickMock });
         await userEvent.click(getByRole('button'));
         expect(onClickMock).toHaveBeenCalledTimes(1);
     });
 
     // Test the "type" prop
     it('applies the "type" prop correctly', () => {
-        const { getByRole } = setupButton({ type: 'reset' });
+        const { getByRole } = renderButton({ type: 'reset' });
         expect(getByRole('button')).toHaveProperty('type', 'reset');
     });
 
@@ -146,7 +170,11 @@ describe('Button component', () => {
 
         render(
             <form onSubmit={handleSubmitMock}>
-                <Button type="submit">Submit</Button>
+                <Button
+                    label='Button label'
+                    type='submit'
+                    onClick={() => null}
+                />
             </form>
         );
 

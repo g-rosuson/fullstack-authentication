@@ -1,5 +1,6 @@
 const ui = {
-    theme: 'dark' as const
+    theme: 'dark' as const,
+    isSidebarOpen: true,
 }
 
 export default ui;

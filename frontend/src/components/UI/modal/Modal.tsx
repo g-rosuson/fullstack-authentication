@@ -120,14 +120,14 @@ const Modal = (props: Props) => {
             hidden={!primaryAction && !secondaryAction}
         >
             <Button 
+                label={secondaryLabel || ''}
                 onClick={secondaryAction} 
                 hidden={!secondaryAction}
                 testId='secondary-button'
-            >
-                {secondaryLabel}
-            </Button>
+            />
 
             <Button
+                label={primaryLabel || ''}
                 // Set the button type to "submit" when the form is enabled
                 type={enableForm ? 'submit' : undefined}
                 testId='primary-button'
@@ -135,9 +135,7 @@ const Modal = (props: Props) => {
                 onClick={enableForm ? undefined : primaryAction}
                 isLoading={isLoading}
                 disabled={disabled || !primaryAction}
-            >
-                {primaryLabel}
-            </Button>
+            />
         </div>
     );
 

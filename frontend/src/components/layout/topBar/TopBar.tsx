@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useUserInterfaceSelection } from 'store/selectors/ui';
 import { useUserSelection } from 'store/selectors/user';
 
-import Avatar from '../../UI/avatar/Avatar';
-import Dropdown from '../../UI/dropdown/Dropdown';
+import Avatar from 'components/UI/avatar/Avatar';
+import Button from 'components/UI/button/Button';
+import Dropdown from 'components/UI/dropdown/Dropdown';
+import { SidebarOpen } from 'components/UI/icons/Icons';
 
 import api from 'api';
 import config from 'config';
@@ -12,8 +15,9 @@ import logging from 'services/logging';
 import styling from './TopBar.module.scss';
 
 const TopBar = () => {
-    // Store selectors
-    const userSelectors = useUserSelection();
+    // Selectors
+    const { isSidebarOpen, toggleSidebar } = useUserInterfaceSelection();
+    const { email, clearUser } = useUserSelection();
 
 
     // State
@@ -33,6 +37,15 @@ const TopBar = () => {
 
 
     /**
+     * Opens and closes the sidebar by toggling
+     * the "isSidebarOpen" store property.
+     */
+    const onToggleSidebar = () => {
+        toggleSidebar(!isSidebarOpen);
+    }
+
+
+    /**
      * - Calls the logout endpoint which clears the httpOnly browser cookie.
      * - And when successful, resets the "user" store object and navigates
      *   the user to the"login" page.
@@ -43,7 +56,7 @@ const TopBar = () => {
             await api.service.resources.authentication.logout();
 
             // Reset the user store object
-            userSelectors.clearUser();
+            clearUser();
 
             navigate(config.routes.login);
 
@@ -65,26 +78,29 @@ const TopBar = () => {
     // Determine menu controller
     const menuController = (
         <div className={styling.avatar}>
-            <Avatar email={userSelectors.email || ''} onClick={toggleMenu}/>
+            <Avatar email={email || ''} onClick={toggleMenu}/>
         </div>
     );
 
 
     return (
         <header className={styling.header}>
-            <nav>
-                <ul className={styling.links}>
-                    <li>
-                        <Link to={config.routes.root}>Home</Link>
-                    </li>
-                </ul>
-            </nav>
+            <div>
+                <Button
+                    icon={<SidebarOpen thick/>}
+                    ariaLabel='Open sidebar'
+                    hidden={isSidebarOpen}
+                    onClick={onToggleSidebar}
+                    inline
+                />
+            </div>
 
             <Dropdown
                 open={isMenuOpen}
                 close={toggleMenu}
                 actions={userMenuActions}
                 controller={menuController}
+                position={{ right: '0' }}
             />
         </header>
     );

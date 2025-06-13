@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { UserStore } from 'store/slices/user/user.types';
 import { afterAll, afterEach, beforeAll } from 'vitest'
 
 import api from 'api';
 import config from 'config';
 
-import { UserStore } from '../../../../shared/types/store/store.user.types';
 import constants from './constants';
 import RefreshSession from './RefreshSession';
 

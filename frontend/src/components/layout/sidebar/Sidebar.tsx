@@ -12,16 +12,7 @@ const Sidebar = () => {
     // Store selectors
     const { isSidebarOpen, toggleSidebar } = useUserInterfaceSelection();
 
-
-    /**
-     * Opens and closes the sidebar by toggling
-     * the "isSidebarOpen" store property.
-     */
-    const onToggleSidebar = () => {
-        toggleSidebar(!isSidebarOpen);
-    }
-
-
+    
     /**
      * Returns a CSS link class based on whether the
      * corresponding link path is active or idle.
@@ -57,7 +48,7 @@ const Sidebar = () => {
                     testId='close-sidebar-btn'
                     icon={<SidebarClose thick/>}
                     ariaLabel='Close sidebar'
-                    onClick={onToggleSidebar}
+                    onClick={toggleSidebar}
                     inline
                 />
             </div>

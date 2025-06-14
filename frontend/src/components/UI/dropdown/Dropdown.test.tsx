@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import Dropdown from './Dropdown';
-
 /**
  * Renders the dropdown with the given props into the JS-DOM and returns testing utilities.
  */
@@ -11,8 +10,8 @@ const setupDropdown = (isOpen = true) => {
         open: isOpen,
         close: vi.fn(),
         actions: [
-            { label: 'Action 1', action: vi.fn() },
-            { label: 'Action 2', action: vi.fn() },
+            { label: 'Action 1', icon: <div>icon</div>, action: vi.fn() },
+            { label: 'Action 2', icon: <div>icon</div>, action: vi.fn() },
         ],
         controller: <button>Open Menu</button>,
     };

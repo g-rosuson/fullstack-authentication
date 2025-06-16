@@ -1,7 +1,9 @@
+import Heading from 'components/UI/heading/Heading';
+
 const Home = () => {
     return (
         <div>
-            <h2>Home</h2>
+            <Heading size='l' level={2}>Home</Heading>
         </div>
     );
 };

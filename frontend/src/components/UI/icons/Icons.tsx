@@ -111,3 +111,44 @@ export const Settings = ({ thick }: Props) => (
         <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
     </svg>
 );
+
+export const Sun = ({ thick }: Props) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
+        height="1em"
+        viewBox="0 0 24 24"
+        strokeWidth={thick ? '2' : '1.5'}
+        stroke="currentColor"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
+        <path d="M4 12h.01"/>
+        <path d="M12 4v.01"/>
+        <path d="M20 12h.01"/>
+        <path d="M12 20v.01"/>
+        <path d="M6.31 6.31l-.01 -.01"/>
+        <path d="M17.71 6.31l-.01 -.01"/>
+        <path d="M17.7 17.7l.01 .01"/>
+        <path d="M6.3 17.7l.01 .01"/>
+    </svg>
+);
+
+export const Moon = ({ thick }: Props) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
+        height="1em"
+        viewBox="0 0 24 24"
+        strokeWidth={thick ? '2' : '1.5'}
+        stroke="currentColor"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M16.418 4.157a8 8 0 0 0 0 15.686"/>
+        <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+    </svg>
+);

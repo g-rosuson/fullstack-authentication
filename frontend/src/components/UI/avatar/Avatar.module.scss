@@ -6,16 +6,21 @@
     align-items: center;
     border-radius: 50%;
     background-color: var(--color-primary);
+    transition: background-color 0.2s ease-in-out;
 
     &:focus,
     &:focus-visible {
         outline-offset: 0.25rem;
         outline: var(--color-primary) solid 1px;
     }
+
+    &:hover {
+        background-color: var(--color-primary-hover);
+    }
 }
 
 .label {
     font-size: 2rem;
     font-weight: 600;
-    color: var(--color-button-label);
+    color: var(--color-primary-text);
 }

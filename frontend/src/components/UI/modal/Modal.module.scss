@@ -24,7 +24,7 @@
     width: 100%;
     padding: var(--gap);
     border-radius: var(--border-radius);
-    background-color: var(--color-bg-primary);
+    background-color: var(--color-surface);
     box-shadow: var(--shadow-light);
     transition: max-width 0.4s;
     will-change: max-width;
@@ -44,11 +44,11 @@
     border-radius: 50%;
     transition: background-color 0.2s;
     font-size: 2rem;
-    color: var(--color-2-1200);
+    color: var(--color-icon);
     z-index: 10;
 
     &:hover {
-        background-color: var(--color-bg-primary-hover);
+        background-color: var(--color-surface-hover);
     }
 }
 

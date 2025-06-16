@@ -6,7 +6,7 @@ import { useUserSelection } from 'store/selectors/user';
 import Avatar from 'components/UI/avatar/Avatar';
 import Button from 'components/UI/button/Button';
 import Dropdown from 'components/UI/dropdown/Dropdown';
-import { SidebarOpen } from 'components/UI/icons/Icons';
+import { Logout, SidebarOpen } from 'components/UI/icons/Icons';
 
 import api from 'api';
 import config from 'config';
@@ -31,17 +31,8 @@ const TopBar = () => {
     /**
      * Toggles the "isMenu" boolean state property.
      */
-    const toggleMenu = () => {
+    const onToggleDropdownMenu = () => {
         setIsMenuOpen(prevState => !prevState);
-    }
-
-
-    /**
-     * Opens and closes the sidebar by toggling
-     * the "isSidebarOpen" store property.
-     */
-    const onToggleSidebar = () => {
-        toggleSidebar(!isSidebarOpen);
     }
 
 
@@ -70,6 +61,7 @@ const TopBar = () => {
     const userMenuActions = [
         {
             label: 'Logout',
+            icon: <Logout thick/>,
             action: onLogout
         }
     ];
@@ -78,7 +70,7 @@ const TopBar = () => {
     // Determine menu controller
     const menuController = (
         <div className={styling.avatar}>
-            <Avatar email={email || ''} onClick={toggleMenu}/>
+            <Avatar email={email || ''} onClick={onToggleDropdownMenu}/>
         </div>
     );
 
@@ -90,14 +82,14 @@ const TopBar = () => {
                     icon={<SidebarOpen thick/>}
                     ariaLabel='Open sidebar'
                     hidden={isSidebarOpen}
-                    onClick={onToggleSidebar}
+                    onClick={toggleSidebar}
                     inline
                 />
             </div>
 
             <Dropdown
                 open={isMenuOpen}
-                close={toggleMenu}
+                close={onToggleDropdownMenu}
                 actions={userMenuActions}
                 controller={menuController}
                 position={{ right: '0' }}

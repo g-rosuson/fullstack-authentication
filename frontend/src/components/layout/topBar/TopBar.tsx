@@ -12,12 +12,14 @@ import { Logout, Moon, SidebarOpen, Sun } from 'components/UI/icons/Icons';
 import api from 'api';
 import config from 'config';
 import logging from 'services/logging';
+import storage from 'services/storage';
+import utils from 'utils';
 
 import styling from './TopBar.module.scss';
 
 const TopBar = () => {
     // Selectors
-    const { isSidebarOpen, theme, toggleSidebar, toggleTheme } = useUserInterfaceSelection();
+    const { isSidebarOpen, theme, toggleSidebar, changeTheme } = useUserInterfaceSelection();
     const { email, clearUser } = useUserSelection();
 
 
@@ -35,6 +37,38 @@ const TopBar = () => {
     const onToggleDropdownMenu = () => {
         setIsMenuOpen(prevState => !prevState);
     }
+
+
+    /**
+     * Changes the theme and hides flash of unstyles content.
+     */
+    const onThemeChange = async () => {
+        const root = document.documentElement;
+
+        // Turn of the lights to hide flash of unstyled content 
+        root.style.filter = 'brightness(0)';
+
+        // Add a delay to wait for the filter being applied
+        await utils.time.sleep(350);
+
+        // Toogle theme
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+
+        // Update store
+        changeTheme(newTheme);
+
+        // Persist theme in local storage
+        storage.setTheme(newTheme);
+
+        // Add a delay to hide flash of unstyled content
+        await utils.time.sleep(150);
+
+        // Set data-theme attribute value as the theme, to render corresponding CSS color palette
+        root.setAttribute('data-theme', newTheme);
+
+        // Remove filter
+        root.style.filter = '';
+    };
 
 
     /**
@@ -77,7 +111,7 @@ const TopBar = () => {
 
 
     // Determine active theme
-    const isDarkModeActive = theme === 'dark'
+    const isDarkModeActive = theme === 'dark';
 
 
     // Determine theme icon
@@ -86,7 +120,7 @@ const TopBar = () => {
 
     // Determine theme button aria-label
     const nextThemeForAriaLabel: Theme = isDarkModeActive ? 'light' : 'dark';
-    const themeButtonAriaLabel = `Change theme to ${nextThemeForAriaLabel} mode`
+    const themeButtonAriaLabel = `Change theme to ${nextThemeForAriaLabel} mode`;
 
 
     return (
@@ -105,7 +139,7 @@ const TopBar = () => {
                 <Button
                     icon={<ThemeIcon thick/>}
                     ariaLabel={themeButtonAriaLabel}
-                    onClick={toggleTheme} 
+                    onClick={onThemeChange} 
                 />
 
                 <Dropdown

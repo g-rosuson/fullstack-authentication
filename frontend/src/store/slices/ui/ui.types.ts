@@ -6,7 +6,7 @@ type UserInterface = {
 };
 
 interface UserInterfaceSlice extends UserInterface {
-    toggleTheme: () => void;
+    changeTheme: (theme: Theme) => void;
     toggleSidebar: () => void;
 }
 

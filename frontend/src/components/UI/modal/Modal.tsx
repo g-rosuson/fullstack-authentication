@@ -159,7 +159,7 @@ const Modal = (props: Props) => {
         );
     }
 
-    // TODO: close-button should be a round <Button/>, implement later?
+    
     const component = (
         <div className={styling.backdrop} {...dataAttributes} ref={backdrop}>
             <div

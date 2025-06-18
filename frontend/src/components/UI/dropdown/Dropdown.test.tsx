@@ -10,8 +10,8 @@ const setupDropdown = (isOpen = true) => {
         open: isOpen,
         close: vi.fn(),
         actions: [
-            { label: 'Action 1', icon: <div>icon</div>, action: vi.fn() },
-            { label: 'Action 2', icon: <div>icon</div>, action: vi.fn() },
+            { label: 'Action 1', icon: <svg>icon</svg>, action: vi.fn() },
+            { label: 'Action 2', icon: <svg>icon</svg>, action: vi.fn() },
         ],
         controller: <button>Open Menu</button>,
     };
@@ -37,6 +37,13 @@ describe('Dropdown component', () => {
     it('is hidden when "open" is false', () => {
         setupDropdown(false);
         expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    });
+
+    it('renders icons', () => {
+        setupDropdown();
+
+        const icons = screen.getAllByText('icon');
+        expect(icons).toHaveLength(2);
     });
 
     it('closes when clicking outside the dropdown', async () => {
@@ -67,24 +74,24 @@ describe('Dropdown component', () => {
     it('supports keyboard navigation using Enter', async () => {
         const { actions } = setupDropdown();
 
-        // Set focus on the first item
-        const firstAction = screen.getByText('Action 1');
-        firstAction.focus();
+        const items = screen.getAllByRole('menuitem');
+
+        items[0].focus();
 
         await userEvent.keyboard('{Enter}');
-
+        
         expect(actions[0].action).toHaveBeenCalledTimes(1);
     });
 
     it('supports keyboard navigation using Space', async () => {
         const { actions } = setupDropdown();
 
-        // Set focus on the first item
-        const firstAction = screen.getByText('Action 1');
-        firstAction.focus();
+        const items = screen.getAllByRole('menuitem');
 
-        await userEvent.keyboard('{ }');
+        items[0].focus();
 
+        await userEvent.keyboard(' ');
+        
         expect(actions[0].action).toHaveBeenCalledTimes(1);
     });
 

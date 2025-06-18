@@ -37,6 +37,7 @@
     padding: var(--gap-small);
     border-radius: var(--border-radius);
     transition: background-color 0.2s ease-in-out;
+    color: var(--color-text);
 
     &:hover {
         background-color: var(--color-surface-hover);

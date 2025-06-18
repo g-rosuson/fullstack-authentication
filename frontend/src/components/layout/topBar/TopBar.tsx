@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserInterfaceSelection } from 'store/selectors/ui';
 import { useUserSelection } from 'store/selectors/user';
-import { Theme } from 'store/slices/ui/ui.types';
+import { Theme } from 'types/theme';
 
 import Avatar from 'components/UI/avatar/Avatar';
 import Button from 'components/UI/button/Button';
@@ -49,7 +49,7 @@ const TopBar = () => {
         root.style.filter = 'brightness(0)';
 
         // Add a delay to wait for the filter being applied
-        await utils.time.sleep(350);
+        await utils.time.sleep(450);
 
         // Toogle theme
         const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -139,7 +139,7 @@ const TopBar = () => {
                 <Button
                     icon={<ThemeIcon thick/>}
                     ariaLabel={themeButtonAriaLabel}
-                    onClick={onThemeChange} 
+                    onClick={utils.time.throttle(onThemeChange, 1000)} 
                 />
 
                 <Dropdown

@@ -36,7 +36,7 @@ const TopBar = () => {
      */
     const onToggleDropdownMenu = () => {
         setIsMenuOpen(prevState => !prevState);
-    }
+    };
 
 
     /**
@@ -129,6 +129,7 @@ const TopBar = () => {
                 <Button
                     icon={<SidebarOpen thick/>}
                     ariaLabel='Open sidebar'
+                    testId='open-sidebar-btn'
                     hidden={isSidebarOpen}
                     onClick={toggleSidebar}
                     inline
@@ -139,6 +140,7 @@ const TopBar = () => {
                 <Button
                     icon={<ThemeIcon thick/>}
                     ariaLabel={themeButtonAriaLabel}
+                    testId='toggle-theme-btn'
                     onClick={utils.time.throttle(onThemeChange, 1000)} 
                 />
 

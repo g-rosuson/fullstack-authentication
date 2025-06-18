@@ -1,4 +1,4 @@
-type Theme = 'dark' | 'light';
+import { Theme } from 'types/theme';
 
 type UserInterface = {
     theme: Theme;

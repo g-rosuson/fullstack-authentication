@@ -159,7 +159,7 @@ const Modal = (props: Props) => {
         );
     }
 
-
+    
     const component = (
         <div className={styling.backdrop} {...dataAttributes} ref={backdrop}>
             <div

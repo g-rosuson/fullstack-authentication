@@ -1,7 +1,11 @@
 import jwt from './jwt';
+import time from './time';
+import validators from './validators';
 
 const utils = {
-    jwt
+    time,
+    jwt,
+    validators
 };
 
 export default utils;

@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import { type ReactNode } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -31,15 +31,6 @@ vi.mock('components/UI/icons/Icons', () => ({
     Home: () => <svg data-testid="icon-home" />,
 }));
 
-// === Mock Button ===
-vi.mock('components/UI/button/Button', () => ({
-    default: ({ onClick, icon }: { onClick: () => void; icon: ReactElement }) => (
-        <button onClick={onClick} data-testid="sidebar-toggle-btn">
-            {icon}
-        </button>
-    ),
-}));
-
 // === Mock store ===
 const toggleSidebarMock = vi.fn();
 // Note: vi.mock is hoisted under the hood, therefore we
@@ -59,21 +50,28 @@ vi.mock('store/selectors/ui', () => ({
  * Custom render helper that sets the sidebar open/close state
  * and allows specifying the current route.
  */
-const renderSidebar = (isSidebarOpen = true, route = '/') => {
+const renderSidebar = (
+    isSidebarOpen: boolean,
+    initialRoute: string,
+    additionalRoutes: { path: string; element: ReactNode }[] = []
+) => {
     useUserInterfaceSelectionMock.mockReturnValue({
         isSidebarOpen,
-        toggleSidebar: toggleSidebarMock,
+        toggleSidebar: toggleSidebarMock
     });
 
     render(
-        <MemoryRouter initialEntries={[route]}>
+        <MemoryRouter initialEntries={[initialRoute]}>
             <Routes>
                 <Route path="*" element={<Sidebar />} />
+
+                {additionalRoutes.map(({ path, element }) => (
+                    <Route key={path} path={path} element={element} />
+                ))}
             </Routes>
         </MemoryRouter>
     );
 };
-
 
 describe('Sidebar component', () => {
     beforeEach(() => {
@@ -81,7 +79,7 @@ describe('Sidebar component', () => {
     });
 
     it('renders the sidebar and navigation items', () => {
-        renderSidebar();
+        renderSidebar(true, '/');
 
         expect(screen.getByTestId('sidebar')).toBeInTheDocument();
         expect(screen.getByText('Home')).toBeInTheDocument();
@@ -90,37 +88,37 @@ describe('Sidebar component', () => {
     });
 
     it('applies "open" class when "isSidebarOpen" is true', () => {
-        renderSidebar(true);
+        renderSidebar(true, '/');
 
         const sidebar = screen.getByTestId('sidebar');
         expect(sidebar.className).toContain('open');
     });
 
     it('applies "close" class when "isSidebarOpen" is false', () => {
-        renderSidebar(false);
+        renderSidebar(false, '/');
 
         const sidebar = screen.getByTestId('sidebar');
         expect(sidebar.className).toContain('close');
     });
 
-    it('"aria-hidden" attribute value is false when "isSidebarOpen" is true', () => {
-        renderSidebar();
+    it('"aria-hidden" attribute value is false when "side-bar is open', () => {
+        renderSidebar(true, '/');
 
         expect(screen.getByTestId('sidebar')).toHaveAttribute('aria-hidden', 'false');
     });
 
-     it('"aria-hidden" attribute value is true when "isSidebarOpen" is false', () => {
-        renderSidebar(false);
+     it('"aria-hidden" attribute value is true when side-bar is closed', () => {
+        renderSidebar(false, '/');
 
         expect(screen.getByTestId('sidebar')).toHaveAttribute('aria-hidden', 'true');
     });
 
-    it('"toggleSidebar" is invoked with false when pressing the close-sidebar button', async () => {
-        renderSidebar();
+    it('"toggleSidebar" is invoked when pressing the close-sidebar button', async () => {
+        renderSidebar(true, '/');
 
-        await userEvent.click(screen.getByTestId('sidebar-toggle-btn'));
+        await userEvent.click(screen.getByTestId('close-sidebar-btn'));
 
-        expect(toggleSidebarMock).toHaveBeenCalledWith(false);
+        expect(toggleSidebarMock).toHaveBeenCalledTimes(1);
     });
 
     it('applies "linkActive" class when route matches link', () => {
@@ -136,6 +134,17 @@ describe('Sidebar component', () => {
         renderSidebar(true, '/not-home');
 
         const link = screen.getByText('Home').closest('a');
+        expect(link?.className).not.toContain('linkActive');
         expect(link?.className).toContain('link');
+    });
+
+    it('renders corresponding view when nav link is clicked', async () => {
+        renderSidebar(true, '/not-home', [
+            { path: '/', element: <h1>Home View</h1> }
+        ]);
+
+        await userEvent.click(screen.getByText('Home'));
+
+        expect(screen.getByRole('heading', { name: 'Home View' })).toBeInTheDocument();
     });
 });

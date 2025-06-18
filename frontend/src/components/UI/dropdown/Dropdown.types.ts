@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 
 type Action = {
     label: string;
+    icon: ReactNode,
     action: () => Promise<void> | void;
 }
 

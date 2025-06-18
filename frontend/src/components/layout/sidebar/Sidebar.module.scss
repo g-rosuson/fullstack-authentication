@@ -1,6 +1,6 @@
 .sidebar {
     border-right: 1px solid var(--color-border);
-    background-color: var(--color-bg-primary);
+    background-color: var(--color-surface);
     transition: all 0.2s ease-in-out;
     overflow-x: hidden;
 }
@@ -37,15 +37,16 @@
     padding: var(--gap-small);
     border-radius: var(--border-radius);
     transition: background-color 0.2s ease-in-out;
+    color: var(--color-text);
 
     &:hover {
-        background-color: var(--color-bg-contrast-light);
+        background-color: var(--color-surface-hover);
     }
 }
 
 .linkActive {
     @extend .link;
-    background-color: var(--color-bg-contrast-light);
+    background-color: var(--color-surface-hover);
 }
 
 .icon {

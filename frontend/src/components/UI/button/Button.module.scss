@@ -10,25 +10,26 @@
     user-select: none;
     font-size: 1.6rem;
     font-weight: 500;
-    color: var(--color-button-label);
+    color: var(--color-text);
     overflow: hidden;
 
     &:hover {
-        background-color: var(--color-bg-contrast-light);
+        background-color: var(--color-surface-hover);
     }
 }
 
 .icon {
     font-size: 2.5rem;
-    color: var(--color-text-primary);
+    color: var(--color-text);
 }
 
 .primary {
     height: var(--ui-element-height);
     background-color: var(--color-primary);
+    color: var(--color-primary-text);
 
     &:hover {
-        background-color: var(--color-primary-dark);
+        background-color: var(--color-primary-hover);
     }
 }
 

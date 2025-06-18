@@ -1,7 +1,7 @@
-import { UserStore } from 'shared/types/store/store.user.types';
 import { StateCreator } from 'zustand';
 
 import { Store } from '../../store.types';
+import { UserStore } from '../user/user.types';
 import initUser from './user.state';
 import { UserSlice } from './user.types';
 

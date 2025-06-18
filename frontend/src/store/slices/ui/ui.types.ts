@@ -1,4 +1,4 @@
-type Theme = 'dark' | 'light';
+import { Theme } from 'types/theme';
 
 type UserInterface = {
     theme: Theme;
@@ -7,7 +7,7 @@ type UserInterface = {
 
 interface UserInterfaceSlice extends UserInterface {
     changeTheme: (theme: Theme) => void;
-    toggleSidebar: (isSidebarOpen: boolean) => void;
+    toggleSidebar: () => void;
 }
 
 export type { UserInterface, UserInterfaceSlice, Theme };

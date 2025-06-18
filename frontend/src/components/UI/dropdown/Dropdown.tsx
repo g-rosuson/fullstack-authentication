@@ -58,7 +58,7 @@ const Dropdown = ({ open, close, actions, controller, position }: Props) => {
                 aria-label="User menu"
                 aria-hidden={!open}
             >
-                {actions.map(({ label, action }) => (
+                {actions.map(({ label, icon, action }) => (
                     <li
                         key={label}
                         className={styling.item}
@@ -66,9 +66,13 @@ const Dropdown = ({ open, close, actions, controller, position }: Props) => {
                         tabIndex={open ? 0 : -1}
                         onClick={action}
                         onKeyDown={(event) => keyboardHandler(event, action)}
-                        aria-label={label}
                     >
-                        {label}
+                        {/* Icon is decorative only, so hide it from screen readers */}
+                        <div aria-hidden="true" className={styling.icon}>{icon}</div>
+                       
+                        <span>
+                            {label}
+                        </span>
                     </li>
                 ))}
             </ul>    

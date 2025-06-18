@@ -2,21 +2,24 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserInterfaceSelection } from 'store/selectors/ui';
 import { useUserSelection } from 'store/selectors/user';
+import { Theme } from 'types/theme';
 
 import Avatar from 'components/UI/avatar/Avatar';
 import Button from 'components/UI/button/Button';
 import Dropdown from 'components/UI/dropdown/Dropdown';
-import { SidebarOpen } from 'components/UI/icons/Icons';
+import { Logout, Moon, SidebarOpen, Sun } from 'components/UI/icons/Icons';
 
 import api from 'api';
 import config from 'config';
 import logging from 'services/logging';
+import storage from 'services/storage';
+import utils from 'utils';
 
 import styling from './TopBar.module.scss';
 
 const TopBar = () => {
     // Selectors
-    const { isSidebarOpen, toggleSidebar } = useUserInterfaceSelection();
+    const { isSidebarOpen, theme, toggleSidebar, changeTheme } = useUserInterfaceSelection();
     const { email, clearUser } = useUserSelection();
 
 
@@ -31,18 +34,41 @@ const TopBar = () => {
     /**
      * Toggles the "isMenu" boolean state property.
      */
-    const toggleMenu = () => {
+    const onToggleDropdownMenu = () => {
         setIsMenuOpen(prevState => !prevState);
-    }
+    };
 
 
     /**
-     * Opens and closes the sidebar by toggling
-     * the "isSidebarOpen" store property.
+     * Changes the theme and hides flash of unstyles content.
      */
-    const onToggleSidebar = () => {
-        toggleSidebar(!isSidebarOpen);
-    }
+    const onThemeChange = async () => {
+        const root = document.documentElement;
+
+        // Turn of the lights to hide flash of unstyled content 
+        root.style.filter = 'brightness(0)';
+
+        // Add a delay to wait for the filter being applied
+        await utils.time.sleep(450);
+
+        // Toogle theme
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+
+        // Update store
+        changeTheme(newTheme);
+
+        // Persist theme in local storage
+        storage.setTheme(newTheme);
+
+        // Add a delay to hide flash of unstyled content
+        await utils.time.sleep(150);
+
+        // Set data-theme attribute value as the theme, to render corresponding CSS color palette
+        root.setAttribute('data-theme', newTheme);
+
+        // Remove filter
+        root.style.filter = '';
+    };
 
 
     /**
@@ -70,6 +96,7 @@ const TopBar = () => {
     const userMenuActions = [
         {
             label: 'Logout',
+            icon: <Logout thick/>,
             action: onLogout
         }
     ];
@@ -78,9 +105,22 @@ const TopBar = () => {
     // Determine menu controller
     const menuController = (
         <div className={styling.avatar}>
-            <Avatar email={email || ''} onClick={toggleMenu}/>
+            <Avatar email={email || ''} onClick={onToggleDropdownMenu}/>
         </div>
     );
+
+
+    // Determine active theme
+    const isDarkModeActive = theme === 'dark';
+
+
+    // Determine theme icon
+    const ThemeIcon = isDarkModeActive ? Sun : Moon;
+
+
+    // Determine theme button aria-label
+    const nextThemeForAriaLabel: Theme = isDarkModeActive ? 'light' : 'dark';
+    const themeButtonAriaLabel = `Change theme to ${nextThemeForAriaLabel} mode`;
 
 
     return (
@@ -89,19 +129,29 @@ const TopBar = () => {
                 <Button
                     icon={<SidebarOpen thick/>}
                     ariaLabel='Open sidebar'
+                    testId='open-sidebar-btn'
                     hidden={isSidebarOpen}
-                    onClick={onToggleSidebar}
+                    onClick={toggleSidebar}
                     inline
                 />
             </div>
 
-            <Dropdown
-                open={isMenuOpen}
-                close={toggleMenu}
-                actions={userMenuActions}
-                controller={menuController}
-                position={{ right: '0' }}
-            />
+            <div className={styling.wrapper}>
+                <Button
+                    icon={<ThemeIcon thick/>}
+                    ariaLabel={themeButtonAriaLabel}
+                    testId='toggle-theme-btn'
+                    onClick={utils.time.throttle(onThemeChange, 1000)} 
+                />
+
+                <Dropdown
+                    open={isMenuOpen}
+                    close={onToggleDropdownMenu}
+                    actions={userMenuActions}
+                    controller={menuController}
+                    position={{ right: '0' }}
+                />
+            </div>
         </header>
     );
 };

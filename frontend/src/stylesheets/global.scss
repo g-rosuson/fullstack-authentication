@@ -1,14 +1,22 @@
 /* stylelint-disable custom-property-empty-line-before, color-no-hex, color-named */
 :root {
-    --color-primary: #3f25d2;
-    --color-primary-dark: #331ac0;
-    --color-border: #e2e1e1;
-    --color-bg-primary: #fafafa;
-    --color-bg-primary-hover: #f1f1f1;
-    --color-bg-contrast-light: #eaeaea;
-    --color-text-primary: #1a1919;
-    --color-text-secondary: #423f3f;
-    --color-button-label: #f5f5f5;
+    /* Brand */
+    --color-primary: #3f25d2;              /* Use with --color-primary-text as background (8.73:1) */
+    --color-primary-hover: #331ac0;
+    --color-primary-text: #fff;
+
+    /* Backgrounds */
+    --color-bg: #fff;                      /* Page background */
+    --color-surface: #fafafa;              /* Elevated content like modals and cards */
+    --color-surface-hover: #efeff1;
+
+    /* Text */
+    --color-text: #1f1f21;                 /* Use with: --color-bg (16.45:1) | --color-surface (15.76:1) | --color-surface-hover (14.33:1) */
+    --color-icon: #1f1f21;                 /* Use with: --color-bg (16.45:1) | --color-surface (15.76:1) | --color-surface-hover (14.33:1) */
+    --color-text-muted: #4d4d51;           /* Use with: --color-bg (8.41:1) | --color-surface (8.06:1) | --color-surface-hover (7.33:1) */
+
+    /* Borders & Dividers */
+    --color-border: #e4e4e6;
 
     --gap-large: 4rem;
     --gap-medium: 3rem;
@@ -26,6 +34,26 @@
     --shadow-light: 0 2px 6px 0 rgb(0 0 0 / 7%);
 }
 
+[data-theme="dark"] {
+    /* Brand */
+    --color-primary: #2e31ff;              /* Use with --color-primary-text as background (8.73:1) */
+    --color-primary-hover: #010101;
+    --color-primary-text: #fff;
+
+    /* Backgrounds */
+    --color-bg: #0f0f11;
+    --color-surface: #18181b;
+    --color-surface-hover: #25252a;
+
+    /* Text */
+    --color-text: #f4f4f5;                 /* Use with: --color-bg (17.42:1) | --color-surface (16.12:1) | --color-surface-hover (13.88:1) */
+    --color-icon: #f4f4f5;                 /* Use with: --color-bg (17.42:1) | --color-surface (16.12:1) | --color-surface-hover (13.88:1) */
+    --color-text-muted: #a1a1a6;           /* Use with: --color-bg (7.44:1) | --color-surface (6.89:1) | --color-surface-hover (5.93:1) */
+
+    /* Borders & Dividers */
+    --color-border: #3f3f46;
+}
+
 html {
     box-sizing: border-box;
     transition: filter 0.5s;
@@ -34,6 +62,7 @@ html {
 
 body {
     margin: 0;
+    background-color: var(--color-bg);
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

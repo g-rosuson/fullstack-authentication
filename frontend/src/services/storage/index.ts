@@ -1,4 +1,7 @@
-import { type Theme } from 'store/slices/ui/ui.types';
+import { type Theme } from 'types/theme';
+
+import logging from 'services/logging';
+import utils from 'utils';
 
 // Determine local storage theme key name
 const THEME_KEY = 'theme';
@@ -14,11 +17,17 @@ const setTheme = (theme: Theme) => {
  * Gets the theme from local storage.
  */
 const getTheme = () => {
-    return localStorage.getItem(THEME_KEY);
+    const raw = localStorage.getItem(THEME_KEY);
+
+    if (raw && !utils.validators.isTheme(raw)) {
+        logging.warning(`[storage]: Invalid theme, expected value "dark" or "light" but got: ${raw}`);
+    }
+        
+    return utils.validators.isTheme(raw) ? raw : null;
 };
 
 export default {
     setTheme,
     getTheme
-}
+};
 

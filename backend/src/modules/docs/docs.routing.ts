@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { openApiDocument } from 'services/openapi/generate-spec';
 
 import config from './docs.config';
+
+import { openApiDocument } from 'services/openapi/generate-spec';
 
 // Determine router
 const router = Router();

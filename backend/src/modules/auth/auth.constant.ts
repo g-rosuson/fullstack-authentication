@@ -1,6 +1,7 @@
 import { CookieOptions } from 'express';
 
 import config from 'aop/config';
+
 import { TokenExpiration } from 'shared/enums';
 
 // Messages

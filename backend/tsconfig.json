@@ -12,5 +12,5 @@
     // Tells TypeScript where to look for global type declarations
     "typeRoots": ["src/global.d.ts"]
   },
-  "include": ["src/**/*.ts", "src/**/*.json", ".eslintrc.js"],
+  "include": ["src/**/*.ts", "src/**/*.json", ".eslintrc.json"],
 }

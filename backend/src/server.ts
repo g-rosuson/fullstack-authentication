@@ -1,14 +1,15 @@
 import cookieParser from 'cookie-parser';
-import express from 'express';
 import cors from 'cors';
+import express from 'express';
 
 import authenticationRoutes from 'modules/auth/auth.routing';
 import documentationRoute from 'modules/docs/docs.routing';
+
 import config from 'aop/config';
 import db from 'aop/db';
+import { logger } from 'aop/logging';
 
 import { shutdown } from 'server.utils';
-import { logger } from 'aop/logging';
 
 const server = express();
 

@@ -1,8 +1,8 @@
 import { sign } from 'jsonwebtoken';
 
-import { TokenExpiration } from 'shared/enums';
-
 import config from 'aop/config';
+
+import { TokenExpiration } from 'shared/enums';
 
 const _signToken = (payload: { id: string; email: string }, signAccessToken = true) => {
     const tokenSecret = signAccessToken ? config.accessTokenSecret : config.refreshTokenSecret;

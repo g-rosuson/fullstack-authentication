@@ -1,10 +1,10 @@
 import { type NextFunction, type Request, type Response } from 'express';
 
-import { parseSchema } from 'lib/validation';
 import response from 'api/response';
+import { parseSchema } from 'lib/validation';
 
-import inputSchema from './dto/auth.input-dto';
 import config from './auth.config';
+import inputSchema from './dto/auth.input-dto';
 
 const validate = async (req: Request, res: Response, next: NextFunction) => {
     // Determine schema based on the request path and validate the request body

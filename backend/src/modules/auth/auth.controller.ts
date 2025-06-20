@@ -1,19 +1,19 @@
-import { MongoServerError } from 'mongodb';
-import { Request, Response } from 'express';
-import { v4 as generateId } from 'uuid';
 import bcrypt from 'bcrypt';
+import { Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
+import { MongoServerError } from 'mongodb';
+import { v4 as generateId } from 'uuid';
 
-import response from 'api/response';
-import { parseSchema } from 'lib/validation';
-import jwtService from 'services/jwt';
 import config from 'aop/config';
 import db from 'aop/db';
-
-import inputSchema, { type RegisterInputDto, type LoginInputDto, type JWTInputDto } from './dto/auth.input-dto';
-import outputSchema, { type AuthenticationOutputDto } from './dto/auth.output-dto';
+import response from 'api/response';
+import { parseSchema } from 'lib/validation';
 
 import constants from './auth.constant';
+import inputSchema, { type JWTInputDto, type LoginInputDto, type RegisterInputDto } from './dto/auth.input-dto';
+import outputSchema, { type AuthenticationOutputDto } from './dto/auth.output-dto';
+
+import jwtService from 'services/jwt';
 
 /**
  * Attempts to create a new user document using atomic insertion.

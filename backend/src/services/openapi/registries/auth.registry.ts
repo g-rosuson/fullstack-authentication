@@ -1,9 +1,8 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
-import authOutputDtoSchema from 'modules/auth/dto/auth.output-dto';
-import authInputDtoSchema from 'modules/auth/dto/auth.input-dto';
-
 import config from 'modules/auth/auth.config';
+import authInputDtoSchema from 'modules/auth/dto/auth.input-dto';
+import authOutputDtoSchema from 'modules/auth/dto/auth.output-dto';
 
 // Determine registry
 const registry = new OpenAPIRegistry();

@@ -1,0 +1,33 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "extends": ["plugin:@typescript-eslint/recommended"],
+    "parserOptions": {
+        "project": "./tsconfig.json",
+        "sourceType": "module",
+        "ecmaVersion": "latest"
+    },
+    "plugins": ["simple-import-sort"],
+    "rules": {
+        "quotes": ["error", "single"],
+        "no-unused-vars": ["error", { "varsIgnorePattern": "Access|Refresh|RefreshIfLessThan" }],
+        "simple-import-sort/imports": [
+            "warn",
+            {
+                "groups": [
+                    ["bcrypt|express|cors|cookie-parser|http|dotenv|jsonwebtoken|mongodb|uuid|zod"],
+                    ["^modules\/.+$"],
+                    ["^(api|aop|lib)(\/.+)?$"],
+                    ["middleware|controller"],
+                    ["(config|constant(s)?|dto)(\\.|\\/|$)|\\/(mappers|services|setup|utils)(\\/|$)"],
+                    ["(^|\/)(enums|types)(\/|$)"],
+                    // Side effect imports e.g. import statements without "from"
+                    ["^\\u0000"],
+                    // "import type" imports
+                    ["^.*\\u0000$"],
+                    // JSON files
+                    ["^.+\\.json$"]
+                ]
+            }
+        ]
+    }
+}

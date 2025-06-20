@@ -1,8 +1,8 @@
 import { ZodSchema } from 'zod';
 
-import { SchemaResult } from './types';
-
 import mappers from './mappers';
+
+import { SchemaResult } from './types';
 
 export const parseSchema = <T>(schema: ZodSchema<T>, data: unknown): SchemaResult<T> => {
     const { success, data: parsedData, error } = schema.safeParse(data);

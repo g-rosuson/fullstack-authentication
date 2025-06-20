@@ -3,7 +3,6 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import { logger } from 'aop/logging';
 
 import config from '../config';
-
 import setup from '../setup';
 
 const DB_NAME = config.db.name;

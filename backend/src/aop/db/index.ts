@@ -1,4 +1,4 @@
-import { getDatabase, connect, disconnect } from './client';
+import { connect, disconnect, getDatabase } from './client';
 import service from './service';
 
 const db = {

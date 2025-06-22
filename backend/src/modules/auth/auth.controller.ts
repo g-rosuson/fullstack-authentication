@@ -58,7 +58,7 @@ const register = async (req: Request<unknown, unknown, RegisterInputDto>, res: R
         // Set refresh token as a cookie and send user data to front-end
         res.cookie(constants.REFRESH_COOKIE_NAME, refreshToken, constants.REFRESH_COOKIE_OPTIONS());
 
-        response.success<AuthenticationOutputDto>(res, payload);
+        response.success<AuthenticationOutputDto>(res, result.data);
     } catch (error) {
         if (error instanceof MongoServerError && error.code === 11000) {
             return response.conflict(res);
@@ -113,7 +113,7 @@ const login = async (req: Request<unknown, unknown, LoginInputDto>, res: Respons
         // Set refresh token as a httpOnly cookie and send user data to front-end
         res.cookie(constants.REFRESH_COOKIE_NAME, refreshToken, constants.REFRESH_COOKIE_OPTIONS());
 
-        response.success(res, payload);
+        response.success(res, result.data);
     } catch (error) {
         response.internalError(res);
     }
@@ -122,16 +122,10 @@ const login = async (req: Request<unknown, unknown, LoginInputDto>, res: Respons
 /**
  * Clears the refresh-token cookie from the browser.
  */
-const logout = async (req: Request, res: Response) => {
-    const cookies = req.cookies;
-
-    if (!cookies?.refreshToken) {
-        return response.badRequest(res, { message: constants.NO_TOKEN_MSG });
-    }
-
+const logout = async (res: Response) => {
     res.clearCookie(constants.REFRESH_COOKIE_NAME, constants.REFRESH_COOKIE_OPTIONS(false));
 
-    response.success(res, undefined);
+    response.success(res);
 };
 
 /**
@@ -140,11 +134,6 @@ const logout = async (req: Request, res: Response) => {
  */
 const renewAccessToken = async (req: Request, res: Response) => {
     try {
-        // Validate that refresh-token cookie is set
-        if (!req.cookies?.refreshToken) {
-            return response.badRequest(res, { message: constants.NO_TOKEN_MSG });
-        }
-
         // Validate and decode the refresh-token
         // Note: When the JWT is invalid "verify" throws an error
         const decoded = verify(req.cookies.refreshToken, config.refreshTokenSecret);
@@ -171,7 +160,7 @@ const renewAccessToken = async (req: Request, res: Response) => {
             return response.internalError(res, constants.INVALID_PAYLOAD_STRUCTURE_MSG);
         }
 
-        response.success<AuthenticationOutputDto>(res, payload);
+        response.success<AuthenticationOutputDto>(res, payloadResult.data);
     } catch (error) {
         response.notAuthorised(res);
     }

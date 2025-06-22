@@ -4,12 +4,13 @@ import response from 'api/response';
 import { parseSchema } from 'lib/validation';
 
 import config from './auth.config';
+import constants from './auth.constant';
 import inputSchema from './dto/auth.input-dto';
 
-const validate = async (req: Request, res: Response, next: NextFunction) => {
+const validateAuthenticationInput = (req: Request, res: Response, next: NextFunction) => {
     // Determine schema based on the request path and validate the request body
-    const isRegister = req.path === config.route.register;
-    const schema = isRegister ? inputSchema.registerInputDto : inputSchema.loginInputDto;
+    const isRegistering = req.path === config.route.register;
+    const schema = isRegistering ? inputSchema.registerInputDto : inputSchema.loginInputDto;
     const result = parseSchema(schema, req.body);
 
     if (!result.success) {
@@ -21,4 +22,12 @@ const validate = async (req: Request, res: Response, next: NextFunction) => {
     next();
 };
 
-export default validate;
+const validateRefreshToken = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.cookies?.[constants.REFRESH_COOKIE_NAME]) {
+        return response.badRequest(res, { message: constants.NO_TOKEN_MSG });
+    }
+
+    next();
+};
+
+export { validateAuthenticationInput, validateRefreshToken };

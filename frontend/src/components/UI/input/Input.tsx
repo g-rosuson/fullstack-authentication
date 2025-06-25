@@ -10,8 +10,7 @@ const Input: React.FC<Props> = ({ value, label, name, placeholder, type, onChang
 
     return (
         <div className={styling.container}>
-            <label htmlFor={id} className={styling.label}
-            >
+            <label htmlFor={id} className={styling.label}>
                 {label}
             </label>
 

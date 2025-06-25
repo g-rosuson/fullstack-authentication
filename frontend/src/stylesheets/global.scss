@@ -1,5 +1,8 @@
 /* stylelint-disable custom-property-empty-line-before, color-no-hex, color-named */
 :root {
+    /* Constant colours */
+    --color-constant-white: #fff;
+
     /* Brand */
     --color-primary: #3f25d2;              /* Use with --color-primary-text as background (8.73:1) */
     --color-primary-hover: #331ac0;
@@ -37,7 +40,7 @@
 [data-theme="dark"] {
     /* Brand */
     --color-primary: #2e31ff;              /* Use with --color-primary-text as background (8.73:1) */
-    --color-primary-hover: #010101;
+    --color-primary-hover: #272bff;
     --color-primary-text: #fff;
 
     /* Backgrounds */

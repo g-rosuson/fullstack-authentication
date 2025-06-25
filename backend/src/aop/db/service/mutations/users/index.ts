@@ -2,14 +2,16 @@ import { getDatabase } from 'aop/db/client';
 import config from 'aop/db/config';
 import { logger } from 'aop/logging';
 
+import { RegisterUserPayload } from 'shared/types/user';
+
 const db = getDatabase();
 const COLLECTION_NAME = config.db.collection.users.name;
 
-const create = async (userData: { email: string; password: string }) => {
+const create = async (user: RegisterUserPayload) => {
     try {
-        return await db.collection(COLLECTION_NAME).insertOne(userData);
+        return await db.collection(COLLECTION_NAME).insertOne(user);
     } catch (error) {
-        logger.error(`Error while adding item to collection: "${COLLECTION_NAME}"`, error as Error);
+        logger.error(`Error while adding item to collection: "${COLLECTION_NAME}"`, { error: error as Error });
         throw error; // Forward error to controller
     }
 };

@@ -24,7 +24,7 @@ const connect = async () => {
         await setup.pingDatabase(db);
         await setup.indexCollections(db);
     } catch (error) {
-        logger.error('Error connecting to MongoDB:', error as Error);
+        logger.error('Error connecting to MongoDB:', { error: error as Error });
     }
 };
 
@@ -33,7 +33,7 @@ const disconnect = async () => {
         await client.close();
         logger.info('Disconnected from MongoDB');
     } catch (error) {
-        logger.error('Error disconnecting from MongoDB:', error as Error);
+        logger.error('Error disconnecting from MongoDB:', { error: error as Error });
     }
 };
 

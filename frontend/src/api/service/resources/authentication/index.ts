@@ -10,7 +10,7 @@ import config from './config';
  */
 const refreshAccessToken = async () => {
     return await client.get<ApiResponse<AuthenticationOutputDto>>(config.path.refresh);
-}
+};
 
 /**
  * Creates a new user and retrieves an access-token when valid credentials
@@ -18,7 +18,7 @@ const refreshAccessToken = async () => {
  */
 const register = async (credentials: RegisterInputDto) => {
     return await client.post<ApiResponse<AuthenticationOutputDto>, RegisterInputDto>(config.path.register, credentials);
-}
+};
 
 /**
  * Retrieves a new access-token when valid credentials are sent
@@ -26,7 +26,7 @@ const register = async (credentials: RegisterInputDto) => {
  */
 const login = async (credentials: LoginInputDto) => {
     return await client.post<ApiResponse<AuthenticationOutputDto>, LoginInputDto>(config.path.login, credentials);
-}
+};
 
 /**
  * Logs out the current user by sending the http only refresh token cookie
@@ -34,13 +34,13 @@ const login = async (credentials: LoginInputDto) => {
  */
 const logout = async () => {
     return await client.post<ApiResponse>(config.path.logout);
-}
+};
 
 const resources = {
     refreshAccessToken,
     register,
     logout,
     login
-}
+};
 
 export default resources;

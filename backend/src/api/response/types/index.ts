@@ -1,7 +1,7 @@
 import { Issue } from 'lib/validation/types';
 
 type Error = {
-    message?: string;
+    message: string;
     issues?: Issue[];
 };
 

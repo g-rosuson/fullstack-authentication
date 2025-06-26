@@ -6,7 +6,9 @@ extendZodWithOpenApi(z);
 
 const userDocumentSchema = z
     .object({
-        password: z.string().min(8),
+        firstName: z.string(),
+        lastName: z.string(),
+        password: z.string(),
         email: z.string().email(),
         _id: z.instanceof(ObjectId),
     })

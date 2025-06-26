@@ -1,9 +1,7 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
 import config from 'modules/auth/auth.config';
-import { loginUserPayloadSchema, registerUserPayloadSchema } from 'modules/auth/schemas';
-
-import { jwtPayloadSchema } from 'shared/schemas/jwt';
+import { accessTokenSchema, loginUserPayloadSchema, registerUserPayloadSchema } from 'modules/auth/schemas';
 
 // Determine registry
 const registry = new OpenAPIRegistry();
@@ -17,7 +15,7 @@ registry.registerPath({
             description: 'Authentication payload when login is successful',
             content: {
                 'application/json': {
-                    schema: jwtPayloadSchema,
+                    schema: accessTokenSchema,
                 },
             },
         },
@@ -42,7 +40,7 @@ registry.registerPath({
             description: 'Authentication payload when registration is successful',
             content: {
                 'application/json': {
-                    schema: jwtPayloadSchema,
+                    schema: accessTokenSchema,
                 },
             },
         },
@@ -67,7 +65,7 @@ registry.registerPath({
             description: 'Authentication payload when refreshing access-token is successful',
             content: {
                 'application/json': {
-                    schema: jwtPayloadSchema,
+                    schema: accessTokenSchema,
                 },
             },
         },

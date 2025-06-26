@@ -5,8 +5,4 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface LoginInputDto {
-  email: string;
-  /** @minLength 8 */
-  password: string;
-}
+export type AccessToken = string;

@@ -5,6 +5,6 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export * from './authenticationOutputDto';
-export * from './loginInputDto';
-export * from './registerInputDto';
+export * from './accessToken';
+export * from './loginUserPayload';
+export * from './registerUserPayload';

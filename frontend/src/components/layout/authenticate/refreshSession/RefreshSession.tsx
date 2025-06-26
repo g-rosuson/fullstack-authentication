@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtPayloadSchema } from 'shared/schemas/jwt';
 import { useUserSelection } from 'store/selectors/user';
 
 import Heading from 'components/UI/heading/Heading';
@@ -8,6 +9,7 @@ import Modal from 'components/UI/modal/Modal';
 import api from 'api';
 import config from 'config';
 import logging from 'services/logging';
+import utils from 'utils';
 
 import styling from './RefreshSession.module.scss';
 
@@ -61,8 +63,26 @@ const RefreshSession = ({ open, close }: Props) => {
             setIsSubmitting(true);
 
             const response = await api.service.resources.authentication.refreshAccessToken();
+            
+            const decoded = utils.jwt.decode(response.data);
 
-            userSelectors.changeUser({ ...response.data });
+            const result = jwtPayloadSchema.safeParse(decoded);
+
+            if (!result.success) {
+                // TODO: Add to sentry
+                // TODO: Create label
+                logging.warning('Access token structure invalid, redirecting to login...');
+                userSelectors.clearUser();
+                navigate(config.routes.login);
+                return;
+            }
+
+            const userPayload = { 
+                accessToken: response.data,
+                ...result.data
+             };
+
+            userSelectors.changeUser(userPayload);
 
             hasRefreshedSession.current = true;
 

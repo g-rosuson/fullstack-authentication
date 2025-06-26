@@ -9,13 +9,26 @@ const constants = {
             register: 'Register'
         },
         input: {
+            firstName: {
+                label: 'First name',
+                placeholder: 'E.g. John'
+            },
+            lastName: {
+                label: 'Last name',
+                placeholder: 'E.g. Doe'
+            },
             email: {
                 label: 'Email',
-                placeholder: 'E.g. example@mail.com'
+                placeholder: 'E.g. example@mail.com',
+                name: 'email'
             },
             password: {
                 label: 'Password',
                 placeholder: 'Enter password...'
+            },
+            confirmPassword: {
+                label: 'Confirm password',
+                placeholder: 'Confirm password...'
             }
         },
         links: {

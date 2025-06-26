@@ -2,12 +2,12 @@ import { getDatabase } from 'aop/db/client';
 import config from 'aop/db/config';
 import { logger } from 'aop/logging';
 
-import { RegisterUserPayload } from 'shared/types/user';
+import { CreateUserPayload } from 'shared/types/user';
 
 const db = getDatabase();
 const COLLECTION_NAME = config.db.collection.users.name;
 
-const create = async (user: RegisterUserPayload) => {
+const create = async (user: CreateUserPayload) => {
     try {
         return await db.collection(COLLECTION_NAME).insertOne(user);
     } catch (error) {

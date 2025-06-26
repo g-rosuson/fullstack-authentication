@@ -29,6 +29,8 @@ describe('Authenticate component', () => {
     // Hoist mock variables since vi.mock is hoisted under the hood
     const mockUser = vi.hoisted<UserStore>(() => ({
         accessToken: null,
+        firstName: null,
+        lastName: null,
         email: null,
         id: null,
     }));
@@ -70,6 +72,10 @@ describe('Authenticate component', () => {
     vi.mock('../../../utils/jwt', () => ({
         default: {
             decode: vi.fn(() => ({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'email@email.com',
+                id: 'id',
                 // Mock JWT expiration time to be 5 seconds in the future
                 exp: Math.floor((Date.now() + 5000) / 1000)
             }))
@@ -107,15 +113,19 @@ describe('Authenticate component', () => {
     });
 
     it('renders authenticated component when access token is successfully refreshed', async () => {
+        const mockAccessTokenResponse = 'mock-access-token';
+
         // Mock successful API response
         const mockUserResponseData = {
-            accessToken: 'mockAccessToken',
-            email: 'email@example.com',
-            id: 'user-1',
+            accessToken: 'mock-access-token',
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'email@email.com',
+            id: 'id',
         };
     
         (api.service.resources.authentication.refreshAccessToken as Mock).mockResolvedValue({
-            data: mockUserResponseData,
+            data: mockAccessTokenResponse,
         });
 
         renderComponent();

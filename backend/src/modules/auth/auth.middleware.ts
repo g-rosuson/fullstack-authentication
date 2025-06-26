@@ -19,6 +19,7 @@ const validateAuthenticationInput = (req: Request, res: Response, next: NextFunc
     const schema = isRegistering ? registerUserPayloadSchema : loginUserPayloadSchema;
 
     // Compare request body to corresponding schema
+    // * Note: When registering the schema will also check if passwords match
     const result = parseSchema(schema, req.body);
 
     // * Register: If the comparison fails, respond with an array of the

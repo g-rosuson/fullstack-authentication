@@ -1,6 +1,6 @@
 /* stylelint-disable custom-property-empty-line-before, color-no-hex, color-named */
 :root {
-    /* Constant colours */
+    /* Constant */
     --color-constant-white: #fff;
 
     /* Brand */
@@ -20,6 +20,9 @@
 
     /* Borders & Dividers */
     --color-border: #e4e4e6;
+
+    /* Semantic */
+    --color-green: #228c5c;
 
     --gap-large: 4rem;
     --gap-medium: 3rem;

@@ -6,7 +6,7 @@ import utils from 'utils';
 
 import styling from './PasswordValidator.module.scss';
 
-import constants from '../constants';
+import constants from './constants';
 import { Props } from './PasswordValidator.types';
 
 
@@ -47,27 +47,27 @@ const PasswordValidator = ({ password, confirmationPassword, hidden, onChange }:
     // Determine validation options
     const validationItems = [
         {
-            text: constants.labels.validator.lowerCase,
+            text: constants.labels.lowerCase,
             isValid: hasLowercase,
         },
         {
-            text: constants.labels.validator.upperCase,
+            text: constants.labels.upperCase,
             isValid: hasUppercase,
         },
         {
-            text: constants.labels.validator.number,
+            text: constants.labels.number,
             isValid: hasNumber,
         },
         {
-            text: constants.labels.validator.specialCharacter,
+            text: constants.labels.specialCharacter,
             isValid: hasSpecialCharacter,
         },
         {
-            text: constants.labels.validator.eightCharacters,
+            text: constants.labels.eightCharacters,
             isValid: hasValidLength,
         },
          {
-            text: constants.labels.validator.passwordsMatch,
+            text: constants.labels.passwordsMatch,
             isValid: passwordsMatch,
         },
     ];

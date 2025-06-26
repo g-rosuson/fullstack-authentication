@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-import { loginUserPayloadSchema } from '../schemas';
+import { jwtPayloadSchema, loginUserPayloadSchema } from '../schemas';
 
+type JwtPayload = z.infer<typeof jwtPayloadSchema>;
 type LoginUserPayload = z.infer<typeof loginUserPayloadSchema>;
 
-export type { LoginUserPayload };
+export type { JwtPayload, LoginUserPayload };

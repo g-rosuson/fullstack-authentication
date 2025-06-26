@@ -10,27 +10,28 @@ import { parseSchema } from 'lib/validation';
 
 import constants from './auth.constant';
 
-import { LoginUserPayload } from './types';
-import { JWTPayload } from 'shared/types/jwt';
-import { RegisterUserPayload } from 'shared/types/user';
+import { JwtPayload, LoginUserPayload } from './types';
+import { CreateUserPayload, RegisterUserPayload } from 'shared/types/user';
 
+import { jwtPayloadSchema } from './schemas';
 import jwtService from 'services/jwt';
-import { jwtPayloadSchema } from 'shared/schemas/jwt';
 
 /**
  * Attempts to create a new user document using atomic insertion.
  * If the email is already registered, it responds with a 409 Conflict.
- * On success, it responds with the user payload and sets an httpOnly
+ * On success, it responds with an JWT access-token and sets a httpOnly
  * refresh-token cookie.
  */
 const register = async (req: Request<unknown, unknown, RegisterUserPayload>, res: Response) => {
     try {
-        const { email, password } = req.body;
+        const { firstName, lastName, email, password } = req.body;
 
         // Create a new user
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser: RegisterUserPayload = {
+        const newUser: CreateUserPayload = {
+            firstName,
+            lastName,
             password: hashedPassword,
             email,
         };
@@ -40,8 +41,12 @@ const register = async (req: Request<unknown, unknown, RegisterUserPayload>, res
         // duplicate key error.
         const insertResponse = await db.service.mutations.users.create(newUser);
 
+        // We are sending both the access-token which contains
+        // the user info
         // Create JWT tokens
-        const tokenPayload: JWTPayload = {
+        const tokenPayload: JwtPayload = {
+            firstName,
+            lastName,
             email,
             id: insertResponse.insertedId.toString(),
         };
@@ -51,12 +56,7 @@ const register = async (req: Request<unknown, unknown, RegisterUserPayload>, res
         // Send a refresh-token to the client in a httpOnly cookie
         res.cookie(constants.REFRESH_COOKIE_NAME, refreshToken, constants.REFRESH_COOKIE_OPTIONS());
 
-        const payload = {
-            ...tokenPayload,
-            accessToken,
-        };
-
-        response.success(res, payload);
+        response.success(res, accessToken);
     } catch (error) {
         if (error instanceof MongoServerError && error.code === 11000) {
             return response.conflict(res);
@@ -89,23 +89,19 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
         }
 
         // Create JWT tokens
-        const tokenPayload = {
-            id: userDocument._id.toString(),
+        const tokenPayload: JwtPayload = {
+            firstName: userDocument.firstName,
+            lastName: userDocument.lastName,
             email: userDocument.email,
+            id: userDocument._id.toString(),
         };
 
         const { accessToken, refreshToken } = jwtService.createTokens(tokenPayload);
 
-        // Payload sent to the client
-        const payload = {
-            ...tokenPayload,
-            accessToken,
-        };
-
         // Set refresh token as a httpOnly cookie and send user data to front-end
         res.cookie(constants.REFRESH_COOKIE_NAME, refreshToken, constants.REFRESH_COOKIE_OPTIONS());
 
-        response.success(res, payload);
+        response.success(res, accessToken);
     } catch (error) {
         response.internalError(res);
     }
@@ -140,13 +136,7 @@ const renewAccessToken = async (req: Request, res: Response) => {
         // Create a new access-token and send it to the browser
         const { accessToken } = jwtService.createTokens(result.data);
 
-        // Send payload to the client
-        const payload = {
-            ...result.data,
-            accessToken,
-        };
-
-        response.success(res, payload);
+        response.success(res, accessToken);
     } catch (error) {
         response.notAuthorised(res);
     }

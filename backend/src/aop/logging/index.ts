@@ -1,14 +1,17 @@
 import config from 'aop/config';
 
+import { Meta } from './types';
+
 class Logger {
-    private log(level: 'debug' | 'info' | 'warn' | 'error', message: string, meta?: object) {
+    private log(level: 'debug' | 'info' | 'warn' | 'error', message: string, meta: Meta) {
         const timestamp = new Date().toISOString();
 
         const logData = {
             timestamp,
             level,
             message,
-            ...(meta || {}),
+            issues: meta?.issues || [],
+            error: meta?.error || {},
         };
 
         if (config.isDeveloping) {
@@ -19,19 +22,19 @@ class Logger {
         console[level](JSON.stringify(logData));
     }
 
-    debug(message: string, meta?: object) {
+    debug(message: string, meta: Meta = {}) {
         this.log('debug', message, meta);
     }
 
-    info(message: string, meta?: object) {
+    info(message: string, meta: Meta = {}) {
         this.log('info', message, meta);
     }
 
-    warn(message: string, meta?: object) {
+    warn(message: string, meta: Meta = {}) {
         this.log('warn', message, meta);
     }
 
-    error(message: string, meta?: object) {
+    error(message: string, meta: Meta) {
         this.log('error', message, meta);
     }
 }

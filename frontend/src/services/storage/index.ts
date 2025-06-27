@@ -1,4 +1,4 @@
-import { type Theme } from 'types/theme';
+import { type Theme } from 'shared/types/theme';
 
 import logging from 'services/logging';
 import utils from 'utils';

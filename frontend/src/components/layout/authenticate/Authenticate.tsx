@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtPayloadSchema } from 'shared/schemas/jwt';
 import { useUserSelection } from 'store/selectors/user';
 
 import Spinner from '../../UI/spinner/Spinner';
@@ -45,7 +46,25 @@ const Authenticate = () => {
         try {
             const response = await api.service.resources.authentication.refreshAccessToken();
             
-            userSelectors.changeUser(response.data);
+            const decoded = utils.jwt.decode(response.data);
+
+            const result = jwtPayloadSchema.safeParse(decoded);
+
+            if (!result.success) {
+                // TODO: Add to sentry
+                // TODO: Create label
+                logging.warning('Access token structure invalid, redirecting to login...');
+                userSelectors.clearUser();
+                navigate(config.routes.login);
+                return;
+            }
+
+            const userPayload = { 
+                accessToken: response.data,
+                ...result.data
+             };
+
+            userSelectors.changeUser(userPayload);
            
             hasMountedRef.current = true;
 

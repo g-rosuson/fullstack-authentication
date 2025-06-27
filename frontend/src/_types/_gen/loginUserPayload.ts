@@ -5,8 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface RegisterInputDto {
+export interface LoginUserPayload {
   email: string;
-  /** @minLength 8 */
   password: string;
 }

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Theme } from 'shared/types/theme';
 import { useUserInterfaceSelection } from 'store/selectors/ui';
 import { useUserSelection } from 'store/selectors/user';
-import { Theme } from 'types/theme';
 
 import Avatar from 'components/UI/avatar/Avatar';
 import Button from 'components/UI/button/Button';

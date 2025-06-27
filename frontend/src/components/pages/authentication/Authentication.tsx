@@ -1,13 +1,17 @@
 import { type ChangeEvent, type FormEvent, useEffect,useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { LoginUserPayload,RegisterUserPayload } from '_types/_gen';
+import { jwtPayloadSchema } from 'shared/schemas/jwt';
 import { useUserSelection } from 'store/selectors/user';
 
+import PasswordValidator from './passwordValidator/PasswordValidator';
 import Button from 'components/UI/button/Button';
 import Heading from 'components/UI/heading/Heading';
 import Input from 'components/UI/input/Input';
 
 import api from 'api';
 import config from 'config';
+import { CustomError } from 'services/error';
 import logging from 'services/logging';
 import utils from 'utils';
 
@@ -22,10 +26,24 @@ const Authentication = () => {
     
     // State
     const [state, setState] = useState({
+        firstName: '',
+        lastName: '',
         email: '',
         password: '',
+        confirmationPassword: '',
         isLoading: false,
+        isPasswordValid: false
     });
+
+    const {
+        firstName,
+        lastName,
+        email,
+        password,
+        confirmationPassword,
+        isLoading,
+        isPasswordValid
+    } = state;
 
 
     // Hooks
@@ -34,7 +52,7 @@ const Authentication = () => {
 
 
     // Flags
-    const isLoginActive = location.pathname === config.routes.login;
+    const isRegisterActive = location.pathname === config.routes.register;
 
 
     /**
@@ -51,7 +69,18 @@ const Authentication = () => {
 
 
     /**
-     * Sets the "accessToken" in the global state on login and register.
+     * Determine whether password is valid when the register form is active.
+     */
+    const onPasswordChange = (isPasswordValid: boolean) => {
+         setState((prevState) => ({
+            ...prevState,
+            isPasswordValid
+        }));
+    };
+
+
+    /**
+     * Sets the access-token and its decoded content in the store on login and register.
      */
     const onSubmit = async (event: FormEvent) => {
         try {
@@ -59,16 +88,65 @@ const Authentication = () => {
 
             setState((prevState) => ({ ...prevState, isLoading: true }));
 
-            const submitFn = isLoginActive ? api.service.resources.authentication.login : api.service.resources.authentication.register;
+            let response;
 
-            const response = await submitFn({
-                email: state.email,
-                password: state.password,
-            });
+            // User is registering
+            if (isRegisterActive) {
+                const registerPayload: RegisterUserPayload = {
+                    email,
+                    password,
+                    firstName,
+                    lastName,
+                    confirmationPassword
+                };
 
-            userSelectors.changeUser({ ...response.data });
+                response = await api.service.resources.authentication.register(registerPayload);
+            } else {
+                 // User is logging in
+                 const loginPayload: LoginUserPayload = {
+                    email,
+                    password
+                };
 
+                response = await api.service.resources.authentication.login(loginPayload);
+            }
+
+            // Decode the access-token jwt
+            const decoded = utils.jwt.decode(response.data);
+
+            // Determing if the parsed jwt payload adhears to the schema
+            const parsedJwt = jwtPayloadSchema.safeParse(decoded);
+
+            // Log, send issue to Sentry, clear the store and
+            // route to "/login" if jwt payload is malformed
+            if (!parsedJwt.success) {
+                // TODO: Add to sentry
+                logging.warning('Access token structure invalid, redirecting to login...');
+
+                // TODO: Notify user
+
+                // Clear user store
+                // * Note: We might need to reset other parts of the store as it grows
+                userSelectors.clearUser();
+
+                // Navigate to the "/login route"   
+                navigate(config.routes.login);
+                return;
+            }
+
+            // Set payload in store
+            const userPayload = { 
+                accessToken: response.data,
+                ...parsedJwt.data
+            };
+
+            userSelectors.changeUser(userPayload);
+            
         } catch (error) {
+            if (error instanceof CustomError) {
+                console.log(error.issues)
+            }
+           
             logging.error(error as Error);
             
         } finally {
@@ -87,11 +165,85 @@ const Authentication = () => {
     }, [navigate, userSelectors.accessToken]);
 
 
+    // Determine partial form (Login)
+    const partialFormContent = (
+        <>
+            <Input
+                label={constants.labels.input.email.label}
+                type="email"
+                name="email"
+                value={email}
+                placeholder={constants.labels.input.email.placeholder}
+                onChange={onInputChange}
+                testId='email-input'
+                required
+            />
+
+            <Input
+                label={constants.labels.input.password.label}
+                type="password"
+                name="password"
+                value={password}
+                placeholder={constants.labels.input.password.placeholder}
+                onChange={onInputChange}
+                testId='password-input'
+                required
+            />
+        </>
+    );
+
+    // Determine full form content (Register)
+    const fullFormContent = (
+        <>
+            <Input
+                label={constants.labels.input.firstName.label}
+                type="text"
+                name="firstName"
+                value={firstName}
+                placeholder={constants.labels.input.firstName.placeholder}
+                onChange={onInputChange}
+                testId='first-name-input'
+                required
+            />
+
+            <Input
+                label={constants.labels.input.lastName.label}
+                type="text"
+                name="lastName"
+                value={lastName}
+                placeholder={constants.labels.input.lastName.placeholder}
+                onChange={onInputChange}
+                testId='last-name-input'
+                required
+            />
+            
+            {partialFormContent}
+
+            <Input
+                label={constants.labels.input.confirmPassword.label}
+                type="password"
+                name="confirmationPassword"
+                value={confirmationPassword}
+                placeholder={constants.labels.input.confirmPassword.placeholder}
+                onChange={onInputChange}
+                testId='password-confirmation-input'
+                required
+            />
+
+            <PasswordValidator
+                password={password}
+                confirmationPassword={state.confirmationPassword}
+                onChange={onPasswordChange}
+            />
+        </>
+    );
+
+
     // Headings, labels and route
-    const heading = isLoginActive ? constants.labels.heading.login : constants.labels.heading.register;
-    const buttonLabel =  isLoginActive ? constants.labels.button.login : constants.labels.button.register;
-    const authModeLinkLabel =  isLoginActive ? constants.labels.links.register : constants.labels.links.login;
-    const route = isLoginActive ? config.routes.register : config.routes.login;
+    const heading = isRegisterActive ? constants.labels.heading.register : constants.labels.heading.login;
+    const buttonLabel =  isRegisterActive ? constants.labels.button.register : constants.labels.button.login;
+    const authModeLinkLabel =  isRegisterActive ? constants.labels.links.login : constants.labels.links.register;
+    const route = isRegisterActive ? config.routes.login : config.routes.register;
 
 
     return (
@@ -101,34 +253,16 @@ const Authentication = () => {
             </Heading>
 
             <form className={styling.form} data-testid="auth-form" onSubmit={onSubmit}>
-                <Input
-                    label={constants.labels.input.email.label}
-                    type="email"
-                    name="email"
-                    value={state.email}
-                    placeholder={constants.labels.input.email.placeholder}
-                    onChange={onInputChange}
-                    testId='email-input'
-                    required
-                />
-
-                <Input
-                    label={constants.labels.input.password.label}
-                    type="password"
-                    name="password"
-                    value={state.password}
-                    placeholder={constants.labels.input.password.placeholder}
-                    onChange={onInputChange}
-                    testId='password-input'
-                    required
-                />
+                {isRegisterActive ? fullFormContent : partialFormContent}
 
                 <Button
                     testId='auth-submit-button'
                     type='submit'
                     label={buttonLabel}
                     variant='primary'
-                    isLoading={state.isLoading}
+                    isLoading={isLoading}
+                    // Disable button when the register form is active and the password is not valid
+                    disabled={isRegisterActive && (isPasswordValid === false)}
                 />
             </form>
 

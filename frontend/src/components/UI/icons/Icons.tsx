@@ -152,3 +152,20 @@ export const Moon = ({ thick }: Props) => (
         <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
     </svg>
 );
+
+export const Tick = ({ thick }: Props) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
+        height="1em"
+        viewBox="0 0 24 24"
+        strokeWidth={thick ? '2' : '1.5'}
+        stroke="currentColor"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M5 12l5 5l10 -10"/>
+    </svg>
+);

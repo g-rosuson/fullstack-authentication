@@ -3,9 +3,9 @@ import { Server } from 'http';
 import { logger } from 'aop/logging';
 
 export const shutdown = async (httpServer: Server, disconnect: () => Promise<void>) => {
-    logger.info('Received shutdown signal, starting graceful shutdown...');
-
     try {
+        logger.info('Received shutdown signal, starting graceful shutdown...');
+
         // Close the HTTP server first & stop accepting new requests
         await new Promise(resolve => {
             httpServer.close(() => {
@@ -19,7 +19,7 @@ export const shutdown = async (httpServer: Server, disconnect: () => Promise<voi
 
         process.exit(0);
     } catch (error) {
-        logger.error('Error during server shutdown:', error as Error);
+        logger.error('Error during server shutdown:', { error: error as Error });
         process.exit(1);
     }
 };

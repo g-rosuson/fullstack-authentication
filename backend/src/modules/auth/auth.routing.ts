@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { login, logout, register, renewAccessToken } from './auth.controller';
-import validate from './auth.middleware';
+import { validateAuthenticationInput, validateRefreshToken } from './auth.middleware';
 import { loginLimiter, refreshLimiter, registerLimiter } from 'shared/middleware/rate-limiter';
 
 import config from './auth.config';
@@ -10,9 +10,9 @@ import config from './auth.config';
 const router = Router();
 
 // Determine routes
-router.post(config.route.login, loginLimiter, validate, login);
-router.post(config.route.register, registerLimiter, validate, register);
-router.post(config.route.logout, logout);
-router.get(config.route.refresh, refreshLimiter, renewAccessToken);
+router.post(config.route.login, loginLimiter, validateAuthenticationInput, login);
+router.post(config.route.register, registerLimiter, validateAuthenticationInput, register);
+router.post(config.route.logout, validateRefreshToken, logout);
+router.get(config.route.refresh, refreshLimiter, validateRefreshToken, renewAccessToken);
 
 export default router;

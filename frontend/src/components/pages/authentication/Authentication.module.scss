@@ -7,10 +7,16 @@
     width: 50rem;
 
     > :not(:last-child) {
-        margin-bottom: var(--gap-large);
+        margin-bottom: var(--gap);
+    }
+
+    > :last-child {
+        margin-top: var(--gap-large);
     }
 }
 
 .link {
-    margin-top: var(--gap-small);
+    margin-top: var(--gap);
+    color: var(--color-text);
+    text-align: center;
 }

@@ -46,6 +46,8 @@ const renderComponent = () => {
 describe('RefreshSession modal component', () => {
     // Hoist mock variables since vi.mock is hoisted under the hood
     const mockUser = vi.hoisted<UserStore>(() => ({
+        firstName: null,
+        lastName: null,
         accessToken: null,
         email: null,
         id: null,
@@ -61,6 +63,21 @@ describe('RefreshSession modal component', () => {
             clearUser: mockClearUser
         }))
     }));
+
+    // Mock jwt utils
+    vi.mock('utils', async () => ({
+        default: {
+            jwt: {
+                decode: vi.fn(() => ({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    email: 'email@email.com',
+                    id: 'id',
+                })),
+            },
+        }
+    }));
+
 
     // Mock logout timeout duration
     const mockLogoutTimeout = constants.time.logoutTimeout;
@@ -174,31 +191,31 @@ describe('RefreshSession modal component', () => {
         // Determine mock response and spy
         const mockResponse = {
             success: true,
-            data: {
-                accessToken: 'access.token',
-                email: 'email@example.com',
-                id: '1234'
-            },
+            data: 'mock-access-token',
             meta: {
                 timestamp: new Date()
             }
         };
 
         const refreshSessionSpy = vi.spyOn(api.service.resources.authentication, 'refreshAccessToken').mockResolvedValue(mockResponse);
-      
+
         // Simulate session refresh when confirm button is clicked
         const refreshSessionButton = within(modal).getByTestId('primary-button');
         await userEvent.click(refreshSessionButton);
     
-        // Assert logout was called
-        expect(refreshSessionSpy).toHaveBeenCalledOnce();
+        expect(refreshSessionSpy).toHaveBeenCalledOnce();  
+        
+        // expected changeUser() payload
+        const expectedPayload = {
+            accessToken: 'mock-access-token',
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'email@email.com',
+            id: 'id',
+        };
 
         // Assert store.user,changeUser function was called with the correct payload
-        expect(mockChangeUser).toHaveBeenCalledWith({
-            accessToken: mockResponse.data.accessToken,
-            email: mockResponse.data.email,
-            id: mockResponse.data.id,
-        });
+        expect(mockChangeUser).toHaveBeenCalledWith(expectedPayload);
 
         waitFor(() => {
             expect(modal).not.toBeInTheDocument();

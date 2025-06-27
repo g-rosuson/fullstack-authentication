@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,6 +25,8 @@ const renderComponent = (path: string) => {
 describe('Authentication component: authentication', () => {
     // Mock user store and hoist variables since vi.mock is hoisted by default
      const mockUser = vi.hoisted<UserStore>(() => ({
+        firstName: null,
+        lastName: null,
         accessToken: null,
         email: null,
         id: null,
@@ -57,9 +60,15 @@ describe('Authentication component: authentication', () => {
 
     // Mock utils.jwt to always return true so we can test
     // the navigation to the root route
-    vi.mock('../../../utils/jwt', () => ({
+    vi.mock('utils/jwt', async () => ({
         default: {
             isValid: vi.fn(() => true),
+            decode: vi.fn(() => ({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'email@example.com',
+                id: 'id',
+            })),
         }
     }));
 
@@ -72,11 +81,26 @@ describe('Authentication component: authentication', () => {
         }
     }));
 
+    // Enable submit button by mocking a positive password validation
+    vi.mock('./passwordValidator/PasswordValidator', () => ({
+        // eslint-disable-next-line no-unused-vars
+        default: ({ onChange }: { onChange: (val: boolean) => void }) => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            useEffect(() => {
+                onChange(true);
+            }, [onChange]);
+
+            return null;
+        }
+    }));
+
     // Mock variables
     const mockAccessToken = 'mockAccessToken';
+    const mockFirstName = 'John';
+    const mockLastName = 'Doe';
     const mockPassword = 'password123';
     const mockEmail = 'email@example.com';
-    const mockId = '123';
+    const mockId = 'id';
 
     afterEach(() => {
         vi.clearAllMocks();
@@ -107,25 +131,28 @@ describe('Authentication component: authentication', () => {
     it('register endpoint is invoked with correct values when the "/register" route is active', async () => {
         renderComponent(config.routes.register);
 
-        // Mock API response to prevent dispatch payload causing errors
         (api.service.resources.authentication.register as Mock).mockResolvedValue({
-            data: {
-                accessToken: mockAccessToken,
-                email: mockEmail,
-                id: mockId,
-            }
+            data: mockAccessToken
         });
 
-        // Simulate user input
+        // Fill all required fields
+        await userEvent.type(screen.getByTestId('first-name-input'), mockFirstName);
+        await userEvent.type(screen.getByTestId('last-name-input'), mockLastName);
         await userEvent.type(screen.getByTestId('email-input'), mockEmail);
         await userEvent.type(screen.getByTestId('password-input'), mockPassword);
+        await userEvent.type(screen.getByTestId('password-confirmation-input'), mockPassword);
+
+        // Submit form
         await userEvent.click(screen.getByTestId('auth-submit-button'));
 
-        // Assert that the register function was called with the correct arguments
+        // Expect full payload
         await waitFor(() => {
             expect(api.service.resources.authentication.register).toHaveBeenCalledWith({
+                firstName: mockFirstName,
+                lastName: mockLastName,
                 email: mockEmail,
                 password: mockPassword,
+                confirmationPassword: mockPassword
             });
         });
     });
@@ -136,11 +163,7 @@ describe('Authentication component: authentication', () => {
 
         // Determine the mock response from the login function in the <Authentication/> component
         (api.service.resources.authentication.login as Mock).mockResolvedValue({
-            data: {
-                accessToken: mockAccessToken,
-                email: mockEmail,
-                id: mockId,
-            }
+            data: mockAccessToken
         });
 
         // Mock user input & submission
@@ -152,6 +175,8 @@ describe('Authentication component: authentication', () => {
         await waitFor(() => {
             expect(mockChangeUser).toHaveBeenCalledWith({
                 accessToken: mockAccessToken,
+                firstName: mockFirstName,
+                lastName: mockLastName,
                 email: mockEmail,
                 id: mockId
             });
@@ -210,25 +235,37 @@ describe('Authentication component: authentication', () => {
     it('register failure is handled gracefully', async () => {
         renderComponent(config.routes.register);
 
-        // Mock login failure
         const mockError = new Error('Registration failed');
         (api.service.resources.authentication.register as Mock).mockRejectedValue(mockError);
 
-        // Fill form and submit
+        // Fill all required fields
+        await userEvent.type(screen.getByTestId('first-name-input'), mockFirstName);
+        await userEvent.type(screen.getByTestId('last-name-input'), mockLastName);
         await userEvent.type(screen.getByTestId('email-input'), mockEmail);
         await userEvent.type(screen.getByTestId('password-input'), mockPassword);
+        await userEvent.type(screen.getByTestId('password-confirmation-input'), mockPassword);
+
         await userEvent.click(screen.getByTestId('auth-submit-button'));
 
-        // Assert that:
-        // - Error was logged
-        // - The user is still on the register page
-        // - The store.dispatch function was not called
         await waitFor(() => {
             expect(mockErrorLogging).toHaveBeenCalledWith(mockError);
             expect(screen.getByRole('heading')).toHaveTextContent(/register/i);
             expect(mockChangeUser).not.toHaveBeenCalled();
         });
     });
+
+    it('submit button is disabled on register when password is invalid', async () => {
+        renderComponent(config.routes.register);
+
+        await userEvent.type(screen.getByTestId('first-name-input'), mockFirstName);
+        await userEvent.type(screen.getByTestId('last-name-input'), mockLastName);
+        await userEvent.type(screen.getByTestId('email-input'), mockEmail);
+        await userEvent.type(screen.getByTestId('password-input'), 'short'); // invalid
+        await userEvent.type(screen.getByTestId('password-confirmation-input'), 'short');
+
+        const submitButton = screen.getByTestId('auth-submit-button');
+        expect(submitButton).toBeDisabled();
+});
 });
 
 describe('Authentication component: UI & navigation', () => {

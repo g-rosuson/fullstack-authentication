@@ -1,3 +1,6 @@
+import { CustomError } from 'services/error';
+import { errorSchema } from 'services/error/schemas';
+
 import { type FetchOptions } from './types';
 
 /**
@@ -27,13 +30,17 @@ const _fetch = async (path: string , fetchOptions: FetchOptions) => {
     if (!response.ok) {
         const jsonResponse = await response.json();
 
-        const loggingMessage = `[API]: "${method}" request to "${url}" path, failed with message: \n "${jsonResponse.error.message}"`;
+        const result = errorSchema.safeParse(jsonResponse.error);
 
-        throw new Error(loggingMessage);
+        if (!result.success) {
+            throw new CustomError(`[API]: "${method}" request to "${url}" path failed`);
+        }
+
+        throw new CustomError(result.data.message, result.data.issues);
     }
 
     return await response.json();
-}
+};
 
 /**
  * Makes a GET request to the given API path.

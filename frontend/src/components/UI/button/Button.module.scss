@@ -16,6 +16,14 @@
     &:hover {
         background-color: var(--color-surface-hover);
     }
+
+    &:disabled {
+        background-color: var(--color-ui-disabled);
+
+        &:hover {
+            background-color: var(--color-ui-disabled);
+        }
+    }
 }
 
 .icon {

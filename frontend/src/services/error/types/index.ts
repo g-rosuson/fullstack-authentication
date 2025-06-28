@@ -4,5 +4,10 @@ import { errorIssueSchema } from '../schemas';
 
 type ErrorIssue = z.infer<typeof errorIssueSchema>;
 
+interface CustomErrorContext {
+    cause?: Error;
+    issues?: ErrorIssue[];
+    timestamp?: number;
+}
 
-export type { ErrorIssue };
+export type { CustomErrorContext };

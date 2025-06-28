@@ -144,7 +144,7 @@ const Authentication = () => {
             
         } catch (error) {
             if (error instanceof CustomError) {
-                console.log(error.issues)
+                console.log(error.context.issues)
             }
            
             logging.error(error as Error);

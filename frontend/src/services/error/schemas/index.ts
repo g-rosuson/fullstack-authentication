@@ -10,7 +10,10 @@ const errorSchema = z
     .object({
         code: z.string(),
         message: z.string(),
-        issues: z.array(errorIssueSchema).optional()
+        issues: z.array(errorIssueSchema),
+        meta: z.object({
+            timestamp: z.number()
+        })
     });
 
 

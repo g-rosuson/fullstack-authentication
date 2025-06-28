@@ -1,11 +1,12 @@
-import { ErrorIssue } from './types';
+import { CustomErrorContext } from './types';
 
-class CustomError {
-    message;
-    issues;
-    constructor(message: string, issues: ErrorIssue[] = []) {
-        this.message = message;
-        this.issues = issues;
+class CustomError extends Error {
+    context: CustomErrorContext;
+
+    constructor(message: string, context: CustomErrorContext = {}) {
+        super(message);
+        this.name = 'error-with-ctx';
+        this.context = context;
     }
 }
 

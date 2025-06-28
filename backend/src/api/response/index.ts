@@ -18,7 +18,8 @@ const response = {
             success: false,
             error: {
                 code: 'BAD_REQUEST',
-                ...error,
+                message: error.message,
+                issues: error.issues || [],
             },
             meta: { timestamp: Date.now() },
         }),
@@ -26,21 +27,21 @@ const response = {
     notAuthorised: (res: Response) =>
         res.status(401).json({
             success: false,
-            error: { code: 'NOT_AUTHORISED', message: 'not authorised' },
+            error: { code: 'NOT_AUTHORISED', message: 'not authorised', issues: [] },
             meta: { timestamp: Date.now() },
         }),
     // 404 Not found: The requested resource could not be found on the server
     notFound: (res: Response, message: string) =>
         res.status(404).json({
             success: false,
-            error: { code: 'NOT_FOUND', message },
+            error: { code: 'NOT_FOUND', message, issues: [] },
             meta: { timestamp: Date.now() },
         }),
     // 409 Conflict: The request conflicts with the current state of the server
     conflict: (res: Response) =>
         res.status(409).json({
             success: false,
-            error: { code: 'AUTHORISATION_CONFLICT', message: 'authorisation conflict' },
+            error: { code: 'AUTHORISATION_CONFLICT', message: 'authorisation conflict', issues: [] },
             meta: { timestamp: Date.now() },
         }),
     // 500 Internal Server Error: An error indicating that something internally went wrong on the server
@@ -53,7 +54,7 @@ const response = {
 
         return res.status(500).json({
             success: false,
-            error: { code: 'INTERNAL_ERROR', message: tmpMessage },
+            error: { code: 'INTERNAL_ERROR', message: tmpMessage, issues: [] },
             meta: { timestamp: Date.now() },
         });
     },

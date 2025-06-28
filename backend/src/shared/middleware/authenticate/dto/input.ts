@@ -1,3 +1,4 @@
+// TODO: Convert to schemas structure
 import { z } from 'zod';
 
 const jwtInputDto = z.object({

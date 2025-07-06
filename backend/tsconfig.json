@@ -1,16 +1,16 @@
 {
-  "compilerOptions": {
-    "moduleResolution": "node", 
-    "target": "es2022",
-    "strict": true,
-    "esModuleInterop": true,
-    "composite": true,
-    "baseUrl": "./",
-    "paths": {
-      "*": ["src/*"]
+    "compilerOptions": {
+        "moduleResolution": "bundler",
+        "target": "es2022",
+        "strict": true,
+        "esModuleInterop": true,
+        "composite": true,
+        "baseUrl": "./",
+        "paths": {
+            "*": ["src/*"]
+        },
+        // Tells TypeScript where to look for global type declarations
+        "typeRoots": ["src/global.d.ts"]
     },
-    // Tells TypeScript where to look for global type declarations
-    "typeRoots": ["src/global.d.ts"]
-  },
-  "include": ["src/**/*.ts", "src/**/*.json", ".eslintrc.json"],
+    "include": ["src/**/*.ts", "src/**/*.json", ".eslintrc.json", "vitest.config.mjs"],
 }

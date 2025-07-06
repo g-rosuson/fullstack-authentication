@@ -14,7 +14,7 @@
             "warn",
             {
                 "groups": [
-                    ["bcrypt|express|cors|cookie-parser|http|dotenv|jsonwebtoken|mongodb|uuid|zod"],
+                    ["bcrypt|cookie-parser|cors|dotenv|express|http|jsonwebtoken|mongodb|sanitize-html|uuid|vitest|zod"],
                     ["^modules\/.+$"],
                     ["^(api|aop|lib)(\/.+)?$"],
                     ["middleware|controller"],

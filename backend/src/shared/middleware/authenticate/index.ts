@@ -5,7 +5,9 @@ import config from 'aop/config';
 import response from 'api/response';
 import { parseSchema } from 'lib/validation';
 
-import schema, { JWTInputDto } from './dto/input';
+import { JWTInput } from './types';
+
+import { jwtInputSchema } from './schemas';
 
 const MALFORMED_AUTHORIZATION_HEADER_MSG = 'authorization header malformed';
 const INVALID_TOKEN_STRUCTURE_MSG = 'token payload structure invalid';
@@ -33,7 +35,7 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
         const decoded = verify(accessToken, config.accessTokenSecret);
 
         // Validate the refresh JWT structure
-        const result = parseSchema<JWTInputDto>(schema.jwtInputDto, decoded);
+        const result = parseSchema<JWTInput>(jwtInputSchema, decoded);
 
         if (!result.success) {
             return response.internalError(res, INVALID_TOKEN_STRUCTURE_MSG);

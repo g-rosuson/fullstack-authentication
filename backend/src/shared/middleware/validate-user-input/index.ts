@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 
 import response from 'api/response';
 
+import messages, { resolvePlaceholders } from 'constants/messages';
+
 import { isObject } from 'utils';
 
 /**
@@ -45,15 +47,13 @@ const _containsHtml = (value: unknown) => {
  */
 const validateUserInput = (req: Request, res: Response, next: NextFunction) => {
     if (!isObject(req.body)) {
-        return response.badRequest(res, {
-            message: `Invalid request body. Expected a JSON object but got ${typeof req.body}`,
-        });
+        const message = resolvePlaceholders(messages.error.invalidRequestBody, { type: typeof req.body });
+
+        return response.badRequest(res, { message });
     }
 
     if (_containsHtml(req.body)) {
-        return response.badRequest(res, {
-            message: 'HTML tags are not allowed in request body.',
-        });
+        return response.badRequest(res, { message: messages.error.htmlTagsNotAllowed });
     }
 
     next();

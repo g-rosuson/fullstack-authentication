@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "types": ["vitest/globals"],
         "moduleResolution": "bundler",
         "target": "es2022",
         "strict": true,
@@ -9,8 +10,6 @@
         "paths": {
             "*": ["src/*"]
         },
-        // Tells TypeScript where to look for global type declarations
-        "typeRoots": ["src/global.d.ts"]
     },
     "include": ["src/**/*.ts", "src/**/*.json", ".eslintrc.json", "vitest.config.mjs"],
 }

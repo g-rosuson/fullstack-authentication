@@ -3,8 +3,7 @@ import { Db } from 'mongodb';
 import { logger } from 'aop/logging';
 
 import config from '../config';
-
-import messages from 'messages';
+import messages from 'constants/messages';
 
 const indexCollections = async (db: Db) => {
     const promises = Object.values(config.db.collection).map(item =>
@@ -13,12 +12,12 @@ const indexCollections = async (db: Db) => {
 
     await Promise.all(promises);
 
-    logger.info(messages.logger.info.INDEXED_COLLECTIONS);
+    logger.info(messages.logger.info.indexedCollections);
 };
 
 const pingDatabase = async (db: Db) => {
     await db.command({ ping: 1 });
-    logger.info(messages.logger.info.PING_SUCCESS);
+    logger.info(messages.logger.info.pingSuccess);
 };
 
 const setup = {

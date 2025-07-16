@@ -4,8 +4,7 @@ import { logger } from 'aop/logging';
 
 import config from '../config';
 import setup from '../setup';
-
-import messages from 'messages';
+import messages from 'constants/messages';
 
 const DB_NAME = config.db.name;
 
@@ -26,16 +25,16 @@ const connect = async () => {
         await setup.pingDatabase(db);
         await setup.indexCollections(db);
     } catch (error) {
-        logger.error(messages.logger.error.CONNECTION_FAILED, { error: error as Error });
+        logger.error(messages.logger.error.connectionFailed, { error: error as Error });
     }
 };
 
 const disconnect = async () => {
     try {
         await client.close();
-        logger.info(messages.logger.info.DISCONNECTED);
+        logger.info(messages.logger.info.disconnected);
     } catch (error) {
-        logger.error(messages.logger.error.DISCONNECTION_FAILED, { error: error as Error });
+        logger.error(messages.logger.error.disconnectingFailed, { error: error as Error });
     }
 };
 
@@ -44,8 +43,7 @@ const getDatabase = () => {
         return client.db(DB_NAME);
     }
 
-    // TODO: This will be caught in mutations/queries and logged wrongly
-    // TODO: as an error while accessing collection.
+    // TODO: This will be caught in mutations/queries and logged wrongly as an error while accessing collection.
     throw Error('Could not access DB');
 };
 

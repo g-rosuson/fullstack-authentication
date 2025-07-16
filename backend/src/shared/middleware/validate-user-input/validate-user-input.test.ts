@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import validateInput from './';
+import validateInput from '.';
 
 // === Mock response module ===
 const mockBadRequest = vi.hoisted(() => vi.fn());
@@ -12,7 +11,7 @@ vi.mock('api/response', async () => ({
     },
 }));
 
-describe('validateInput middleware', () => {
+describe('validateUserInput middleware: ', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });

@@ -3,6 +3,7 @@ import config from 'aop/db/config';
 import { logger } from 'aop/logging';
 import { parseSchema } from 'lib/validation';
 
+import messages, { getMessageWithCtx } from 'messages';
 import { userDocumentSchema } from 'shared/schemas/user';
 
 const COLLECTION_NAME = config.db.collection.users.name;
@@ -17,14 +18,22 @@ const getByEmail = async (email: string) => {
 
         if (!result.success) {
             // todo: Integrate Sentry
-            const message = `Error while getting item with email: "${email}", from collection: "${COLLECTION_NAME}".`;
-            logger.error(message, { issues: result.issues });
+            logger.error(
+                getMessageWithCtx(messages.logger.error.GET_ITEM_WITH_EMAIL_FROM_COLLECTION_FAILED, {
+                    email,
+                    name: COLLECTION_NAME,
+                }),
+                { issues: result.issues }
+            );
             return;
         }
 
         return result.data;
     } catch (error) {
-        logger.error(`Error while getting item from collection: "${COLLECTION_NAME}"`, { error: error as Error });
+        logger.error(
+            getMessageWithCtx(messages.logger.error.GET_ITEM_FROM_COLLECTION_FAILED, { name: COLLECTION_NAME }),
+            { error: error as Error }
+        );
     }
 };
 

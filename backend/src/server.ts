@@ -9,6 +9,7 @@ import config from 'aop/config';
 import db from 'aop/db';
 import { logger } from 'aop/logging';
 
+import messages, { getMessageWithCtx } from 'messages';
 import { shutdown } from 'server.utils';
 
 const server = express();
@@ -33,7 +34,7 @@ server.use(config.basePath, authenticationRoutes);
 
 const serverInstance = server.listen(1000, async () => {
     await db.connect();
-    logger.info(`Listening on port ${1000}`);
+    logger.info(getMessageWithCtx(messages.logger.info.SERVER_STARTED, { port: 1000 }));
 });
 
 process.on('SIGTERM', () => shutdown(serverInstance, db.disconnect));

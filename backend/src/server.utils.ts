@@ -2,24 +2,26 @@ import { Server } from 'http';
 
 import { logger } from 'aop/logging';
 
+import messages from 'messages';
+
 export const shutdown = async (httpServer: Server, disconnect: () => Promise<void>) => {
     try {
-        logger.info('Received shutdown signal, starting graceful shutdown...');
+        logger.info(messages.logger.info.SHUTDOWN_SIGNAL);
 
         // Close the HTTP server first & stop accepting new requests
         await new Promise(resolve => {
             httpServer.close(() => {
-                logger.info('Server closed');
+                logger.info(messages.logger.info.SERVER_CLOSED);
                 resolve(undefined);
             });
         });
 
         await disconnect();
-        logger.info('Database connection closed');
+        logger.info(messages.logger.info.DB_CONNECTION_CLOSED);
 
         process.exit(0);
     } catch (error) {
-        logger.error('Error during server shutdown:', { error: error as Error });
+        logger.error(messages.logger.error.SHUTDOWN_ERROR, { error: error as Error });
         process.exit(1);
     }
 };

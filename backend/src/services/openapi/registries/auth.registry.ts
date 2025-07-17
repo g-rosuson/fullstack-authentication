@@ -1,7 +1,8 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
-import config from 'modules/auth/auth.config';
 import { accessTokenSchema, loginUserPayloadSchema, registerUserPayloadSchema } from 'modules/auth/schemas';
+
+import routeConstants from 'constants/routes';
 
 // Determine registry
 const registry = new OpenAPIRegistry();
@@ -9,7 +10,7 @@ const registry = new OpenAPIRegistry();
 // Register paths
 registry.registerPath({
     method: 'post',
-    path: config.route.login,
+    path: routeConstants.auth.login,
     responses: {
         200: {
             description: 'Authentication payload when login is successful',
@@ -34,7 +35,7 @@ registry.registerPath({
 
 registry.registerPath({
     method: 'post',
-    path: config.route.register,
+    path: routeConstants.auth.register,
     responses: {
         200: {
             description: 'Authentication payload when registration is successful',
@@ -59,7 +60,7 @@ registry.registerPath({
 
 registry.registerPath({
     method: 'get',
-    path: config.route.refresh,
+    path: routeConstants.auth.refresh,
     responses: {
         200: {
             description: 'Authentication payload when refreshing access-token is successful',

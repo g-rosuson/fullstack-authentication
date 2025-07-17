@@ -3,8 +3,9 @@ import { type NextFunction, type Request, type Response } from 'express';
 import response from 'api/response';
 import { parseSchema } from 'lib/validation';
 
-import config from './auth.config';
-import constants from './auth.constant';
+import messages from 'constants/messages';
+import names from 'constants/names';
+import routes from 'constants/routes';
 
 import { loginUserPayloadSchema, registerUserPayloadSchema } from './schemas';
 
@@ -15,7 +16,7 @@ import { loginUserPayloadSchema, registerUserPayloadSchema } from './schemas';
  */
 const validateAuthenticationInput = (req: Request, res: Response, next: NextFunction) => {
     // Determine schema based on the request path
-    const isRegistering = req.path === config.route.register;
+    const isRegistering = req.path === routes.auth.register;
     const schema = isRegistering ? registerUserPayloadSchema : loginUserPayloadSchema;
 
     // Compare request body to corresponding schema
@@ -27,8 +28,8 @@ const validateAuthenticationInput = (req: Request, res: Response, next: NextFunc
     // * Login: If the comparison fails, respond with a generic error message
     if (!result.success) {
         const error = isRegistering
-            ? { issues: result.issues, message: constants.INVALID_AUTH_MSG }
-            : { message: constants.INVALID_AUTH_MSG };
+            ? { issues: result.issues, message: messages.error.invalidCredentials }
+            : { message: messages.error.invalidCredentials };
         return response.badRequest(res, error);
     }
 
@@ -43,8 +44,8 @@ const validateAuthenticationInput = (req: Request, res: Response, next: NextFunc
  ** Fail: Responds with a generic no-token error message
  */
 const validateRefreshToken = (req: Request, res: Response, next: NextFunction) => {
-    if (!req.cookies?.[constants.REFRESH_COOKIE_NAME]) {
-        return response.badRequest(res, { message: constants.NO_TOKEN_MSG });
+    if (!req.cookies?.[names.refreshTokenCookie]) {
+        return response.badRequest(res, { message: messages.error.refreshTokenCookieNotFound });
     }
 
     next();

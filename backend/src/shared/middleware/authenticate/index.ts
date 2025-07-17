@@ -5,12 +5,11 @@ import config from 'aop/config';
 import response from 'api/response';
 import { parseSchema } from 'lib/validation';
 
+import messages from 'constants/messages';
+
 import { JWTInput } from './types';
 
 import { jwtInputSchema } from './schemas';
-
-const MALFORMED_AUTHORIZATION_HEADER_MSG = 'authorization header malformed';
-const INVALID_TOKEN_STRUCTURE_MSG = 'token payload structure invalid';
 
 /**
  * Verifies the access-token from the "authorization" header before forwarding
@@ -24,7 +23,7 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
         const isHeaderInvalid = !authHeader || !authHeader.startsWith('Bearer ');
 
         if (isHeaderInvalid) {
-            return response.badRequest(res, { message: MALFORMED_AUTHORIZATION_HEADER_MSG });
+            return response.badRequest(res, { message: messages.error.malformedAuthorizationHeader });
         }
 
         // Extract the access-token
@@ -38,14 +37,14 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
         const result = parseSchema<JWTInput>(jwtInputSchema, decoded);
 
         if (!result.success) {
-            return response.internalError(res, INVALID_TOKEN_STRUCTURE_MSG);
+            return response.internalError(res, messages.error.invalidTokenStructure);
         }
 
         req.user = result.data;
 
         next();
     } catch (error) {
-        response.notAuthorised(res);
+        response.notAuthorised(res, messages.error.notAuthorised);
     }
 };
 

@@ -4,6 +4,7 @@ import { logger } from 'aop/logging';
 
 import config from '../config';
 import setup from '../setup';
+import messages from 'constants/messages';
 
 const DB_NAME = config.db.name;
 
@@ -24,16 +25,16 @@ const connect = async () => {
         await setup.pingDatabase(db);
         await setup.indexCollections(db);
     } catch (error) {
-        logger.error('Error connecting to MongoDB:', { error: error as Error });
+        logger.error(messages.logger.error.connectionFailed, { error: error as Error });
     }
 };
 
 const disconnect = async () => {
     try {
         await client.close();
-        logger.info('Disconnected from MongoDB');
+        logger.info(messages.logger.info.disconnected);
     } catch (error) {
-        logger.error('Error disconnecting from MongoDB:', { error: error as Error });
+        logger.error(messages.logger.error.disconnectingFailed, { error: error as Error });
     }
 };
 

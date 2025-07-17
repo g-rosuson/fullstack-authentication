@@ -8,7 +8,9 @@ import db from 'aop/db';
 import response from 'api/response';
 import { parseSchema } from 'lib/validation';
 
-import constants from './auth.constant';
+import utils from './utils';
+import messages from 'constants/messages';
+import names from 'constants/names';
 
 import { JwtPayload, LoginUserPayload } from './types';
 import { CreateUserPayload, RegisterUserPayload } from 'shared/types/user';
@@ -54,15 +56,15 @@ const register = async (req: Request<unknown, unknown, RegisterUserPayload>, res
         const { accessToken, refreshToken } = jwtService.createTokens(tokenPayload);
 
         // Send a refresh-token to the client in a httpOnly cookie
-        res.cookie(constants.REFRESH_COOKIE_NAME, refreshToken, constants.REFRESH_COOKIE_OPTIONS());
+        res.cookie(names.refreshTokenCookie, refreshToken, utils.getRefreshCookieOptions());
 
         response.success(res, accessToken);
     } catch (error) {
         if (error instanceof MongoServerError && error.code === 11000) {
-            return response.conflict(res);
+            return response.conflict(res, messages.error.authorisationConflict);
         }
 
-        response.internalError(res);
+        response.internalError(res, messages.error.internalServerError);
     }
 };
 
@@ -78,14 +80,14 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
 
         // Validate if user exists
         if (!userDocument) {
-            return response.notFound(res, constants.INVALID_AUTH_MSG);
+            return response.notFound(res, messages.error.invalidCredentials);
         }
 
         // Validate if password is correct
         const isPasswordValid = await bcrypt.compare(password, userDocument.password);
 
         if (!isPasswordValid) {
-            return response.notFound(res, constants.INVALID_AUTH_MSG);
+            return response.notFound(res, messages.error.invalidCredentials);
         }
 
         // Create JWT tokens
@@ -99,11 +101,11 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
         const { accessToken, refreshToken } = jwtService.createTokens(tokenPayload);
 
         // Set refresh token as a httpOnly cookie and send user data to front-end
-        res.cookie(constants.REFRESH_COOKIE_NAME, refreshToken, constants.REFRESH_COOKIE_OPTIONS());
+        res.cookie(names.refreshTokenCookie, refreshToken, utils.getRefreshCookieOptions());
 
         response.success(res, accessToken);
     } catch (error) {
-        response.internalError(res);
+        response.internalError(res, messages.error.internalServerError);
     }
 };
 
@@ -111,7 +113,7 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
  * Clears the refresh-token cookie from the browser.
  */
 const logout = async (_req: Request, res: Response) => {
-    res.clearCookie(constants.REFRESH_COOKIE_NAME, constants.REFRESH_COOKIE_OPTIONS(false));
+    res.clearCookie(names.refreshTokenCookie, utils.getRefreshCookieOptions(false));
 
     response.success(res);
 };
@@ -130,7 +132,7 @@ const renewAccessToken = async (req: Request, res: Response) => {
         const result = parseSchema(jwtPayloadSchema, decoded);
 
         if (!result.success) {
-            return response.internalError(res, constants.INVALID_TOKEN_STRUCTURE_MSG);
+            return response.internalError(res, messages.error.invalidTokenStructure);
         }
 
         // Create a new access-token and send it to the browser
@@ -138,7 +140,7 @@ const renewAccessToken = async (req: Request, res: Response) => {
 
         response.success(res, accessToken);
     } catch (error) {
-        response.notAuthorised(res);
+        response.notAuthorised(res, messages.error.notAuthorised);
     }
 };
 

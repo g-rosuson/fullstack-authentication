@@ -43,7 +43,6 @@ const getDatabase = () => {
         return client.db(DB_NAME);
     }
 
-    // TODO: This will be caught in mutations/queries and logged wrongly as an error while accessing collection.
     throw Error('Could not access DB');
 };
 

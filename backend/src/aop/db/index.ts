@@ -1,11 +1,14 @@
-import { connect, disconnect, getDatabase } from './client';
+import config from './config';
+import setup from './setup';
+
+import client from './client';
 import service from './service';
 
-const db = {
-    service,
-    getDatabase,
-    disconnect,
-    connect,
-};
+const dbSetup = setup(config);
+const dbClient = client(config, dbSetup);
 
-export default db;
+const disconnect = dbClient.disconnect;
+const connect = dbClient.connect;
+const database = dbClient.database;
+
+export { database, disconnect, connect, service };

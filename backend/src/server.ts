@@ -6,12 +6,9 @@ import authenticationRoutes from 'modules/auth/auth.routing';
 import documentationRoute from 'modules/docs/docs.routing';
 
 import config from 'aop/config';
-import db from 'aop/db';
-import { logger } from 'aop/logging';
+import { connect, disconnect } from 'aop/db';
 
-import messages, { resolvePlaceholders } from 'constants/messages';
-
-import { shutdown } from 'server.utils';
+import { shutdown, start } from 'server.utils';
 
 const server = express();
 
@@ -33,10 +30,9 @@ server.use(config.basePath, documentationRoute);
 // Authentication routes
 server.use(config.basePath, authenticationRoutes);
 
-const serverInstance = server.listen(1000, async () => {
-    await db.connect();
-    logger.info(resolvePlaceholders(messages.logger.info.serverStarted, { port: 1000 }));
-});
+// Start server
+const serverInstance = server.listen(1000, () => start(connect));
 
-process.on('SIGTERM', () => shutdown(serverInstance, db.disconnect));
-process.on('SIGINT', () => shutdown(serverInstance, db.disconnect));
+// Handle server shutdown
+process.on('SIGTERM', () => shutdown(serverInstance, disconnect));
+process.on('SIGINT', () => shutdown(serverInstance, disconnect));

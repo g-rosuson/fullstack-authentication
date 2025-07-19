@@ -4,7 +4,7 @@ import { verify } from 'jsonwebtoken';
 import { MongoServerError } from 'mongodb';
 
 import config from 'aop/config';
-import db from 'aop/db';
+import { service } from 'aop/db';
 import response from 'api/response';
 import { parseSchema } from 'lib/validation';
 
@@ -41,7 +41,7 @@ const register = async (req: Request<unknown, unknown, RegisterUserPayload>, res
         // Note: Because the email field has a unique index (see db/setup/index),
         // attempting to insert a user with an existing email will throw a
         // duplicate key error.
-        const insertResponse = await db.service.mutations.users.create(newUser);
+        const insertResponse = await service.mutations.users.create(newUser);
 
         // We are sending both the access-token which contains
         // the user info
@@ -76,7 +76,7 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
         const { email, password } = req.body;
 
         // Get user by email
-        const userDocument = await db.service.queries.users.getByEmail(email);
+        const userDocument = await service.queries.users.getByEmail(email);
 
         // Validate if user exists
         if (!userDocument) {

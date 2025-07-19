@@ -1,4 +1,6 @@
-const config = {
+import type { DbConfig } from './types';
+
+const config: DbConfig = {
     db: {
         name: process.env.MONGO_DB_NAME!,
         uri: process.env.MONGO_URI!,

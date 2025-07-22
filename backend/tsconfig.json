@@ -2,6 +2,7 @@
     "compilerOptions": {
         "types": ["vitest/globals"],
         "moduleResolution": "bundler",
+        "strictPropertyInitialization": false,
         "target": "es2022",
         "strict": true,
         "esModuleInterop": true,
@@ -11,5 +12,5 @@
             "*": ["src/*"]
         },
     },
-    "include": ["src/**/*.ts", "src/**/*.json", ".eslintrc.json", "vitest.config.mjs"],
+    "include": ["src/**/*.ts", "src/**/*.json", "src/global.d.ts", ".eslintrc.json", "vitest.config.mjs"],
 }

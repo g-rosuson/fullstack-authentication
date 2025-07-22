@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
+import { loginLimiter, refreshLimiter, registerLimiter } from '../shared/middleware/rate-limiter';
+import validateUserInput from '../shared/middleware/validate-user-input';
 import { login, logout, register, renewAccessToken } from './auth.controller';
 import { validateAuthenticationInput, validateRefreshToken } from './auth.middleware';
-import { loginLimiter, refreshLimiter, registerLimiter } from 'shared/middleware/rate-limiter';
-import validateUserInput from 'shared/middleware/validate-user-input';
 
 import routes from 'constants/routes';
 

@@ -8,12 +8,10 @@ import { BaseException } from '../base';
  */
 export class NotFoundException extends BaseException {
     /**
-     * Creates a new NotFoundException instance.
-     *
      * @param message Human-readable error message
      * @param context Additional context information
      */
-    constructor(message: string = 'Resource not found', context?: ExceptionContext) {
+    constructor(message: 'Resource not found', context?: ExceptionContext) {
         super(message, HttpStatusCode.NOT_FOUND, ErrorType.NOT_FOUND_ERROR, context);
     }
 }
@@ -24,12 +22,10 @@ export class NotFoundException extends BaseException {
  */
 export class ConflictException extends BaseException {
     /**
-     * Creates a new ConflictException instance.
-     *
      * @param message Human-readable error message
      * @param context Additional context information
      */
-    constructor(message: string = 'Resource already exists', context?: ExceptionContext) {
+    constructor(message: 'Resource already exists', context?: ExceptionContext) {
         super(message, HttpStatusCode.CONFLICT, ErrorType.CONFLICT_ERROR, context);
     }
 }
@@ -40,12 +36,10 @@ export class ConflictException extends BaseException {
  */
 export class BusinessLogicException extends BaseException {
     /**
-     * Creates a new BusinessLogicException instance.
-     *
      * @param message Human-readable error message
      * @param context Additional context information
      */
-    constructor(message: string = 'Business logic violation', context?: ExceptionContext) {
+    constructor(message: 'Business logic violation', context?: ExceptionContext) {
         super(message, HttpStatusCode.UNPROCESSABLE_ENTITY, ErrorType.BUSINESS_LOGIC_ERROR, context);
     }
 }

@@ -8,12 +8,10 @@ import { BaseException } from '../base';
  */
 export class DatabaseException extends BaseException {
     /**
-     * Creates a new DatabaseException instance.
-     *
      * @param message Human-readable error message
      * @param context Additional context information
      */
-    constructor(message: string = 'Database operation failed', context?: ExceptionContext) {
+    constructor(message: 'Database operation failed', context?: ExceptionContext) {
         super(message, HttpStatusCode.INTERNAL_SERVER_ERROR, ErrorType.DATABASE_ERROR, context);
     }
 }
@@ -24,12 +22,10 @@ export class DatabaseException extends BaseException {
  */
 export class DatabaseConnectionException extends BaseException {
     /**
-     * Creates a new DatabaseConnectionException instance.
-     *
      * @param message Human-readable error message
      * @param context Additional context information
      */
-    constructor(message: string = 'Database connection failed', context?: ExceptionContext) {
+    constructor(message: 'Database connection failed', context?: ExceptionContext) {
         super(message, HttpStatusCode.INTERNAL_SERVER_ERROR, ErrorType.DATABASE_ERROR, context);
     }
 }
@@ -40,12 +36,10 @@ export class DatabaseConnectionException extends BaseException {
  */
 export class DatabaseTransactionException extends BaseException {
     /**
-     * Creates a new DatabaseTransactionException instance.
-     *
      * @param message Human-readable error message
      * @param context Additional context information
      */
-    constructor(message: string = 'Database transaction failed', context?: ExceptionContext) {
+    constructor(message: 'Database transaction failed', context?: ExceptionContext) {
         super(message, HttpStatusCode.INTERNAL_SERVER_ERROR, ErrorType.DATABASE_ERROR, context);
     }
 }

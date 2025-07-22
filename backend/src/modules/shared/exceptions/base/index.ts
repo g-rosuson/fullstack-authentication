@@ -7,13 +7,11 @@ import { ApplicationException, ErrorType, ExceptionContext, HttpStatusCode } fro
 export abstract class BaseException extends Error implements ApplicationException {
     public readonly statusCode: HttpStatusCode;
     public readonly errorType: ErrorType;
-    public readonly isOperational: boolean = true;
+    public readonly isOperational = true;
     public readonly context?: ExceptionContext;
     public readonly timestamp: Date;
 
     /**
-     * Creates a new BaseException instance.
-     *
      * @param message Human-readable error message
      * @param statusCode HTTP status code for the error
      * @param errorType Category of the error
@@ -38,7 +36,7 @@ export abstract class BaseException extends Error implements ApplicationExceptio
      *
      * @returns Object representation of the exception
      */
-    public toJSON(): Record<string, unknown> {
+    public toJSON() {
         return {
             name: this.name,
             message: this.message,
@@ -55,7 +53,7 @@ export abstract class BaseException extends Error implements ApplicationExceptio
      *
      * @returns String representation including name, message, and context
      */
-    public toString(): string {
+    public toString() {
         const contextStr = this.context ? ` | Context: ${JSON.stringify(this.context)}` : '';
         return `${this.name}: ${this.message}${contextStr}`;
     }

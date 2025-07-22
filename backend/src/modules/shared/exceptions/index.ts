@@ -15,8 +15,5 @@ export { NotFoundException, ConflictException, BusinessLogicException } from './
 // Database exceptions
 export { DatabaseException, DatabaseConnectionException, DatabaseTransactionException } from './database';
 
-// External service exceptions
-export { ExternalServiceException, RateLimitException } from './external';
-
 // System exceptions
-export { InternalException, ConfigurationException, NotImplementedException } from './system';
+export { InternalException, ConfigurationException } from './system';

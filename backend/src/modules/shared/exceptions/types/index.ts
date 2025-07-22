@@ -20,9 +20,7 @@ export interface ExceptionContext {
     operation?: string;
     resource?: string;
     userId?: string;
-    requestId?: string;
     timestamp?: Date;
-    [key: string]: unknown;
 }
 
 /**

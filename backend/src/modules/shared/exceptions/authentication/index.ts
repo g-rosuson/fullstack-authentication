@@ -8,12 +8,10 @@ import { BaseException } from '../base';
  */
 export class AuthenticationException extends BaseException {
     /**
-     * Creates a new AuthenticationException instance.
-     *
      * @param message Human-readable error message
      * @param context Additional context information
      */
-    constructor(message: string = 'Authentication failed', context?: ExceptionContext) {
+    constructor(message: 'Authentication failed', context?: ExceptionContext) {
         super(message, HttpStatusCode.UNAUTHORIZED, ErrorType.AUTHENTICATION_ERROR, context);
     }
 }
@@ -24,12 +22,10 @@ export class AuthenticationException extends BaseException {
  */
 export class AuthorizationException extends BaseException {
     /**
-     * Creates a new AuthorizationException instance.
-     *
      * @param message Human-readable error message
      * @param context Additional context information
      */
-    constructor(message: string = 'Access forbidden', context?: ExceptionContext) {
+    constructor(message: 'Access forbidden', context?: ExceptionContext) {
         super(message, HttpStatusCode.FORBIDDEN, ErrorType.AUTHORIZATION_ERROR, context);
     }
 }
@@ -40,12 +36,10 @@ export class AuthorizationException extends BaseException {
  */
 export class TokenException extends BaseException {
     /**
-     * Creates a new TokenException instance.
-     *
      * @param message Human-readable error message
      * @param context Additional context information
      */
-    constructor(message: string = 'Invalid or expired token', context?: ExceptionContext) {
+    constructor(message: 'Invalid or expired token', context?: ExceptionContext) {
         super(message, HttpStatusCode.UNAUTHORIZED, ErrorType.AUTHENTICATION_ERROR, context);
     }
 }

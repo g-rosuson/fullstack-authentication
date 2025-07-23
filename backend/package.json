@@ -33,7 +33,7 @@
         "type-check": "tsc --noEmit",
         "lint": "eslint \"**/*.{js,ts}\" --max-warnings=0 --cache",
         "lint-fix": "eslint \"**/*.{js,ts}\" --fix",
-        "start": "ts-node-dev --project ./tsconfig.json -r tsconfig-paths/register src/server.ts",
+        "start": "ts-node-dev --files --project ./tsconfig.json -r tsconfig-paths/register src/main.ts",
         "test": "vitest"
     }
 }

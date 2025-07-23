@@ -3,8 +3,9 @@ import { Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 import { MongoServerError } from 'mongodb';
 
+import { CreateUserPayload, RegisterUserPayload } from 'modules/shared/types/user';
+
 import config from 'aop/config';
-import db from 'aop/db';
 import response from 'api/response';
 import { parseSchema } from 'lib/validation';
 
@@ -13,7 +14,6 @@ import messages from 'constants/messages';
 import names from 'constants/names';
 
 import { JwtPayload, LoginUserPayload } from './types';
-import { CreateUserPayload, RegisterUserPayload } from 'shared/types/user';
 
 import { jwtPayloadSchema } from './schemas';
 import jwtService from 'services/jwt';
@@ -38,13 +38,9 @@ const register = async (req: Request<unknown, unknown, RegisterUserPayload>, res
             email,
         };
 
-        // Note: Because the email field has a unique index (see db/setup/index),
-        // attempting to insert a user with an existing email will throw a
-        // duplicate key error.
-        const insertResponse = await db.service.mutations.users.create(newUser);
+        // Note: Collection is indexed so duplicate emails will throw a duplicate key error
+        const insertResponse = await req.context.db.user.create(newUser);
 
-        // We are sending both the access-token which contains
-        // the user info
         // Create JWT tokens
         const tokenPayload: JwtPayload = {
             firstName,
@@ -76,7 +72,7 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
         const { email, password } = req.body;
 
         // Get user by email
-        const userDocument = await db.service.queries.users.getByEmail(email);
+        const userDocument = await req.context.db.user.getByEmail(email);
 
         // Validate if user exists
         if (!userDocument) {

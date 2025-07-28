@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-import response from 'api/response';
-
-import messages, { resolvePlaceholders } from 'constants/messages';
+import { InputValidationException } from 'aop/exceptions';
 
 import { isObject } from 'utils';
 
@@ -45,15 +43,15 @@ const _containsHtml = (value: unknown) => {
  * Middleware to validate that the request body is a valid JSON object
  * and does not contain HTML tags.
  */
-const validateUserInput = (req: Request, res: Response, next: NextFunction) => {
+const validateUserInput = (req: Request, _res: Response, next: NextFunction) => {
     if (!isObject(req.body)) {
-        const message = resolvePlaceholders(messages.error.invalidRequestBody, { type: typeof req.body });
-
-        return response.badRequest(res, { message });
+        throw new InputValidationException(
+            `Invalid request body. Expected a JSON object but got: "${typeof req.body}"`
+        );
     }
 
     if (_containsHtml(req.body)) {
-        return response.badRequest(res, { message: messages.error.htmlTagsNotAllowed });
+        throw new InputValidationException('Invalid request body. HTML tags detected');
     }
 
     next();

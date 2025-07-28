@@ -1,8 +1,8 @@
-import { Issue } from 'lib/validation/types';
+import { ValidationIssue } from 'lib/validation/types';
 
 interface Meta {
     error?: Error;
-    issues?: Issue[];
+    issues?: ValidationIssue[];
 }
 
 export type { Meta };

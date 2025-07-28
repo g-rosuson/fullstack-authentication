@@ -1,3 +1,4 @@
+// TODO: Exist in exceptions?
 const error = {
     badRequest: 'BAD_REQUEST',
     notAuthorised: 'NOT_AUTHORISED',

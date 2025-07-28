@@ -1,3 +1,5 @@
+// TODO: We are only using dev messages, should this be moved
+// TODO: to exceptions?
 const errorMessages = {
     invalidRequestBody: 'Invalid request body. Expected a JSON object but got: "{type}"',
     htmlTagsNotAllowed: 'HTML tags are not allowed in request body',

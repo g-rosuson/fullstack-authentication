@@ -1,8 +1,8 @@
-import { Issue } from 'lib/validation/types';
+import { ValidationIssue } from 'lib/validation/types';
 
 type Error = {
     message: string;
-    issues?: Issue[];
+    issues?: ValidationIssue[];
 };
 
 export type { Error };

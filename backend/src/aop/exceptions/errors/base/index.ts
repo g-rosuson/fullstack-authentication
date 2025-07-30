@@ -1,4 +1,4 @@
-import { ErrorType, HttpStatusCode } from '../../shared/enums';
+import { ErrorCode, HttpStatusCode } from '../../shared/enums';
 import { ApplicationException, ExceptionContext } from '../../shared/types';
 
 /**
@@ -7,7 +7,7 @@ import { ApplicationException, ExceptionContext } from '../../shared/types';
  */
 export abstract class BaseException extends Error implements ApplicationException {
     public readonly statusCode: HttpStatusCode;
-    public readonly errorType: ErrorType;
+    public readonly errorType: ErrorCode;
     public readonly context: ExceptionContext;
     public readonly timestamp: Date;
 
@@ -17,7 +17,7 @@ export abstract class BaseException extends Error implements ApplicationExceptio
      * @param errorType Category of the error
      * @param context Additional context information for debugging
      */
-    constructor(message: string, statusCode: HttpStatusCode, errorType: ErrorType, context: ExceptionContext) {
+    constructor(message: string, statusCode: HttpStatusCode, errorType: ErrorCode, context: ExceptionContext) {
         super(message);
 
         this.name = this.constructor.name;

@@ -1,4 +1,4 @@
-import { ErrorType, HttpStatusCode } from '../../shared/enums';
+import { ErrorCode, HttpStatusCode } from '../../shared/enums';
 import { ExceptionContext } from '../../shared/types';
 
 import { BaseException } from '../base';
@@ -13,7 +13,7 @@ export class NotFoundException extends BaseException {
      * @param context Additional context information
      */
     constructor(message: string, context: ExceptionContext = {}) {
-        super(message, HttpStatusCode.NOT_FOUND, ErrorType.NOT_FOUND_ERROR, context);
+        super(message, HttpStatusCode.NOT_FOUND, ErrorCode.NOT_FOUND_ERROR, context);
     }
 }
 
@@ -27,6 +27,6 @@ export class TokenException extends BaseException {
      * @param context Additional context information
      */
     constructor(message: string, context: ExceptionContext = {}) {
-        super(message, HttpStatusCode.UNAUTHORIZED, ErrorType.AUTHENTICATION_ERROR, context);
+        super(message, HttpStatusCode.UNAUTHORIZED, ErrorCode.AUTHENTICATION_ERROR, context);
     }
 }

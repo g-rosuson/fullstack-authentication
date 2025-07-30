@@ -93,7 +93,7 @@ class ErrorHandlerMiddleware {
         const errorResponse: ErrorResponse = {
             success: false,
             issues: error.context.issues,
-            type: error.errorType,
+            code: error.errorType,
             timestamp: error.timestamp.toISOString(),
         };
 

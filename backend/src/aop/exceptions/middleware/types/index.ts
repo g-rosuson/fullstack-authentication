@@ -12,7 +12,7 @@ import { ExceptionContext } from '../../shared/types';
  */
 export interface ErrorResponse {
     success: false;
-    type: string;
+    code: string;
     timestamp: string;
     issues?: ValidationIssue[];
 }

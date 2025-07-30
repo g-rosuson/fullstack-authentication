@@ -1,6 +1,6 @@
 import { ValidationIssue } from 'lib/validation/types';
 
-import { ErrorType, HttpStatusCode } from '../enums';
+import { ErrorCode, HttpStatusCode } from '../enums';
 
 /**
  * Type definitions for the exception system.
@@ -19,7 +19,7 @@ export interface ApplicationException {
     readonly name: string;
     readonly message: string;
     readonly statusCode: HttpStatusCode;
-    readonly errorType: ErrorType;
+    readonly errorType: ErrorCode;
     readonly context: ExceptionContext;
     readonly timestamp: Date;
 }

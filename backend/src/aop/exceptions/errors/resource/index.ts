@@ -1,4 +1,4 @@
-import { ErrorType, HttpStatusCode } from '../../shared/enums';
+import { ErrorCode, HttpStatusCode } from '../../shared/enums';
 import { ExceptionContext } from '../../shared/types';
 
 import { BaseException } from '../base';
@@ -13,6 +13,6 @@ export class ConflictException extends BaseException {
      * @param context Additional context information
      */
     constructor(message: string, context: ExceptionContext) {
-        super(message, HttpStatusCode.CONFLICT, ErrorType.CONFLICT_ERROR, context);
+        super(message, HttpStatusCode.CONFLICT, ErrorCode.CONFLICT_ERROR, context);
     }
 }

@@ -54,9 +54,9 @@ export enum HttpStatusCode {
 }
 
 /**
- * Error types for categorizing different kinds of exceptions.
+ * Error codes for categorizing different kinds of exceptions.
  */
-export enum ErrorType {
+export enum ErrorCode {
     VALIDATION_ERROR = 'VALIDATION_ERROR',
     AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
     AUTHORIZATION_ERROR = 'AUTHORIZATION_ERROR',

@@ -2,7 +2,7 @@ import { sign } from 'jsonwebtoken';
 
 import { JwtPayload } from 'modules/auth/types';
 
-import config from 'aop/config';
+import config from 'config';
 
 import { TokenExpiration } from 'shared/enums';
 

@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 import { JsonWebTokenError } from 'jsonwebtoken';
 import { MongoError } from 'mongodb';
 
-import config from 'aop/config';
 import { logger } from 'aop/logging';
 
 import { ErrorLogger } from './utils/logger';
+import config from 'config';
 
 import { ErrorHandlerConfig, ErrorLogContext, ErrorResponse } from './types';
 

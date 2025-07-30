@@ -4,12 +4,12 @@ import { verify } from 'jsonwebtoken';
 
 import { CreateUserPayload, RegisterUserPayload } from 'modules/shared/types/user';
 
-import config from 'aop/config';
 import { NotFoundException, TokenException } from 'aop/exceptions';
 import { parseSchema } from 'lib/validation';
 
 import { REFRESH_TOKEN_COOKIE_NAME } from './constants';
 import utils from './utils';
+import config from 'config';
 
 import { JwtPayload, LoginUserPayload } from './types';
 

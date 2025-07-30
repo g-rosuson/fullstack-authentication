@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
-import config from 'aop/config';
 import { TokenException } from 'aop/exceptions';
 import { InputValidationException } from 'aop/exceptions/errors/validation';
 import { parseSchema } from 'lib/validation';
+
+import config from 'config';
 
 import { jwtInputSchema } from './schemas';
 

@@ -1,4 +1,4 @@
-import config from 'aop/config';
+import config from 'config';
 
 import { Meta } from './types';
 

@@ -2,9 +2,12 @@ import { Db } from 'mongodb';
 
 import type { CreateUserPayload } from 'modules/shared/types/user';
 
+import { SchemaValidationException } from 'aop/exceptions';
 import { parseSchema } from 'lib/validation';
 
 import config from '../../config';
+
+import { ErrorMessage } from 'shared/enums/error-messages';
 
 import { userDocumentSchema } from './schemas';
 
@@ -49,7 +52,7 @@ export class UserRepository {
         const result = parseSchema(userDocumentSchema, userDocument);
 
         if (!result.success) {
-            throw new Error('Invalid schema');
+            throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, { issues: result.issues });
         }
 
         return result.data;

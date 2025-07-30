@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import routes from 'constants/routes';
+import { OPENAPI_ROUTE } from './constants';
 
 import { openApiDocument } from 'services/openapi/generate-spec';
 
@@ -8,6 +8,6 @@ import { openApiDocument } from 'services/openapi/generate-spec';
 const router = Router();
 
 // Determine route
-router.get(routes.docs.openapi, (_req, res) => res.json(openApiDocument));
+router.get(OPENAPI_ROUTE, (_req, res) => res.json(openApiDocument));
 
 export default router;

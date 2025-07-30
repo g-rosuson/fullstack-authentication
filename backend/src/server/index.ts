@@ -5,9 +5,11 @@ import express from 'express';
 import authenticationRoutes from 'modules/auth/auth.routing';
 import documentationRoute from 'modules/docs/docs.routing';
 
-import config from 'aop/config';
-import mongo from 'aop/db/mongo';
+import db from 'aop/db/mongo';
+import { exceptionsMiddleware } from 'aop/exceptions';
 import http from 'aop/http';
+
+import config from 'config';
 
 const init = async () => {
     const REQ_BODY_LIMIT = '6mb';
@@ -22,7 +24,7 @@ const init = async () => {
     server.use(http.contextMiddleware);
 
     // Middleware to inject database context into req.context.db
-    server.use(mongo.dbContextMiddleware);
+    server.use(db.dbContextMiddleware);
 
     // Routes
 
@@ -31,6 +33,9 @@ const init = async () => {
 
     // Authentication routes
     server.use(config.basePath, authenticationRoutes);
+
+    // Exception middleware
+    server.use(exceptionsMiddleware);
 
     return server;
 };

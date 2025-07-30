@@ -12,7 +12,8 @@ import utils from './utils';
 import config from 'config';
 
 import { JwtPayload, LoginUserPayload } from './types';
-import { HttpStatusCode } from 'shared/enums';
+import { ErrorMessage } from 'shared/enums/error-messages';
+import { HttpStatusCode } from 'shared/enums/http-status-codes';
 
 import { jwtPayloadSchema } from './schemas';
 import jwtService from 'services/jwt';
@@ -69,14 +70,14 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
 
     // Validate if user exists
     if (!userDocument) {
-        throw new NotFoundException('User not found in database');
+        throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
 
     // Validate if password is correct
     const isPasswordValid = await bcrypt.compare(password, userDocument.password);
 
     if (!isPasswordValid) {
-        throw new NotFoundException('User entered wrong password');
+        throw new NotFoundException(ErrorMessage.USER_PASSWORD_WRONG);
     }
 
     // Create JWT tokens
@@ -124,7 +125,7 @@ const renewAccessToken = async (req: Request, res: Response) => {
     const result = parseSchema(jwtPayloadSchema, decoded);
 
     if (!result.success) {
-        throw new TokenException('Parsed refresh token schema is invalid');
+        throw new TokenException(ErrorMessage.TOKEN_INVALID);
     }
 
     // Create a new access-token and send it to the browser

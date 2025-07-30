@@ -2,7 +2,7 @@ import { CookieOptions } from 'express';
 
 import config from 'config';
 
-import { TokenExpiration } from 'shared/enums';
+import { TokenExpiration } from 'shared/enums/jwt';
 
 /**
  * Returns the cookie options for the refresh token

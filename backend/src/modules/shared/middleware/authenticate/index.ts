@@ -7,6 +7,8 @@ import { parseSchema } from 'lib/validation';
 
 import config from 'config';
 
+import { ErrorMessage } from 'shared/enums/error-messages';
+
 import { jwtInputSchema } from './schemas';
 
 /**
@@ -20,7 +22,7 @@ const authenticate = async (req: Request, _res: Response, next: NextFunction) =>
     const isHeaderInvalid = !authHeader || !authHeader.startsWith('Bearer ');
 
     if (isHeaderInvalid) {
-        throw new InputValidationException('Authorization header is invalid');
+        throw new InputValidationException(ErrorMessage.AUTHENTICATION_HEADER_INVALID);
     }
 
     // Extract the access-token
@@ -34,7 +36,7 @@ const authenticate = async (req: Request, _res: Response, next: NextFunction) =>
     const result = parseSchema(jwtInputSchema, decoded);
 
     if (!result.success) {
-        throw new TokenException('Parsed access token schema is invalid');
+        throw new TokenException(ErrorMessage.TOKEN_INVALID);
     }
 
     req.context.user = result.data;

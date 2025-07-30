@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 
 import { InputValidationException } from 'aop/exceptions';
 
+import { ErrorMessage } from 'shared/enums/error-messages';
+
 import { isObject } from 'utils';
 
 /**
@@ -45,13 +47,11 @@ const _containsHtml = (value: unknown) => {
  */
 const validateUserInput = (req: Request, _res: Response, next: NextFunction) => {
     if (!isObject(req.body)) {
-        throw new InputValidationException(
-            `Invalid request body. Expected a JSON object but got: "${typeof req.body}"`
-        );
+        throw new InputValidationException(`${ErrorMessage.INVALID_REQUEST_BODY} ${typeof req.body}`);
     }
 
     if (_containsHtml(req.body)) {
-        throw new InputValidationException('Invalid request body. HTML tags detected');
+        throw new InputValidationException(ErrorMessage.HTML_TAGS_DETECTED);
     }
 
     next();

@@ -6,6 +6,8 @@ import { parseSchema } from 'lib/validation';
 
 import { REFRESH_TOKEN_COOKIE_NAME, REGISTER_ROUTE } from './constants';
 
+import { ErrorMessage } from 'shared/enums/error-messages';
+
 import { loginUserPayloadSchema, registerUserPayloadSchema } from './schemas';
 
 /**
@@ -23,7 +25,7 @@ const validateAuthenticationInput = (req: Request, _res: Response, next: NextFun
     // Throw InputValidationException if the register and login schema
     // validation fail with an array of property issues and a error message
     if (!result.success) {
-        throw new InputValidationException('Authentication schema validation failed', {
+        throw new InputValidationException(ErrorMessage.AUTHENTICATION_SCHEMA_VALIDATION_FAILED, {
             issues: result.issues,
         });
     }
@@ -38,7 +40,7 @@ const validateAuthenticationInput = (req: Request, _res: Response, next: NextFun
  */
 const validateRefreshToken = (req: Request, _res: Response, next: NextFunction) => {
     if (!req.cookies?.[REFRESH_TOKEN_COOKIE_NAME]) {
-        throw new TokenException('Refresh token cookie not found');
+        throw new TokenException(ErrorMessage.REFRESH_TOKEN_COOKIE_NOT_FOUND);
     }
 
     next();

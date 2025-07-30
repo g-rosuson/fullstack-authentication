@@ -1,6 +1,6 @@
 import { ErrorCode } from '../../shared/enums';
 import { ApplicationException, ExceptionContext } from '../../shared/types';
-import { HttpStatusCode } from 'shared/enums';
+import { HttpStatusCode } from 'shared/enums/http-status-codes';
 
 /**
  * Base exception class that all application exceptions extend.

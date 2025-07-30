@@ -4,7 +4,7 @@ import { JwtPayload } from 'modules/auth/types';
 
 import config from 'config';
 
-import { TokenExpiration } from 'shared/enums';
+import { TokenExpiration } from 'shared/enums/jwt';
 
 const _signToken = (payload: JwtPayload, signAccessToken = true) => {
     const tokenSecret = signAccessToken ? config.accessTokenSecret : config.refreshTokenSecret;

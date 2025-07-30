@@ -12,6 +12,7 @@ import utils from './utils';
 import config from 'config';
 
 import { JwtPayload, LoginUserPayload } from './types';
+import { HttpStatusCode } from 'shared/enums';
 
 import { jwtPayloadSchema } from './schemas';
 import jwtService from 'services/jwt';
@@ -50,7 +51,7 @@ const register = async (req: Request<unknown, unknown, RegisterUserPayload>, res
     // Send a refresh-token to the client in a httpOnly cookie
     res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, utils.getRefreshCookieOptions());
 
-    res.status(200).json({
+    res.status(HttpStatusCode.OK).json({
         success: true,
         data: accessToken,
         meta: { timestamp: Date.now() },
@@ -91,7 +92,7 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
     // Set refresh token as a httpOnly cookie and send user data to front-end
     res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, utils.getRefreshCookieOptions());
 
-    res.status(200).json({
+    res.status(HttpStatusCode.OK).json({
         success: true,
         data: accessToken,
         meta: { timestamp: Date.now() },
@@ -104,7 +105,7 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
 const logout = async (_req: Request, res: Response) => {
     res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, utils.getRefreshCookieOptions(false));
 
-    res.status(200).json({
+    res.status(HttpStatusCode.OK).json({
         success: true,
         meta: { timestamp: Date.now() },
     });
@@ -129,7 +130,7 @@ const renewAccessToken = async (req: Request, res: Response) => {
     // Create a new access-token and send it to the browser
     const { accessToken } = jwtService.createTokens(result.data);
 
-    res.status(200).json({
+    res.status(HttpStatusCode.OK).json({
         success: true,
         data: accessToken,
         meta: { timestamp: Date.now() },

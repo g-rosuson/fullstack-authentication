@@ -1,6 +1,7 @@
 import { ValidationIssue } from 'lib/validation/types';
 
-import { ErrorCode, HttpStatusCode } from '../enums';
+import { ErrorCode } from '../enums';
+import { HttpStatusCode } from 'shared/enums';
 
 /**
  * Type definitions for the exception system.

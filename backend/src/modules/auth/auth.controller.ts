@@ -6,11 +6,10 @@ import { CreateUserPayload, RegisterUserPayload } from 'modules/shared/types/use
 
 import config from 'aop/config';
 import { NotFoundException, TokenException } from 'aop/exceptions';
-import response from 'api/response';
 import { parseSchema } from 'lib/validation';
 
+import { REFRESH_TOKEN_COOKIE_NAME } from './constants';
 import utils from './utils';
-import names from 'constants/names';
 
 import { JwtPayload, LoginUserPayload } from './types';
 
@@ -49,9 +48,13 @@ const register = async (req: Request<unknown, unknown, RegisterUserPayload>, res
     const { accessToken, refreshToken } = jwtService.createTokens(tokenPayload);
 
     // Send a refresh-token to the client in a httpOnly cookie
-    res.cookie(names.refreshTokenCookie, refreshToken, utils.getRefreshCookieOptions());
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, utils.getRefreshCookieOptions());
 
-    response.success(res, accessToken);
+    res.status(200).json({
+        success: true,
+        data: accessToken,
+        meta: { timestamp: Date.now() },
+    });
 };
 
 /**
@@ -86,18 +89,25 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
     const { accessToken, refreshToken } = jwtService.createTokens(tokenPayload);
 
     // Set refresh token as a httpOnly cookie and send user data to front-end
-    res.cookie(names.refreshTokenCookie, refreshToken, utils.getRefreshCookieOptions());
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, utils.getRefreshCookieOptions());
 
-    response.success(res, accessToken);
+    res.status(200).json({
+        success: true,
+        data: accessToken,
+        meta: { timestamp: Date.now() },
+    });
 };
 
 /**
  * Clears the refresh-token cookie from the browser.
  */
 const logout = async (_req: Request, res: Response) => {
-    res.clearCookie(names.refreshTokenCookie, utils.getRefreshCookieOptions(false));
+    res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, utils.getRefreshCookieOptions(false));
 
-    response.success(res);
+    res.status(200).json({
+        success: true,
+        meta: { timestamp: Date.now() },
+    });
 };
 
 /**
@@ -119,7 +129,11 @@ const renewAccessToken = async (req: Request, res: Response) => {
     // Create a new access-token and send it to the browser
     const { accessToken } = jwtService.createTokens(result.data);
 
-    response.success(res, accessToken);
+    res.status(200).json({
+        success: true,
+        data: accessToken,
+        meta: { timestamp: Date.now() },
+    });
 };
 
 export { renewAccessToken, register, logout, login };

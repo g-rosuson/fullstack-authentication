@@ -5,15 +5,15 @@ import validateUserInput from '../shared/middleware/validate-user-input';
 import { login, logout, register, renewAccessToken } from './auth.controller';
 import { validateAuthenticationInput, validateRefreshToken } from './auth.middleware';
 
-import routes from 'constants/routes';
+import { LOGIN_ROUTE, LOGOUT_ROUTE, REFRESH_ROUTE, REGISTER_ROUTE } from './constants';
 
 // Determine router
 const router = Router();
 
 // Determine routes
-router.post(routes.auth.login, loginLimiter, validateAuthenticationInput, login);
-router.post(routes.auth.register, registerLimiter, validateUserInput, validateAuthenticationInput, register);
-router.post(routes.auth.logout, validateRefreshToken, logout);
-router.get(routes.auth.refresh, refreshLimiter, validateRefreshToken, renewAccessToken);
+router.post(LOGIN_ROUTE, loginLimiter, validateAuthenticationInput, login);
+router.post(REGISTER_ROUTE, registerLimiter, validateUserInput, validateAuthenticationInput, register);
+router.post(LOGOUT_ROUTE, validateRefreshToken, logout);
+router.get(REFRESH_ROUTE, refreshLimiter, validateRefreshToken, renewAccessToken);
 
 export default router;

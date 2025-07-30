@@ -4,8 +4,7 @@ import { TokenException } from 'aop/exceptions';
 import { InputValidationException } from 'aop/exceptions/errors/validation';
 import { parseSchema } from 'lib/validation';
 
-import names from 'constants/names';
-import routes from 'constants/routes';
+import { REFRESH_TOKEN_COOKIE_NAME, REGISTER_ROUTE } from './constants';
 
 import { loginUserPayloadSchema, registerUserPayloadSchema } from './schemas';
 
@@ -14,7 +13,7 @@ import { loginUserPayloadSchema, registerUserPayloadSchema } from './schemas';
  */
 const validateAuthenticationInput = (req: Request, _res: Response, next: NextFunction) => {
     // Determine schema based on the request path
-    const isRegistering = req.path === routes.auth.register;
+    const isRegistering = req.path === REGISTER_ROUTE;
     const schema = isRegistering ? registerUserPayloadSchema : loginUserPayloadSchema;
 
     // Compare request body to corresponding schema
@@ -38,7 +37,7 @@ const validateAuthenticationInput = (req: Request, _res: Response, next: NextFun
  * Validates that a refreshToken request cookie exists.
  */
 const validateRefreshToken = (req: Request, _res: Response, next: NextFunction) => {
-    if (!req.cookies?.[names.refreshTokenCookie]) {
+    if (!req.cookies?.[REFRESH_TOKEN_COOKIE_NAME]) {
         throw new TokenException('Refresh token cookie not found');
     }
 

@@ -1,4 +1,4 @@
-import { dbContextMiddleware } from './middleware/db-context.middleware';
+import { dbContextMiddleware } from './middleware/db-context-middleware';
 
 import config from './config';
 

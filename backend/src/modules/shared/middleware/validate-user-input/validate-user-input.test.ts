@@ -1,36 +1,19 @@
 import { Request, Response } from 'express';
 
+import { InputValidationException } from 'aop/exceptions';
+
 import validateInput from '.';
 
-// === Mock response module ===
-const mockBadRequest = vi.hoisted(() => vi.fn());
-
-vi.mock('api/response', async () => ({
-    default: {
-        badRequest: mockBadRequest,
-    },
-}));
-
 describe('validateUserInput middleware: ', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
     // Determine invalid request bodies: Everything besides a plain object
     const invalidRequestBodies = [null, undefined, [], 'string', 123, true, false, () => ({})];
 
-    it.each(invalidRequestBodies)('responds with: 400 Bad Request, when request body is not an object: %p', body => {
+    it.each(invalidRequestBodies)('throws InputValidationException when request body is not an object: %p', body => {
         const mockNext = vi.fn();
         const response = {} as unknown as Response;
         const request = { body } as Request;
 
-        validateInput(request, response, mockNext);
-
-        expect(mockBadRequest).toHaveBeenCalledWith(
-            response,
-            expect.objectContaining({ message: expect.stringContaining(`${typeof request.body}`) })
-        );
-
+        expect(() => validateInput(request, response, mockNext)).toThrow(InputValidationException);
         expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -47,10 +30,9 @@ describe('validateUserInput middleware: ', () => {
         validateInput(request, response, mockNext);
 
         expect(mockNext).toHaveBeenCalled();
-        expect(mockBadRequest).not.toHaveBeenCalled();
     });
 
-    it('responds with 400 Bad Request when body contains top-level HTML', () => {
+    it('throws InputValidationException when body contains top-level HTML', () => {
         const mockNext = vi.fn();
         const response = {} as unknown as Response;
         const request = {
@@ -59,16 +41,11 @@ describe('validateUserInput middleware: ', () => {
             },
         } as Request;
 
-        validateInput(request, response, mockNext);
-
-        expect(mockBadRequest).toHaveBeenCalledWith(
-            response,
-            expect.objectContaining({ message: expect.stringContaining('HTML tags are not allowed') })
-        );
+        expect(() => validateInput(request, response, mockNext)).toThrow(InputValidationException);
         expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('responds with 400 Bad Request when body contains nested HTML', () => {
+    it('throws InputValidationException when body contains nested HTML', () => {
         const mockNext = vi.fn();
         const response = {} as unknown as Response;
         const request = {
@@ -79,9 +56,7 @@ describe('validateUserInput middleware: ', () => {
             },
         } as Request;
 
-        validateInput(request, response, mockNext);
-
-        expect(mockBadRequest).toHaveBeenCalled();
+        expect(() => validateInput(request, response, mockNext)).toThrow(InputValidationException);
         expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -102,7 +77,6 @@ describe('validateUserInput middleware: ', () => {
         validateInput(request, response, mockNext);
 
         expect(mockNext).toHaveBeenCalled();
-        expect(mockBadRequest).not.toHaveBeenCalled();
     });
 
     it('calls next when body contains non-string values (numbers, booleans)', () => {
@@ -118,6 +92,5 @@ describe('validateUserInput middleware: ', () => {
         validateInput(request, response, mockNext);
 
         expect(mockNext).toHaveBeenCalled();
-        expect(mockBadRequest).not.toHaveBeenCalled();
     });
 });

@@ -1,6 +1,6 @@
 import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
 
-import authRegistry from './registries/auth.registry';
+import authRegistry from './registries/auth-registry';
 
 // Determine registries for all relevant modules
 const registries = [...authRegistry.definitions];

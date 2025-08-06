@@ -2,8 +2,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 
-import authenticationRoutes from 'modules/auth/auth.routing';
-import documentationRoute from 'modules/docs/docs.routing';
+import authenticationRoutes from 'modules/auth/auth-routing';
+import documentationRoute from 'modules/docs/docs-routing';
 
 import db from 'aop/db/mongo';
 import { exceptionsMiddleware } from 'aop/exceptions';

@@ -15,17 +15,28 @@ src/
 ├── aop/                    # Cross-cutting concerns
 ├── modules/               # Feature modules (auth, users, etc.)
 │   ├── feature-name/
-│   │   ├── constants/index.ts
-│   │   ├── schemas/index.ts
-│   │   ├── types/index.ts
-│   │   ├── utils/index.ts
-│   │   ├── feature-controller.ts
-│   │   ├── feature-middleware.ts
-│   │   └── feature-routing.ts
+│   │   ├── constants/     # Folder with index.ts
+│   │   │   └── index.ts
+│   │   ├── schemas/       # Folder with index.ts
+│   │   │   └── index.ts
+│   │   ├── types/         # Folder with index.ts
+│   │   │   └── index.ts
+│   │   ├── utils/         # Folder with index.ts
+│   │   │   └── index.ts
+│   │   ├── feature-controller.ts    # Standalone file
+│   │   ├── feature-middleware.ts    # Standalone file
+│   │   └── feature-routing.ts       # Standalone file
 ├── services/              # Business logic
 ├── shared/               # Enums, types, constants
 └── config/               # Configuration
+    ├── schemas/
+    │   └── index.ts
+    ├── types/
+    │   └── index.ts
+    └── index.ts
 ```
+
+**Folder structure rule**: Only schemas, types, constants, utils, helpers, mappers should be in folders with index.ts. Controllers, middleware, and routing files can be standalone.
 
 ### 2. Import Order (ESLint Rule)
 **Always follow the import order defined in `backend/.eslintrc.json`**
@@ -373,8 +384,10 @@ export class EntityRepository {
 7. **Don't** use `any` type - use proper TypeScript types
 8. **Don't** forget to add `.openapi()` to schemas
 9. **Don't** forget to create OpenAPI registry and add to generate-spec.ts
-9. **Don't** use console.log - use proper logging
-10. **Don't** skip error handling - always handle potential errors
+10. **Don't** use console.log - use proper logging
+11. **Don't** skip error handling - always handle potential errors
+12. **Don't** put schemas and types in the same file - always separate them
+13. **Don't** create single files outside folders - use `folder/index.ts` structure for schemas, types, constants, utils, helpers, mappers
 
 ## Key Enums and Constants
 

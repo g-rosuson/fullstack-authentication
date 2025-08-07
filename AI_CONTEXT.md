@@ -28,24 +28,18 @@ src/
 ```
 
 ### 2. Import Order (ESLint Rule)
+**Always follow the import order defined in `backend/.eslintrc.json`**
+
+The current import order is configured in the ESLint `simple-import-sort` rule. Check the `.eslintrc.json` file for the exact order and grouping rules.
+
+Example of proper import organization:
 ```typescript
-// 1. External packages
+// External packages first
 import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 
-// 2. Module imports
-import { CreateUserPayload } from 'modules/shared/types/user';
-
-// 3. AOP imports
-import { TokenException } from 'aop/exceptions';
-import { parseSchema } from 'lib/validation';
-
-// 4. Config
-import config from 'config';
-
-// 5. Local types/enums
-import { JwtPayload } from './types';
-import { ErrorMessage } from 'shared/enums/error-messages';
+// Then module imports, AOP imports, config, etc.
+// (exact order defined in ESLint config)
 ```
 
 ### 3. Controller Pattern
@@ -86,14 +80,104 @@ const payloadSchema = z
     .openapi('PayloadType');
 ```
 
-### 5. Type Definition
+### 4.1 Schema Validation (Always use parseSchema)
+**Always use the `parseSchema` function from `lib/validation` for schema validation:**
+
 ```typescript
+import { parseSchema } from 'lib/validation';
+import { documentSchema } from './schemas';
+
+const result = parseSchema(documentSchema, unknownData);
+
+if (!result.success) {
+    throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, { issues: result.issues });
+}
+
+return result.data; // Type-safe validated data
+```
+
+The `parseSchema` function takes `data: unknown` and returns `SchemaResult<T>` which provides:
+- `{ success: true, data: T }` for valid data
+- `{ success: false, issues: ValidationIssue[] }` for validation errors with mapped error structure
+
+### 4.2 OpenAPI Registry (Required for API Documentation)
+To expose schemas in the OpenAPI documentation, you must:
+
+1. **Create a registry file**: `backend/src/services/openapi/registries/feature-registry.ts`
+2. **Register paths and schemas** in the registry
+3. **Add registry to generate-spec.ts**
+
+```typescript
+// backend/src/services/openapi/registries/feature-registry.ts
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import { FEATURE_ROUTE } from 'modules/feature/constants';
+import { featurePayloadSchema, featureResponseSchema } from 'modules/feature/schemas';
+
+const registry = new OpenAPIRegistry();
+
+registry.registerPath({
+    method: 'post',
+    path: FEATURE_ROUTE,
+    responses: {
+        200: {
+            description: 'Feature operation successful',
+            content: {
+                'application/json': {
+                    schema: featureResponseSchema,
+                },
+            },
+        },
+    },
+    request: {
+        body: {
+            description: 'Feature payload',
+            content: {
+                'application/json': {
+                    schema: featurePayloadSchema,
+                },
+            },
+        },
+    },
+});
+
+export default registry;
+```
+
+```typescript
+// Update backend/src/services/openapi/generate-spec.ts
+import featureRegistry from './registries/feature-registry';
+
+const registries = [...authRegistry.definitions, ...featureRegistry.definitions];
+```
+
+### 5. Type Definition
+**Always separate types from schemas in different files:**
+
+```typescript
+// types/index.ts - Only type definitions
 import { z } from 'zod';
 import { payloadSchema } from '../schemas';
 
 type PayloadType = z.infer<typeof payloadSchema>;
 
 export type { PayloadType };
+```
+
+```typescript
+// schemas/index.ts - Only Zod schemas with .openapi() decorators
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+import { z } from 'zod';
+
+extendZodWithOpenApi(z);
+
+const payloadSchema = z
+    .object({
+        field1: z.string(),
+        field2: z.string().email(),
+    })
+    .openapi('PayloadType');
+
+export { payloadSchema };
 ```
 
 ### 6. Repository Pattern
@@ -162,9 +246,10 @@ export const COLLECTION_NAME = 'features';
 // Success response
 {
     success: true,
-    data: any,
+    data: responseData, // Type is inferred from the actual data
     meta: { timestamp: number }
 }
+```
 
 // Error response (handled by exception middleware)
 {
@@ -216,6 +301,43 @@ const payloadSchema = z
 export { payloadSchema };
 ```
 
+### OpenAPI Registry Template
+```typescript
+// backend/src/services/openapi/registries/feature-registry.ts
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import { FEATURE_ROUTE } from 'modules/feature/constants';
+import { featurePayloadSchema, featureResponseSchema } from 'modules/feature/schemas';
+
+const registry = new OpenAPIRegistry();
+
+registry.registerPath({
+    method: 'post',
+    path: FEATURE_ROUTE,
+    responses: {
+        200: {
+            description: 'Feature operation successful',
+            content: {
+                'application/json': {
+                    schema: featureResponseSchema,
+                },
+            },
+        },
+    },
+    request: {
+        body: {
+            description: 'Feature payload',
+            content: {
+                'application/json': {
+                    schema: featurePayloadSchema,
+                },
+            },
+        },
+    },
+});
+
+export default registry;
+```
+
 ### Repository Template
 ```typescript
 import { Db } from 'mongodb';
@@ -247,9 +369,10 @@ export class EntityRepository {
 3. **Don't** skip JSDoc comments for public functions
 4. **Don't** use generic error messages - use specific ErrorMessage enum
 5. **Don't** access database directly - always use repository pattern
-6. **Don't** skip validation - always validate with Zod schemas
+6. **Don't** skip validation - always validate with Zod schemas using `parseSchema`
 7. **Don't** use `any` type - use proper TypeScript types
 8. **Don't** forget to add `.openapi()` to schemas
+9. **Don't** forget to create OpenAPI registry and add to generate-spec.ts
 9. **Don't** use console.log - use proper logging
 10. **Don't** skip error handling - always handle potential errors
 

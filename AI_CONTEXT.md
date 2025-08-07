@@ -83,13 +83,22 @@ import { z } from 'zod';
 
 extendZodWithOpenApi(z);
 
+// For API endpoints (exposed to client) - add .openapi()
 const payloadSchema = z
     .object({
         field1: z.string(),
         field2: z.string().email(),
     })
     .openapi('PayloadType');
+
+// For internal validation (not exposed to client) - no .openapi()
+const internalSchema = z
+    .object({
+        internalField: z.string(),
+    });
 ```
+
+**Rule**: Only add `.openapi()` to schemas that are exposed to the client via API endpoints. Internal schemas (config, validation, etc.) should not have `.openapi()` decorators.
 
 ### 4.1 Schema Validation (Always use parseSchema)
 **Always use the `parseSchema` function from `lib/validation` for schema validation:**
@@ -382,12 +391,15 @@ export class EntityRepository {
 5. **Don't** access database directly - always use repository pattern
 6. **Don't** skip validation - always validate with Zod schemas using `parseSchema`
 7. **Don't** use `any` type - use proper TypeScript types
-8. **Don't** forget to add `.openapi()` to schemas
+8. **Don't** forget to add `.openapi()` to schemas that are exposed to the client (API endpoints)
 9. **Don't** forget to create OpenAPI registry and add to generate-spec.ts
 10. **Don't** use console.log - use proper logging
 11. **Don't** skip error handling - always handle potential errors
 12. **Don't** put schemas and types in the same file - always separate them
 13. **Don't** create single files outside folders - use `folder/index.ts` structure for schemas, types, constants, utils, helpers, mappers
+14. **Don't** add `.openapi()` to internal schemas - only add to schemas that are exposed to the client via API endpoints
+15. **Don't** use dynamic imports - use regular imports instead of `await import('./module')`
+16. **Don't** have code lines without spacing - add at least one empty line between code blocks
 
 ## Key Enums and Constants
 

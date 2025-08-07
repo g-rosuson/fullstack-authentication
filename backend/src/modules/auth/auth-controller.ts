@@ -4,7 +4,7 @@ import { verify } from 'jsonwebtoken';
 
 import { CreateUserPayload, RegisterUserPayload } from 'modules/shared/types/user';
 
-import { NotFoundException, TokenException } from 'aop/exceptions';
+import { TokenException, UnauthorizedException } from 'aop/exceptions';
 import { parseSchema } from 'lib/validation';
 
 import { REFRESH_TOKEN_COOKIE_NAME } from './constants';
@@ -70,14 +70,14 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
 
     // Validate if user exists
     if (!userDocument) {
-        throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
+        throw new UnauthorizedException(ErrorMessage.USER_NOT_FOUND);
     }
 
     // Validate if password is correct
     const isPasswordValid = await bcrypt.compare(password, userDocument.password);
 
     if (!isPasswordValid) {
-        throw new NotFoundException(ErrorMessage.USER_PASSWORD_WRONG);
+        throw new UnauthorizedException(ErrorMessage.USER_PASSWORD_WRONG);
     }
 
     // Create JWT tokens

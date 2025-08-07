@@ -8,7 +8,7 @@ import { BaseException } from '../base';
  * Exception thrown when authentication fails.
  * Used when user credentials are invalid or authentication tokens are missing/expired.
  */
-export class NotFoundException extends BaseException {
+export class UnauthorizedException extends BaseException {
     /**
      * @param message Human-readable error message
      * @param context Additional context information

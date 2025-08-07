@@ -13,4 +13,8 @@ export enum ErrorMessage {
     INVALID_REQUEST_BODY = 'Invalid request body. Expected a JSON object but got: ',
     HTML_TAGS_DETECTED = 'Invalid request body. HTML tags detected',
     SCHEMA_VALIDATION_FAILED = 'Schema validation failed',
+    CONFLICT_ERROR = 'Database conflict error',
+    DATABASE_ERROR = 'Database error',
+    TOKEN_ERROR = 'Token error',
+    UNEXPECTED_ERROR = 'Unexpected error',
 }

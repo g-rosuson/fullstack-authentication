@@ -8,6 +8,7 @@ import { ErrorLogger } from './utils/logger';
 import config from 'config';
 
 import { ErrorHandlerConfig, ErrorLogContext, ErrorResponse } from './types';
+import { ErrorMessage } from 'shared/enums/error-messages';
 
 import { BaseException, ConflictException, DatabaseException, InternalException, TokenException } from '../';
 
@@ -112,16 +113,16 @@ class ErrorHandlerMiddleware {
         let appException: BaseException;
 
         if (error.code === 11000) {
-            appException = new ConflictException('MongoDB conflict error', { error, userId });
+            appException = new ConflictException(ErrorMessage.CONFLICT_ERROR, { error, userId });
         } else {
-            appException = new DatabaseException(`MongoDB error, code: ${error.code}`, { error, userId });
+            appException = new DatabaseException(ErrorMessage.DATABASE_ERROR, { error, userId });
         }
 
         this.handleApplicationException(appException, req, res, userId);
     }
 
     private handleJsonWebTokenError(error: JsonWebTokenError, req: Request, res: Response, userId: string) {
-        const appException = new TokenException('JSON Web Token error', { error, userId });
+        const appException = new TokenException(ErrorMessage.TOKEN_ERROR, { error, userId });
         this.handleApplicationException(appException, req, res, userId);
     }
 
@@ -134,7 +135,7 @@ class ErrorHandlerMiddleware {
      * @param userId User ID if available
      */
     private handleUnexpectedError(error: Error, req: Request, res: Response, userId: string) {
-        const internalException = new InternalException('Unexpected error', { error, userId });
+        const internalException = new InternalException(ErrorMessage.UNEXPECTED_ERROR, { error, userId });
 
         this.handleApplicationException(internalException, req, res, userId);
     }

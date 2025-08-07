@@ -15,17 +15,28 @@ src/
 ├── aop/                    # Cross-cutting concerns
 ├── modules/               # Feature modules (auth, users, etc.)
 │   ├── feature-name/
-│   │   ├── constants/index.ts
-│   │   ├── schemas/index.ts
-│   │   ├── types/index.ts
-│   │   ├── utils/index.ts
-│   │   ├── feature-controller.ts
-│   │   ├── feature-middleware.ts
-│   │   └── feature-routing.ts
+│   │   ├── constants/     # Folder with index.ts
+│   │   │   └── index.ts
+│   │   ├── schemas/       # Folder with index.ts
+│   │   │   └── index.ts
+│   │   ├── types/         # Folder with index.ts
+│   │   │   └── index.ts
+│   │   ├── utils/         # Folder with index.ts
+│   │   │   └── index.ts
+│   │   ├── feature-controller.ts    # Standalone file
+│   │   ├── feature-middleware.ts    # Standalone file
+│   │   └── feature-routing.ts       # Standalone file
 ├── services/              # Business logic
 ├── shared/               # Enums, types, constants
 └── config/               # Configuration
+    ├── schemas/
+    │   └── index.ts
+    ├── types/
+    │   └── index.ts
+    └── index.ts
 ```
+
+**Folder structure rule**: Only schemas, types, constants, utils, helpers, mappers should be in folders with index.ts. Controllers, middleware, and routing files can be standalone.
 
 ### 2. Import Order (ESLint Rule)
 **Always follow the import order defined in `backend/.eslintrc.json`**
@@ -72,13 +83,22 @@ import { z } from 'zod';
 
 extendZodWithOpenApi(z);
 
+// For API endpoints (exposed to client) - add .openapi()
 const payloadSchema = z
     .object({
         field1: z.string(),
         field2: z.string().email(),
     })
     .openapi('PayloadType');
+
+// For internal validation (not exposed to client) - no .openapi()
+const internalSchema = z
+    .object({
+        internalField: z.string(),
+    });
 ```
+
+**Rule**: Only add `.openapi()` to schemas that are exposed to the client via API endpoints. Internal schemas (config, validation, etc.) should not have `.openapi()` decorators.
 
 ### 4.1 Schema Validation (Always use parseSchema)
 **Always use the `parseSchema` function from `lib/validation` for schema validation:**
@@ -371,10 +391,16 @@ export class EntityRepository {
 5. **Don't** access database directly - always use repository pattern
 6. **Don't** skip validation - always validate with Zod schemas using `parseSchema`
 7. **Don't** use `any` type - use proper TypeScript types
-8. **Don't** forget to add `.openapi()` to schemas
+8. **Don't** forget to add `.openapi()` to schemas that are exposed to the client (API endpoints)
 9. **Don't** forget to create OpenAPI registry and add to generate-spec.ts
-9. **Don't** use console.log - use proper logging
-10. **Don't** skip error handling - always handle potential errors
+10. **Don't** use console.log - use proper logging
+11. **Don't** skip error handling - always handle potential errors
+12. **Don't** put schemas and types in the same file - always separate them
+13. **Don't** create single files outside folders - use `folder/index.ts` structure for schemas, types, constants, utils, helpers, mappers
+14. **Don't** add `.openapi()` to internal schemas - only add to schemas that are exposed to the client via API endpoints
+15. **Don't** use dynamic imports - use regular imports instead of `await import('./module')`
+16. **Don't** have code lines without spacing - add at least one empty line between code blocks
+17. **Don't** manually call `process.exit()` for validation errors - let them bubble up to be handled by exception middleware
 
 ## Key Enums and Constants
 
@@ -397,6 +423,11 @@ ErrorMessage.SCHEMA_VALIDATION_FAILED = 'Schema validation failed'
 // In controllers, access database via:
 req.context.db.entity.methodName()
 ```
+
+## Error Handling Patterns
+- **Internal Error Flow**: All errors are automatically logged and responded to the client through the exception middleware
+- **Environment Validation**: Throw `SchemaValidationException` for invalid environment variables - this will crash the server after logging and client notification
+- **Fail-Fast Structure**: Due to the application structure, environment errors bubble up through the call stack, get logged/responded by middleware, then crash the server
 
 ## Commit Message Format
 

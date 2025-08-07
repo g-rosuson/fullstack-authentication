@@ -18,3 +18,14 @@ export enum ErrorMessage {
     TOKEN_ERROR = 'Token error',
     UNEXPECTED_ERROR = 'Unexpected error',
 }
+
+/**
+ * Error messages for environment variable validation.
+ */
+export enum EnvErrorMessage {
+    ACCESS_TOKEN_SECRET_REQUIRED = 'Access token secret is required',
+    REFRESH_TOKEN_SECRET_REQUIRED = 'Refresh token secret is required',
+    MONGO_URI_INVALID = 'MongoDB URI must be a valid URL',
+    MONGO_DB_NAME_REQUIRED = 'MongoDB database name is required',
+    BASE_ROUTE_PATH_REQUIRED = 'Base route path is required',
+}

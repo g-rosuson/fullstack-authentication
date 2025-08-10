@@ -462,7 +462,36 @@ chore(global): update dependencies
 
 ### Rules
 - Scope is **required** (cannot be empty)
-- Subject should be brief and descriptive
+- Subject should be brief and descriptive (under 72 characters)
 - Use imperative mood ("add" not "added")
+- Focus on what the change accomplishes
+- Avoid technical implementation details in subject
+
+## Branch Naming Convention
+
+Follow the format: `[scope]/[action]-[description]`
+
+### Allowed Scopes
+- `backend`: Backend-specific changes
+- `frontend`: Frontend-specific changes
+- `global`: Changes affecting both or project-wide
+- `docs`: Documentation changes
+- `test`: Testing-related changes
+- `chore`: Maintenance tasks
+
+### Examples
+```bash
+backend/resolve-circular-dependency
+frontend/create-auth-component
+global/update-dependencies
+docs/add-api-documentation
+test/add-user-repository-tests
+chore/update-eslint-config
+```
+
+### Rules
+- Use kebab-case for description
+- Be descriptive but concise
+- Action should be a verb (create, fix, resolve, update, etc.)
 
 This context ensures all generated code follows your established patterns and conventions.

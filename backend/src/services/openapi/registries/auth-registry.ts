@@ -1,7 +1,8 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
 import { LOGIN_ROUTE, REFRESH_ROUTE, REGISTER_ROUTE } from 'modules/auth/constants';
-import { accessTokenSchema, loginUserPayloadSchema, registerUserPayloadSchema } from 'modules/auth/schemas';
+import { accessTokenSchema, loginUserPayloadSchema } from 'modules/auth/schemas';
+import { registerUserPayloadSchema } from 'modules/shared/schemas/user';
 
 // Determine registry
 const registry = new OpenAPIRegistry();

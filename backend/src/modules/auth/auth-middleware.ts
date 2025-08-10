@@ -8,7 +8,8 @@ import { REFRESH_TOKEN_COOKIE_NAME, REGISTER_ROUTE } from './constants';
 
 import { ErrorMessage } from 'shared/enums/error-messages';
 
-import { loginUserPayloadSchema, registerUserPayloadSchema } from './schemas';
+import { registerUserPayloadSchema } from '../shared/schemas/user';
+import { loginUserPayloadSchema } from './schemas';
 
 /**
  * Validates that the request body adhears to the corresponding schema.

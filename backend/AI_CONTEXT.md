@@ -494,4 +494,21 @@ chore/update-eslint-config
 - Be descriptive but concise
 - Action should be a verb (create, fix, resolve, update, etc.)
 
+## Testing Strategy
+
+### ✅ Test This
+- **Service contracts**: Does it return what it promises?
+- **Business logic**: Does it behave correctly?
+- **Integration**: Does it work with real dependencies?
+
+### ❌ Don't Test This  
+- **Third-party libraries**: Not your responsibility
+- **Configuration values**: Already validated by config modules
+- **Implementation details**: Test WHAT it does, not HOW
+- **Redundant scenarios**: If it works for one input, it works for all
+
+**Coverage target**: 80-90% backend, focus on critical paths, not over-engineering.
+
+**Note**: Vitest is configured with `globals: true`, so `describe`, `it`, `expect` are available globally - no need to import them.
+
 This context ensures all generated code follows your established patterns and conventions.

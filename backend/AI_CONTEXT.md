@@ -7,12 +7,12 @@
 - **Architecture**: AOP (Aspect-Oriented Programming) with feature modules
 - **Error Handling**: Custom exception hierarchy with BaseException
 
-## Critical Patterns to Follow
+## Code Generation Rules
 
-### 1. File Organization
+### File Organization Rules
 ```
 src/
-├── aop/                    # Cross-cutting concerns
+├── aop/                   # Cross-cutting concerns
 ├── modules/               # Feature modules (auth, users, etc.)
 │   ├── feature-name/
 │   │   ├── constants/     # Folder with index.ts
@@ -26,7 +26,7 @@ src/
 │   │   ├── feature-controller.ts    # Standalone file
 │   │   ├── feature-middleware.ts    # Standalone file
 │   │   └── feature-routing.ts       # Standalone file
-├── services/              # Business logic
+├── services/             # Business logic
 ├── shared/               # Enums, types, constants
 └── config/               # Configuration
     ├── schemas/
@@ -38,22 +38,7 @@ src/
 
 **Folder structure rule**: Only schemas, types, constants, utils, helpers, mappers should be in folders with index.ts. Controllers, middleware, and routing files can be standalone.
 
-### 2. Import Order (ESLint Rule)
-**Always follow the import order defined in `backend/.eslintrc.json`**
-
-The current import order is configured in the ESLint `simple-import-sort` rule. Check the `.eslintrc.json` file for the exact order and grouping rules.
-
-Example of proper import organization:
-```typescript
-// External packages first
-import bcrypt from 'bcrypt';
-import { Request, Response } from 'express';
-
-// Then module imports, AOP imports, config, etc.
-// (exact order defined in ESLint config)
-```
-
-### 3. Controller Pattern
+### Controller Generation Rules
 ```typescript
 /**
  * Brief description of what the function does.
@@ -76,7 +61,7 @@ const functionName = async (req: Request<unknown, unknown, PayloadType>, res: Re
 };
 ```
 
-### 4. Schema Definition
+### Schema Generation Rules
 ```typescript
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
@@ -100,7 +85,7 @@ const internalSchema = z
 
 **Rule**: Only add `.openapi()` to schemas that are exposed to the client via API endpoints. Internal schemas (config, validation, etc.) should not have `.openapi()` decorators.
 
-### 4.1 Schema Validation (Always use parseSchema)
+**Schema Validation:**
 **Always use the `parseSchema` function from `lib/validation` for schema validation:**
 
 ```typescript
@@ -120,7 +105,7 @@ The `parseSchema` function takes `data: unknown` and returns `SchemaResult<T>` w
 - `{ success: true, data: T }` for valid data
 - `{ success: false, issues: ValidationIssue[] }` for validation errors with mapped error structure
 
-### 4.2 OpenAPI Registry (Required for API Documentation)
+**OpenAPI Registry:**
 To expose schemas in the OpenAPI documentation, you must:
 
 1. **Create a registry file**: `backend/src/services/openapi/registries/feature-registry.ts`
@@ -170,7 +155,7 @@ import featureRegistry from './registries/feature-registry';
 const registries = [...authRegistry.definitions, ...featureRegistry.definitions];
 ```
 
-### 5. Type Definition
+### Type Definition Rules
 **Always separate types from schemas in different files:**
 
 ```typescript
@@ -183,24 +168,9 @@ type PayloadType = z.infer<typeof payloadSchema>;
 export type { PayloadType };
 ```
 
-```typescript
-// schemas/index.ts - Only Zod schemas with .openapi() decorators
-import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
-import { z } from 'zod';
+**Rule**: Types should only contain `z.infer<>` statements and type exports. No schema definitions.
 
-extendZodWithOpenApi(z);
-
-const payloadSchema = z
-    .object({
-        field1: z.string(),
-        field2: z.string().email(),
-    })
-    .openapi('PayloadType');
-
-export { payloadSchema };
-```
-
-### 6. Repository Pattern
+### Repository Generation Rules
 ```typescript
 export class EntityRepository {
     private db: Db;
@@ -224,7 +194,7 @@ export class EntityRepository {
 }
 ```
 
-### 7. Error Handling
+### Error Handling Rules
 ```typescript
 // Always extend BaseException
 export class CustomException extends BaseException {
@@ -239,7 +209,7 @@ if (!isValid) {
 }
 ```
 
-### 8. Route Definition
+### Route Definition Rules
 ```typescript
 import { Router } from 'express';
 import { rateLimiter } from '../shared/middleware/rate-limiter';
@@ -255,13 +225,13 @@ router.post(ROUTE_PATH, rateLimiter, validateUserInput, validateInput, functionN
 export default router;
 ```
 
-### 9. Constants
+### Constants Rules
 ```typescript
 export const ROUTE_PATH = '/feature';
 export const COLLECTION_NAME = 'features';
 ```
 
-### 10. Response Format
+### Response Format Rules
 ```typescript
 // Success response
 {
@@ -282,127 +252,50 @@ export const COLLECTION_NAME = 'features';
 }
 ```
 
-## Common File Templates
 
-### Controller Template
-```typescript
-import { Request, Response } from 'express';
-import { PayloadType } from './types';
-import { HttpStatusCode } from 'shared/enums/http-status-codes';
 
-const functionName = async (req: Request<unknown, unknown, PayloadType>, res: Response) => {
-    const { field1, field2 } = req.body;
+## Validation Rules
 
-    // Implementation here
+### What to Test
+- **Service contracts**: Does it return what it promises?
+- **Business logic**: Does it behave correctly?
+- **Integration**: Does it work with real dependencies?
 
-    res.status(HttpStatusCode.OK).json({
-        success: true,
-        data: result,
-        meta: { timestamp: Date.now() },
-    });
-};
+### What NOT to Test  
+- **Third-party libraries**: Not your responsibility
+- **Configuration values**: Already validated by config modules
+- **Implementation details**: Test WHAT it does, not HOW
+- **Redundant scenarios**: If it works for one input, it works for all
 
-export { functionName };
+**Coverage target**: 80-90% backend, focus on critical paths, not over-engineering.
+
+**Note**: Vitest is configured with `globals: true`, so `describe`, `it`, `expect` are available globally - no need to import them.
+
+## Workflow Rules
+
+**After file creation/modification:**
+- Run linter to auto-sort imports and fix formatting
+
+### Commit Message Rules
+Follow the conventional commit format with custom scope requirements:
+
+```bash
+type(scope): subject
 ```
 
-### Schema Template
-```typescript
-import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
-import { z } from 'zod';
+**Allowed Types**: `feat`, `fix`, `refactor`, `chore`, `test`, `docs`
+**Required Scopes**: `backend`, `frontend`, `global`
+**Rules**: Scope required, subject under 72 chars, imperative mood, focus on what change accomplishes
 
-extendZodWithOpenApi(z);
+### Branch Naming Rules
+Follow the format: `[scope]/[action]-[description]`
 
-const payloadSchema = z
-    .object({
-        // Define fields here
-    })
-    .openapi('PayloadType');
+**Allowed Scopes**: `backend`, `frontend`, `global`, `docs`, `test`, `chore`
+**Rules**: Use kebab-case, be descriptive but concise, action should be a verb
 
-export { payloadSchema };
-```
+## Reference Data
 
-### OpenAPI Registry Template
-```typescript
-// backend/src/services/openapi/registries/feature-registry.ts
-import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
-import { FEATURE_ROUTE } from 'modules/feature/constants';
-import { featurePayloadSchema, featureResponseSchema } from 'modules/feature/schemas';
-
-const registry = new OpenAPIRegistry();
-
-registry.registerPath({
-    method: 'post',
-    path: FEATURE_ROUTE,
-    responses: {
-        200: {
-            description: 'Feature operation successful',
-            content: {
-                'application/json': {
-                    schema: featureResponseSchema,
-                },
-            },
-        },
-    },
-    request: {
-        body: {
-            description: 'Feature payload',
-            content: {
-                'application/json': {
-                    schema: featurePayloadSchema,
-                },
-            },
-        },
-    },
-});
-
-export default registry;
-```
-
-### Repository Template
-```typescript
-import { Db } from 'mongodb';
-import { SchemaValidationException } from 'aop/exceptions';
-import { parseSchema } from 'lib/validation';
-import config from '../../config';
-import { ErrorMessage } from 'shared/enums/error-messages';
-import { documentSchema } from './schemas';
-
-export class EntityRepository {
-    private db: Db;
-    private collectionName: string;
-
-    constructor(db: Db) {
-        this.db = db;
-        this.collectionName = config.db.collection.entity.name;
-    }
-
-    async methodName(param: string) {
-        // Implementation here
-    }
-}
-```
-
-## Things to Avoid
-
-1. **Don't** use `interface` - prefer `type` for simple type aliases
-2. **Don't** use double quotes - always use single quotes
-3. **Don't** skip JSDoc comments for public functions
-4. **Don't** use generic error messages - use specific ErrorMessage enum
-5. **Don't** access database directly - always use repository pattern
-6. **Don't** skip validation - always validate with Zod schemas using `parseSchema`
-7. **Don't** use `any` type - use proper TypeScript types
-8. **Don't** forget to add `.openapi()` to schemas that are exposed to the client (API endpoints)
-9. **Don't** forget to create OpenAPI registry and add to generate-spec.ts
-10. **Don't** use console.log - use proper logging
-11. **Don't** skip error handling - always handle potential errors
-12. **Don't** put schemas and types in the same file - always separate them
-13. **Don't** create single files outside folders - use `folder/index.ts` structure for schemas, types, constants, utils, helpers, mappers
-14. **Don't** add `.openapi()` to internal schemas - only add to schemas that are exposed to the client via API endpoints
-15. **Don't** use dynamic imports - use regular imports instead of `await import('./module')`
-16. **Don't** have code lines without spacing - add at least one empty line between code blocks
-17. **Don't** manually call `process.exit()` for validation errors - let them bubble up to be handled by exception middleware
-
-## Key Enums and Constants
+### Key Enums and Constants
 
 ```typescript
 // Status codes
@@ -429,69 +322,21 @@ req.context.db.entity.methodName()
 - **Environment Validation**: Throw `SchemaValidationException` for invalid environment variables - this will crash the server after logging and client notification
 - **Fail-Fast Structure**: Due to the application structure, environment errors bubble up through the call stack, get logged/responded by middleware, then crash the server
 
-## Commit Message Format
-
-Follow the conventional commit format with custom scope requirements:
-
-```bash
-type(scope): subject
-```
-
-### Allowed Types
-- `feat`: New feature
-- `fix`: Bug fix
-- `refactor`: Code refactoring
-- `chore`: Maintenance tasks
-- `test`: Adding or updating tests
-- `docs`: Documentation changes
-
-### Required Scopes
-- `backend`: Backend-specific changes
-- `frontend`: Frontend-specific changes
-- `global`: Changes affecting both or project-wide
-
-### Examples
-```bash
-feat(backend): add user profile endpoint
-fix(frontend): resolve authentication redirect issue
-refactor(global): update error handling patterns
-docs(backend): add API documentation
-test(backend): add user repository tests
-chore(global): update dependencies
-```
-
-### Rules
-- Scope is **required** (cannot be empty)
-- Subject should be brief and descriptive (under 72 characters)
-- Use imperative mood ("add" not "added")
-- Focus on what the change accomplishes
-- Avoid technical implementation details in subject
-
-## Branch Naming Convention
-
-Follow the format: `[scope]/[action]-[description]`
-
-### Allowed Scopes
-- `backend`: Backend-specific changes
-- `frontend`: Frontend-specific changes
-- `global`: Changes affecting both or project-wide
-- `docs`: Documentation changes
-- `test`: Testing-related changes
-- `chore`: Maintenance tasks
-
-### Examples
-```bash
-backend/resolve-circular-dependency
-frontend/create-auth-component
-global/update-dependencies
-docs/add-api-documentation
-test/add-user-repository-tests
-chore/update-eslint-config
-```
-
-### Rules
-- Use kebab-case for description
-- Be descriptive but concise
-- Action should be a verb (create, fix, resolve, update, etc.)
+### Anti-Patterns to Avoid
+- **Don't** use `interface` - prefer `type` for simple type aliases
+- **Don't** use double quotes - always use single quotes
+- **Don't** skip JSDoc comments for public functions
+- **Don't** use generic error messages - use specific ErrorMessage enum
+- **Don't** access database directly - always use repository pattern
+- **Don't** skip validation - always validate with Zod schemas using `parseSchema`
+- **Don't** use `any` type - use proper TypeScript types
+- **Don't** forget to create OpenAPI registry and add to generate-spec.ts
+- **Don't** use console.log - use proper logging
+- **Don't** skip error handling - always handle potential errors
+- **Don't** put schemas and types in the same file - always separate them
+- **Don't** create single files outside folders - use `folder/index.ts` structure for schemas, types, constants, utils, helpers, mappers
+- **Don't** use dynamic imports - use regular imports instead of `await import('./module')`
+- **Don't** have code lines without spacing - add at least one empty line between code blocks
+- **Don't** manually call `process.exit()` for validation errors - let them bubble up to be handled by exception middleware
 
 This context ensures all generated code follows your established patterns and conventions.

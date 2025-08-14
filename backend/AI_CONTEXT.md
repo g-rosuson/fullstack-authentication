@@ -254,7 +254,7 @@ export const COLLECTION_NAME = 'features';
 
 
 
-## Validation Rules
+## Testing Rules
 
 ### What to Test
 - **Service contracts**: Does it return what it promises?
@@ -270,6 +270,34 @@ export const COLLECTION_NAME = 'features';
 **Coverage target**: 80-90% backend, focus on critical paths, not over-engineering.
 
 **Note**: Vitest is configured with `globals: true`, so `describe`, `it`, `expect` are available globally - no need to import them.
+
+### Test Code Organization
+When writing tests, extract shared values into variables within each test block. Use the same variable names across schema definitions, test data, and expected results. This ensures consistency and maintainability.
+
+**Example**:
+```typescript
+it('should validate user data', () => {
+    const nameProperty = 'name';
+    const emailProperty = 'email';
+    const nameValue = 'John';
+    const emailValue = 'john@example.com';
+
+    const schema = z.object({
+        [nameProperty]: z.string(),
+        [emailProperty]: z.string().email(),
+    });
+
+    const result = parseSchema(schema, {
+        [nameProperty]: nameValue,
+        [emailProperty]: emailValue,
+    });
+
+    expect(result).toEqual({
+        success: true,
+        data: { [nameProperty]: nameValue, [emailProperty]: emailValue },
+    });
+});
+```
 
 ## Workflow Rules
 

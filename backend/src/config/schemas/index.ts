@@ -1,9 +1,6 @@
-import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 
 import { EnvErrorMessage } from 'shared/enums/error-messages';
-
-extendZodWithOpenApi(z);
 
 // Environment variable schemas
 const nodeEnvSchema = z.enum(['development', 'production']);

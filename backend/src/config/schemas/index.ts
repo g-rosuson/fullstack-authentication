@@ -3,15 +3,17 @@ import { z } from 'zod';
 import { EnvErrorMessage } from 'shared/enums/error-messages';
 
 // Environment variable schemas
-const nodeEnvSchema = z.enum(['development', 'production']);
+const nodeEnvSchema = z.enum(['development', 'production'], {
+    errorMap: () => ({ message: EnvErrorMessage.NODE_ENV_REQUIRED }),
+});
 
-const devClientUrlSchema = z.string().url();
+const devClientUrlSchema = z.string().url(EnvErrorMessage.DEV_CLIENT_URL_REQUIRED);
 
-const prodClientUrlSchema = z.string().url();
+const prodClientUrlSchema = z.string().url(EnvErrorMessage.PROD_CLIENT_URL_REQUIRED);
 
-const devDomainSchema = z.string();
+const devDomainSchema = z.string().min(1, EnvErrorMessage.DEV_DOMAIN_REQUIRED);
 
-const prodDomainSchema = z.string();
+const prodDomainSchema = z.string().min(1, EnvErrorMessage.PROD_DOMAIN_REQUIRED);
 
 const accessTokenSecretSchema = z.string().min(1, EnvErrorMessage.ACCESS_TOKEN_SECRET_REQUIRED);
 

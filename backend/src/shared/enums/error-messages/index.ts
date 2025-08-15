@@ -28,4 +28,9 @@ export enum EnvErrorMessage {
     MONGO_URI_INVALID = 'MongoDB URI must be a valid URL',
     MONGO_DB_NAME_REQUIRED = 'MongoDB database name is required',
     BASE_ROUTE_PATH_REQUIRED = 'Base route path is required',
+    NODE_ENV_REQUIRED = 'Environment must be either "development" or "production"',
+    DEV_CLIENT_URL_REQUIRED = 'Development client URL must be a valid URL',
+    DEV_DOMAIN_REQUIRED = 'Development domain is required',
+    PROD_CLIENT_URL_REQUIRED = 'Production client URL must be a valid URL',
+    PROD_DOMAIN_REQUIRED = 'Production domain is required',
 }

@@ -35,21 +35,16 @@ import { DbContext } from '../context';
  */
 export function dbContextMiddleware(options: { uri: string; dbName: string }, customClient?: MongoClient) {
     return async function (req: Request, _res: Response, next: NextFunction) {
-        try {
-            // Get or create the singleton MongoDB client manager
-            const manager = MongoClientManager.getInstance(options);
+        // Get or create the singleton MongoDB client manager
+        const manager = MongoClientManager.getInstance(options);
 
-            // Connect to database (idempotent - returns existing connection if available)
-            const db = await manager.connect(customClient);
+        // Connect to database (idempotent - returns existing connection if available)
+        const db = await manager.connect(customClient);
 
-            // Create and attach database context to request object
-            req.context.db = new DbContext(db);
+        // Create and attach database context to request object
+        req.context.db = new DbContext(db);
 
-            // Continue to next middleware/route handler
-            next();
-        } catch (error) {
-            // Forward any database connection errors to Express error handler
-            next(error);
-        }
+        // Continue to next middleware/route handler
+        next();
     };
 }

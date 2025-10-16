@@ -1,7 +1,9 @@
-import { contextMiddleware } from './middleware/context';
+import contextMiddleware from './middleware/context';
 
 const http = {
-    contextMiddleware,
+    context: {
+        middleware: contextMiddleware,
+    },
 };
 
 export default http;

@@ -1,5 +1,6 @@
 import { Db } from 'mongodb';
 
+import { CronJobRepository } from '../repository/cron-job';
 import { UserRepository } from '../repository/user';
 
 /**
@@ -21,6 +22,8 @@ export class DbContext {
     private readonly db: Db;
     /** Repository for user-related database operations */
     public readonly user: UserRepository;
+    /** Repository for cron job-related database operations */
+    public readonly cronJob: CronJobRepository;
 
     /**
      * Constructs a new DbContext instance.
@@ -30,6 +33,7 @@ export class DbContext {
     constructor(db: Db) {
         this.db = db;
         this.user = new UserRepository(db);
+        this.cronJob = new CronJobRepository(db);
     }
 
     /**

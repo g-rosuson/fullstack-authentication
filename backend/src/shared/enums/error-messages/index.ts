@@ -17,6 +17,13 @@ export enum ErrorMessage {
     DATABASE_ERROR = 'Database error',
     TOKEN_ERROR = 'Token error',
     UNEXPECTED_ERROR = 'Unexpected error',
+    CRON_JOB_SCHEMA_VALIDATION_FAILED = 'Cron job schema validation failed',
+    CRON_JOB_NOT_FOUND_IN_DATABASE = 'Cron job not found in database',
+    CRON_JOB_NOT_FOUND_IN_MEMORY = 'Cron job not found in memory',
+    CRON_JOB_START_DATE_IN_FUTURE = 'Start date must be in the future',
+    CRON_JOB_START_DATE_COME_BEFORE_END_DATE = 'Start date must come before end date',
+    DATABASE_OPERATION_FAILED_ERROR = 'Database operation failed',
+    MONGO_CLIENT_MANAGER_INSTANCE_NOT_FOUND = 'Options are required to create a new MongoClientManager instance',
 }
 
 /**

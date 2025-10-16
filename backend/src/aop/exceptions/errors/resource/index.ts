@@ -17,3 +17,17 @@ export class ConflictException extends BaseException {
         super(message, HttpStatusCode.CONFLICT, ErrorCode.CONFLICT_ERROR, context);
     }
 }
+
+/**
+ * Exception thrown when a requested resource cannot be found.
+ * Used for missing users, cron jobs, or any other entity that doesn't exist.
+ */
+export class ResourceNotFoundException extends BaseException {
+    /**
+     * @param message Human-readable error message
+     * @param context Additional context information (optional)
+     */
+    constructor(message: string, context: ExceptionContext = {}) {
+        super(message, HttpStatusCode.NOT_FOUND, ErrorCode.NOT_FOUND_ERROR, context);
+    }
+}

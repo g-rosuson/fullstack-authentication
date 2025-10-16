@@ -17,3 +17,13 @@ export class DatabaseException extends BaseException {
         super(message, HttpStatusCode.INTERNAL_SERVER_ERROR, ErrorCode.DATABASE_ERROR, context);
     }
 }
+
+export class DatabaseOperationFailedException extends BaseException {
+    /**
+     * @param message Human-readable error message
+     * @param context Additional context information (optional)
+     */
+    constructor(message: string, context: ExceptionContext = {}) {
+        super(message, HttpStatusCode.INTERNAL_SERVER_ERROR, ErrorCode.DATABASE_OPERATION_FAILED_ERROR, context);
+    }
+}

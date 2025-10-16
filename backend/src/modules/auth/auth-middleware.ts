@@ -8,7 +8,7 @@ import { REFRESH_TOKEN_COOKIE_NAME, REGISTER_ROUTE } from './constants';
 
 import { ErrorMessage } from 'shared/enums/error-messages';
 
-import { registerUserPayloadSchema } from '../shared/schemas/user';
+import { registerUserPayloadSchema } from './schemas';
 import { loginUserPayloadSchema } from './schemas';
 
 /**

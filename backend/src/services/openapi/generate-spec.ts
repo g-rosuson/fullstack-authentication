@@ -1,9 +1,10 @@
 import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
 
-import authRegistry from './registries/auth-registry';
+import authRegistry from 'modules/auth/auth-registry';
+import cronJobsRegistry from 'modules/cron-jobs/cron-jobs-registry';
 
 // Determine registries for all relevant modules
-const registries = [...authRegistry.definitions];
+const registries = [...authRegistry.definitions, ...cronJobsRegistry.definitions];
 
 // Determine generator & generate document
 const generator = new OpenApiGeneratorV3(registries);

@@ -6,7 +6,7 @@ import { parseSchema } from 'lib/validation';
 import { ErrorMessage } from 'shared/enums/error-messages';
 
 import { cronJobPayloadSchema } from './schemas';
-import { idQuerySchema, paginatedCollectionQuerySchema } from 'shared/schemas';
+import { idRouteParamSchema, paginatedRouteParamSchema } from 'shared/schemas/routeParam';
 
 /**
  * Validates that the request body adhears to the corresponding schema.
@@ -33,7 +33,7 @@ const validatePayload = (req: Request, _res: Response, next: NextFunction) => {
  * @param next Express next function
  */
 const validateIdQueryParams = (req: Request, _res: Response, next: NextFunction) => {
-    const result = parseSchema(idQuerySchema, req.query);
+    const result = parseSchema(idRouteParamSchema, req.query);
 
     if (!result.success) {
         throw new InputValidationException(ErrorMessage.CRON_JOB_SCHEMA_VALIDATION_FAILED, {
@@ -51,7 +51,7 @@ const validateIdQueryParams = (req: Request, _res: Response, next: NextFunction)
  * @param next Express next function
  */
 const validatePaginationQueryParams = (req: Request, _res: Response, next: NextFunction) => {
-    const result = parseSchema(paginatedCollectionQuerySchema, req.query);
+    const result = parseSchema(paginatedRouteParamSchema, req.query);
 
     if (!result.success) {
         throw new InputValidationException(ErrorMessage.CRON_JOB_SCHEMA_VALIDATION_FAILED, {

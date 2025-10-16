@@ -4,7 +4,7 @@ import utils from './utils';
 
 import { CronJobPayload } from './types';
 import { HttpStatusCode } from 'shared/enums/http-status-codes';
-import { IdQuery } from 'shared/types';
+import { IdRouteParam } from 'shared/types';
 
 /**
  * Creates a new cron job in the database and memory via scheduler.
@@ -32,11 +32,24 @@ const createCronJob = async (req: Request<unknown, unknown, CronJobPayload>, res
         isActive: true,
     };
 
-    const insertResult = await req.context.db.cronJob.create(payload);
+    const createdCronJob = await req.context.db.cronJob.create(payload);
+
+    // TODO: I assume we need to have a job type ("job-scraper" etc). And depending on the type, we invoke callback methods from different services.
+    const schedulePayload = {
+        id: createdCronJob.id,
+        name: createdCronJob.name,
+        time: createdCronJob.time,
+        type: createdCronJob.type,
+        startDate: createdCronJob.startDate,
+        endDate: createdCronJob.endDate,
+        taskFn: () => Promise.resolve(),
+    };
+
+    req.context.scheduler.schedule(schedulePayload);
 
     res.status(HttpStatusCode.CREATED).json({
         success: true,
-        data: insertResult,
+        data: createdCronJob,
     });
 };
 
@@ -46,7 +59,7 @@ const createCronJob = async (req: Request<unknown, unknown, CronJobPayload>, res
  * @param req Express request object with typed params and body
  * @param res Express response object
  */
-const updateCronJob = async (req: Request<IdQuery, unknown, CronJobPayload>, res: Response) => {
+const updateCronJob = async (req: Request<IdRouteParam, unknown, CronJobPayload>, res: Response) => {
     const { id } = req.params;
     const body = req.body;
 
@@ -57,7 +70,7 @@ const updateCronJob = async (req: Request<IdQuery, unknown, CronJobPayload>, res
         ...body,
         nextRun: utils.getNextRunDate(body.type, tmpStartDate),
         updatedAt: new Date(body.time),
-        isActive: true,
+        isActive: body.isActive,
     };
 
     const updatedCronJob = await req.context.db.cronJob.update(payload);
@@ -74,14 +87,14 @@ const updateCronJob = async (req: Request<IdQuery, unknown, CronJobPayload>, res
  * @param req Express request object with typed params
  * @param res Express response object
  */
-const deleteCronJob = async (req: Request<IdQuery>, res: Response) => {
+const deleteCronJob = async (req: Request<IdRouteParam>, res: Response) => {
     const { id } = req.params;
 
-    await req.context.db.cronJob.delete(id);
+    const result = await req.context.db.cronJob.delete(id);
 
     res.status(HttpStatusCode.OK).json({
         success: true,
-        data: { jobId: id },
+        data: { ...result, id },
     });
 };
 
@@ -91,7 +104,7 @@ const deleteCronJob = async (req: Request<IdQuery>, res: Response) => {
  * @param req Express request object with typed params
  * @param res Express response object
  */
-const getCronJob = async (req: Request<IdQuery>, res: Response) => {
+const getCronJob = async (req: Request<IdRouteParam>, res: Response) => {
     const { id } = req.params;
 
     const cronJob = await req.context.db.cronJob.getById(id);

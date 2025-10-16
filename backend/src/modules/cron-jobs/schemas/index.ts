@@ -3,9 +3,9 @@ import { z } from 'zod';
 
 import { ErrorMessage } from 'shared/enums/error-messages';
 
-extendZodWithOpenApi(z);
+import { cronJobTypeSchema } from 'shared/schemas/db/documents/cron-job';
 
-const cronJobTypeSchema = z.enum(['daily', 'weekly', 'monthly', 'yearly']);
+extendZodWithOpenApi(z);
 
 const cronJobPayloadSchema = z
     .object({
@@ -14,6 +14,7 @@ const cronJobPayloadSchema = z
         type: cronJobTypeSchema,
         startDate: z.date(),
         endDate: z.date().nullable(),
+        isActive: z.boolean(),
     })
     .superRefine((payload, ctx) => {
         if (payload.startDate > payload.time) {
@@ -40,4 +41,4 @@ const cronJobPayloadSchema = z
     })
     .openapi('CronJobPayload');
 
-export { cronJobPayloadSchema, cronJobTypeSchema };
+export { cronJobPayloadSchema };

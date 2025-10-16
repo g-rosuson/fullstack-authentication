@@ -25,6 +25,10 @@ const mongoDbNameSchema = z.string().min(1, EnvErrorMessage.MONGO_DB_NAME_REQUIR
 
 const baseRoutePathSchema = z.string().min(1, EnvErrorMessage.BASE_ROUTE_PATH_REQUIRED);
 
+const maxDbRetriesSchema = z.coerce.number().int().positive(EnvErrorMessage.MAX_DB_RETRIES_INVALID).default(3);
+
+const dbRetryDelayMsSchema = z.coerce.number().int().positive(EnvErrorMessage.DB_RETRY_DELAY_MS_INVALID).default(5000);
+
 export {
     nodeEnvSchema,
     devClientUrlSchema,
@@ -36,4 +40,6 @@ export {
     mongoUriSchema,
     mongoDbNameSchema,
     baseRoutePathSchema,
+    maxDbRetriesSchema,
+    dbRetryDelayMsSchema,
 };

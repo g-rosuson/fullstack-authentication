@@ -1,8 +1,4 @@
-/**
- * Determines if the given value is an object.
- */
-const isObject = (value: unknown): value is Record<string, unknown> => {
-    return Object.prototype.toString.call(value) === '[object Object]';
-};
+import { retryWithFixedInterval } from './async/utils-async-retry';
+import { isObject } from './validation/utils-validation';
 
-export { isObject };
+export { retryWithFixedInterval, isObject };

@@ -1,7 +1,5 @@
 import { Db } from 'mongodb';
 
-import type { CreateUserPayload } from 'modules/shared/types/user';
-
 import { SchemaValidationException } from 'aop/exceptions';
 import { parseSchema } from 'lib/validation';
 
@@ -9,7 +7,9 @@ import config from '../../config';
 
 import { ErrorMessage } from 'shared/enums/error-messages';
 
-import { userDocumentSchema } from './schemas';
+import type { CreateUserPayload } from './types';
+
+import { userDocumentSchema } from 'shared/schemas/db/documents/user';
 
 /**
  * UserRepository encapsulates all user-related database operations.

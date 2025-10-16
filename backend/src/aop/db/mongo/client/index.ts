@@ -1,6 +1,11 @@
 import { Db, MongoClient } from 'mongodb';
 
+import { InternalException } from 'aop/exceptions/errors/system';
+import { logger } from 'aop/logging';
+
 import config from '../config';
+
+import { ErrorMessage } from 'shared/enums/error-messages';
 
 import type { MongoClientOptions } from './types';
 
@@ -39,8 +44,12 @@ export class MongoClientManager {
      * @param options MongoClientOptions containing URI and database name
      * @returns The singleton MongoClientManager instance
      */
-    static getInstance(options: MongoClientOptions): MongoClientManager {
-        if (!this.instance) {
+    static getInstance(options?: MongoClientOptions): MongoClientManager {
+        if (!this.instance && !options) {
+            throw new InternalException(ErrorMessage.MONGO_CLIENT_MANAGER_INSTANCE_NOT_FOUND);
+        }
+
+        if (!this.instance && options) {
             this.instance = new MongoClientManager(options);
         }
 
@@ -116,17 +125,24 @@ export class MongoClientManager {
      * @throws Error if ping fails or index creation fails
      */
     private async initializeDb(db: Db) {
-        // Ping the database to verify connectivity and responsiveness
+        // Ping database
+        logger.info('Pinging database');
+
         await db.command({ ping: 1 });
 
-        // Get all collections that should be indexed (where index flag is true)
+        logger.info('Database pinged');
+
+        // Index collections
+        logger.info('Indexing collections');
+
         const collections = Object.values(config.db.collection).filter(item => item.index);
 
-        // Create indexes for each collection that requires indexing
         for (const item of collections) {
             await db
                 .collection(item.name)
                 .createIndex({ [item.targetField]: item.targetValue }, { unique: item.unique });
         }
+
+        logger.info('Collections indexed');
     }
 }

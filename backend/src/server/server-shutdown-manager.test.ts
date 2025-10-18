@@ -89,8 +89,10 @@ describe('ShutdownManager', () => {
         });
 
         it('should register signal handlers on first instantiation', () => {
-            expect(process.on).toHaveBeenCalledWith('SIGTERM', expect.any(Function));
-            expect(process.on).toHaveBeenCalledWith('SIGINT', expect.any(Function));
+            vi.waitFor(() => {
+                expect(process.on).toHaveBeenCalledWith('SIGTERM', expect.any(Function));
+                expect(process.on).toHaveBeenCalledWith('SIGINT', expect.any(Function));
+            });
         });
     });
 
@@ -121,14 +123,16 @@ describe('ShutdownManager', () => {
             expect(mockServer.close).toHaveBeenCalled();
 
             // Verify scheduler methods were called
-            const mockScheduler = Scheduler.getInstance();
-            expect(mockScheduler.stop).toHaveBeenCalledTimes(2);
-            expect(mockScheduler.stop).toHaveBeenCalledWith('job1');
-            expect(mockScheduler.stop).toHaveBeenCalledWith('job2');
+            vi.waitFor(() => {
+                const mockScheduler = Scheduler.getInstance();
+                expect(mockScheduler.stop).toHaveBeenCalledTimes(2);
+                expect(mockScheduler.stop).toHaveBeenCalledWith('job1');
+                expect(mockScheduler.stop).toHaveBeenCalledWith('job2');
 
-            // Verify database disconnect was called
-            const mockMongoManager = MongoClientManager.getInstance();
-            expect(mockMongoManager.disconnect).toHaveBeenCalled();
+                // Verify database disconnect was called
+                const mockMongoManager = MongoClientManager.getInstance();
+                expect(mockMongoManager.disconnect).toHaveBeenCalled();
+            });
         });
 
         it('should ignore duplicate shutdown requests', async () => {
@@ -149,8 +153,10 @@ describe('ShutdownManager', () => {
             await shutdownManager.initiateShutdown();
 
             // Should still complete shutdown process
-            const mockMongoManager = MongoClientManager.getInstance();
-            expect(mockMongoManager.disconnect).toHaveBeenCalled();
+            vi.waitFor(() => {
+                const mockMongoManager = MongoClientManager.getInstance();
+                expect(mockMongoManager.disconnect).toHaveBeenCalled();
+            });
         });
 
         it('should handle HTTP server close error gracefully', async () => {
@@ -165,7 +171,9 @@ describe('ShutdownManager', () => {
             await shutdownManager.initiateShutdown();
 
             // Should still exit with error code 1
-            expect(process.exit).toHaveBeenCalledWith(1);
+            vi.waitFor(() => {
+                expect(process.exit).toHaveBeenCalledWith(1);
+            });
         });
 
         it('should trigger timeout if shutdown takes too long', async () => {
@@ -181,18 +189,22 @@ describe('ShutdownManager', () => {
             // Fast-forward past timeout
             vi.advanceTimersByTime(1001);
 
-            // Should exit with code 1 due to timeout
-            expect(process.exit).toHaveBeenCalledWith(1);
+            vi.waitFor(() => {
+                // Should exit with code 1 due to timeout
+                expect(process.exit).toHaveBeenCalledWith(1);
 
-            // Verify timeout error was logged
-            expect(logger.error).toHaveBeenCalledWith('Graceful shutdown timeout reached, forcing exit', {});
+                // Verify timeout error was logged
+                expect(logger.error).toHaveBeenCalledWith('Graceful shutdown timeout reached, forcing exit', {});
+            });
         });
     });
 
     describe('signal handling', () => {
         it('should register signal handlers for SIGTERM and SIGINT', () => {
-            expect(process.on).toHaveBeenCalledWith('SIGTERM', expect.any(Function));
-            expect(process.on).toHaveBeenCalledWith('SIGINT', expect.any(Function));
+            vi.waitFor(() => {
+                expect(process.on).toHaveBeenCalledWith('SIGTERM', expect.any(Function));
+                expect(process.on).toHaveBeenCalledWith('SIGINT', expect.any(Function));
+            });
         });
     });
 });

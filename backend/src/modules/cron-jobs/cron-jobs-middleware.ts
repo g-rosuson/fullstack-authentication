@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { InputValidationException } from 'aop/exceptions/errors/validation';
-import { parseSchema } from 'lib/validation';
+import { validateRequestPayload } from 'aop/http/validators/validators-request-payload';
 
 import { ErrorMessage } from 'shared/enums/error-messages';
 
@@ -15,13 +14,13 @@ import { idRouteParamSchema, paginatedRouteParamSchema } from 'shared/schemas/ro
  * @param next Express next function
  */
 const validatePayload = (req: Request, _res: Response, next: NextFunction) => {
-    const result = parseSchema(cronJobPayloadSchema, req.body);
+    const validatedPayload = validateRequestPayload(
+        cronJobPayloadSchema,
+        req.body,
+        ErrorMessage.CRON_JOB_SCHEMA_VALIDATION_FAILED
+    );
 
-    if (!result.success) {
-        throw new InputValidationException(ErrorMessage.CRON_JOB_SCHEMA_VALIDATION_FAILED, {
-            issues: result.issues,
-        });
-    }
+    req.body = validatedPayload;
 
     next();
 };
@@ -33,13 +32,13 @@ const validatePayload = (req: Request, _res: Response, next: NextFunction) => {
  * @param next Express next function
  */
 const validateIdQueryParams = (req: Request, _res: Response, next: NextFunction) => {
-    const result = parseSchema(idRouteParamSchema, req.query);
+    const validatedPayload = validateRequestPayload(
+        idRouteParamSchema,
+        req.query,
+        ErrorMessage.CRON_JOB_SCHEMA_VALIDATION_FAILED
+    );
 
-    if (!result.success) {
-        throw new InputValidationException(ErrorMessage.CRON_JOB_SCHEMA_VALIDATION_FAILED, {
-            issues: result.issues,
-        });
-    }
+    req.query = validatedPayload;
 
     next();
 };
@@ -51,13 +50,13 @@ const validateIdQueryParams = (req: Request, _res: Response, next: NextFunction)
  * @param next Express next function
  */
 const validatePaginationQueryParams = (req: Request, _res: Response, next: NextFunction) => {
-    const result = parseSchema(paginatedRouteParamSchema, req.query);
+    const validatedPayload = validateRequestPayload(
+        paginatedRouteParamSchema,
+        req.query,
+        ErrorMessage.CRON_JOB_SCHEMA_VALIDATION_FAILED
+    );
 
-    if (!result.success) {
-        throw new InputValidationException(ErrorMessage.CRON_JOB_SCHEMA_VALIDATION_FAILED, {
-            issues: result.issues,
-        });
-    }
+    req.query = validatedPayload;
 
     next();
 };

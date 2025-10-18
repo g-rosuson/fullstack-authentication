@@ -1,8 +1,7 @@
 import { type NextFunction, type Request, type Response } from 'express';
 
 import { TokenException } from 'aop/exceptions';
-import { InputValidationException } from 'aop/exceptions/errors/validation';
-import { parseSchema } from 'lib/validation';
+import { validateRequestPayload } from 'aop/http/validators/validators-request-payload';
 
 import { REFRESH_TOKEN_COOKIE_NAME, REGISTER_ROUTE } from './constants';
 
@@ -19,19 +18,13 @@ const validateAuthenticationInput = (req: Request, _res: Response, next: NextFun
     const isRegistering = req.path === REGISTER_ROUTE;
     const schema = isRegistering ? registerUserPayloadSchema : loginUserPayloadSchema;
 
-    // Compare request body to corresponding schema
-    // Note: When registering the schema will also check if passwords match
-    const result = parseSchema(schema, req.body);
+    const validatedPayload = validateRequestPayload(
+        schema,
+        req.body,
+        ErrorMessage.AUTHENTICATION_SCHEMA_VALIDATION_FAILED
+    );
 
-    // Throw InputValidationException if the register and login schema
-    // validation fail with an array of property issues and a error message
-    if (!result.success) {
-        throw new InputValidationException(ErrorMessage.AUTHENTICATION_SCHEMA_VALIDATION_FAILED, {
-            issues: result.issues,
-        });
-    }
-
-    req.body = result.data;
+    req.body = validatedPayload;
 
     next();
 };

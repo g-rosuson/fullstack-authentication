@@ -24,6 +24,7 @@ export enum ErrorMessage {
     CRON_JOB_START_DATE_COME_BEFORE_END_DATE = 'Start date must come before end date',
     DATABASE_OPERATION_FAILED_ERROR = 'Database operation failed',
     MONGO_CLIENT_MANAGER_INSTANCE_NOT_FOUND = 'Options are required to create a new MongoClientManager instance',
+    MONGO_CLIENT_NOT_CONNECTED = 'MongoClient is not connected',
 }
 
 /**

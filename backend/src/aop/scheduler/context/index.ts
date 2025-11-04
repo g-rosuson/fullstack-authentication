@@ -23,8 +23,8 @@ export class SchedulerContext {
      */
     constructor(scheduler: Scheduler) {
         this.getAllJobs = scheduler.allJobs;
-        this.schedule = scheduler.schedule;
-        this.delete = scheduler.delete;
-        this.stop = scheduler.stop;
+        this.schedule = scheduler.schedule.bind(scheduler);
+        this.delete = scheduler.delete.bind(scheduler);
+        this.stop = scheduler.stop.bind(scheduler);
     }
 }

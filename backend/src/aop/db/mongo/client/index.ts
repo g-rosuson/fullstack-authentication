@@ -112,6 +112,19 @@ export class MongoClientManager {
     }
 
     /**
+     * Starts a new MongoDB session if the client is connected.
+     * @throws InternalException if the client is not connected
+     * @returns The MongoDB session
+     */
+    public startSession() {
+        if (!this.client) {
+            throw new InternalException(ErrorMessage.MONGO_CLIENT_NOT_CONNECTED);
+        }
+
+        return this.client.startSession();
+    }
+
+    /**
      * Performs initial database setup operations after connection is established.
      * This method handles two critical initialization tasks:
      * 1. Database health verification via ping

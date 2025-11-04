@@ -17,7 +17,7 @@ const cronJobPayloadSchema = z
         isActive: z.boolean(),
     })
     .superRefine((payload, ctx) => {
-        if (payload.startDate > payload.time) {
+        if (payload.startDate < payload.time) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: ErrorMessage.CRON_JOB_START_DATE_IN_FUTURE,

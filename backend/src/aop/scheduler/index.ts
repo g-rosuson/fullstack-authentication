@@ -123,7 +123,7 @@ export class Scheduler {
         };
 
         // Calculate the time to start the cron job
-        const msToStart = now.getTime() - startDate.getTime() + now.getTime();
+        const msToStart = startDate.getTime() - now.getTime();
 
         newCronJob.metadata.startTimeoutId = setTimeout(() => {
             cronTask.start();
@@ -137,7 +137,7 @@ export class Scheduler {
 
         // Calculate the time to stop the cron job
         if (endDate) {
-            const msToEnd = now.getTime() - endDate.getTime() + now.getTime();
+            const msToEnd = endDate.getTime() - now.getTime();
 
             newCronJob.metadata.stopTimeoutId = setTimeout(() => {
                 cronTask.stop();

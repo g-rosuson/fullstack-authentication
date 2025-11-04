@@ -36,7 +36,7 @@ const register = async (req: Request<unknown, unknown, RegisterUserPayload>, res
     };
 
     // Note: Collection is indexed so duplicate emails will throw a duplicate key error
-    const insertResponse = await req.context.db.user.create(newUser);
+    const insertResponse = await req.context.db.repository.users.create(newUser);
 
     // Create JWT tokens
     const tokenPayload: JwtPayload = {
@@ -65,7 +65,7 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
     const { email, password } = req.body;
 
     // Get user by email
-    const userDocument = await req.context.db.user.getByEmail(email);
+    const userDocument = await req.context.db.repository.users.getByEmail(email);
 
     // Validate if user exists
     if (!userDocument) {

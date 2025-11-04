@@ -1,5 +1,7 @@
 import { Router } from 'express';
 
+import { forwardAsyncError } from 'aop/http/middleware/async';
+
 import { createCronJob, deleteCronJob, getAllCronJobs, getCronJob, updateCronJob } from './cron-jobs-controller';
 import { validateIdQueryParams, validatePaginationQueryParams, validatePayload } from './cron-jobs-middleware';
 
@@ -15,10 +17,10 @@ import {
 const router = Router();
 
 // Determine routes
-router.post(CREATE_CRON_JOB_ROUTE, validatePayload, createCronJob);
-router.get(GET_ALL_CRON_JOBS_ROUTE, validatePaginationQueryParams, getAllCronJobs);
-router.get(GET_CRON_JOB_ROUTE, validateIdQueryParams, getCronJob);
-router.put(UPDATE_CRON_JOB_ROUTE, validatePayload, validateIdQueryParams, updateCronJob);
-router.delete(DELETE_CRON_JOB_ROUTE, validateIdQueryParams, deleteCronJob);
+router.post(CREATE_CRON_JOB_ROUTE, validatePayload, forwardAsyncError(createCronJob));
+router.get(GET_ALL_CRON_JOBS_ROUTE, validatePaginationQueryParams, forwardAsyncError(getAllCronJobs));
+router.get(GET_CRON_JOB_ROUTE, validateIdQueryParams, forwardAsyncError(getCronJob));
+router.put(UPDATE_CRON_JOB_ROUTE, validatePayload, validateIdQueryParams, forwardAsyncError(updateCronJob));
+router.delete(DELETE_CRON_JOB_ROUTE, validateIdQueryParams, forwardAsyncError(deleteCronJob));
 
 export default router;

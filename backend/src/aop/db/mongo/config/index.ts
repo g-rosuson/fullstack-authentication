@@ -21,7 +21,7 @@ const config = {
             cronJobs: {
                 name: process.env.MONGO_CRON_JOBS_COLLECTION_NAME!,
                 // Field to create index on (e.g., 'name')
-                targetField: 'createdAt',
+                targetField: 'name',
                 // Index sort order: 1 for ascending, -1 for descending
                 targetValue: 1,
                 // Whether the index should enforce uniqueness

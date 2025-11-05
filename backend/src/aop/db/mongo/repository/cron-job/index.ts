@@ -1,4 +1,4 @@
-import { Db, ObjectId } from 'mongodb';
+import { ClientSession, Db, ObjectId } from 'mongodb';
 
 import { ResourceNotFoundException, SchemaValidationException } from 'aop/exceptions';
 import { DatabaseOperationFailedException } from 'aop/exceptions/errors/database';
@@ -46,8 +46,8 @@ export class CronJobRepository {
      * @param cronJob Cron job object containing all required data
      * @returns Promise resolving to the created cron job document
      */
-    async create(cronJob: CreateCronJobPayload) {
-        const insertResult = await this.db.collection(this.collectionName).insertOne(cronJob);
+    async create(cronJob: CreateCronJobPayload, session?: ClientSession) {
+        const insertResult = await this.db.collection(this.collectionName).insertOne(cronJob, { session });
 
         if (!insertResult.acknowledged) {
             throw new DatabaseOperationFailedException(ErrorMessage.DATABASE_OPERATION_FAILED_ERROR);
@@ -118,14 +118,15 @@ export class CronJobRepository {
      * @returns Promise resolving to MongoDB's UpdateResult
      * @throws ResourceNotFoundException if cron job not found
      */
-    async update(updatedCronJob: UpdateCronJobPayload) {
-        const updateResult = await this.db
-            .collection(this.collectionName)
-            .findOneAndUpdate(
-                { _id: new ObjectId(updatedCronJob.id) },
-                { $set: updatedCronJob },
-                { returnDocument: 'after' }
-            );
+    async update(updatedCronJob: UpdateCronJobPayload, session?: ClientSession) {
+        const updateResult = await this.db.collection(this.collectionName).findOneAndUpdate(
+            { _id: new ObjectId(updatedCronJob.id) },
+            { $set: updatedCronJob },
+            {
+                returnDocument: 'after',
+                ...(session ? { session } : {}),
+            }
+        );
 
         if (!updateResult?.value) {
             throw new ResourceNotFoundException(ErrorMessage.CRON_JOB_NOT_FOUND_IN_DATABASE);
@@ -147,8 +148,10 @@ export class CronJobRepository {
      * @returns Promise resolving to MongoDB's DeleteResult
      * @throws ResourceNotFoundException if cron job not found
      */
-    async delete(id: string) {
-        const result = await this.db.collection(this.collectionName).deleteOne({ _id: new ObjectId(id) });
+    async delete(id: string, session?: ClientSession) {
+        const result = await this.db
+            .collection(this.collectionName)
+            .deleteOne({ _id: new ObjectId(id) }, { ...(session ? { session } : {}) });
 
         if (result.deletedCount === 0) {
             throw new ResourceNotFoundException(ErrorMessage.CRON_JOB_NOT_FOUND_IN_DATABASE);

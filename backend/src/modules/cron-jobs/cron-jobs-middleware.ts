@@ -44,11 +44,11 @@ const validatePayload = (req: Request, _res: Response, next: NextFunction) => {
 const validateIdQueryParams = (req: Request, _res: Response, next: NextFunction) => {
     const validatedPayload = validateRequestPayload(
         idRouteParamSchema,
-        req.query,
+        req.params,
         ErrorMessage.CRON_JOB_SCHEMA_VALIDATION_FAILED
     );
 
-    req.query = validatedPayload;
+    req.params = validatedPayload;
 
     next();
 };

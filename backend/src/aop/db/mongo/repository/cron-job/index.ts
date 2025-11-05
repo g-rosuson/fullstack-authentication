@@ -119,26 +119,31 @@ export class CronJobRepository {
      * @throws ResourceNotFoundException if cron job not found
      */
     async update(updatedCronJob: UpdateCronJobPayload, session?: ClientSession) {
+        const { id, ...updateFields } = updatedCronJob;
+
         const updateResult = await this.db.collection(this.collectionName).findOneAndUpdate(
-            { _id: new ObjectId(updatedCronJob.id) },
-            { $set: updatedCronJob },
+            { _id: new ObjectId(id) },
+            { $set: updateFields },
             {
                 returnDocument: 'after',
                 ...(session ? { session } : {}),
             }
         );
 
-        if (!updateResult?.value) {
+        if (!updateResult) {
             throw new ResourceNotFoundException(ErrorMessage.CRON_JOB_NOT_FOUND_IN_DATABASE);
         }
 
-        const schemaResult = parseSchema(cronJobDocumentSchema, updateResult.value);
+        const schemaResult = parseSchema(cronJobDocumentSchema, updateResult);
 
         if (!schemaResult.success) {
             throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, { issues: schemaResult.issues });
         }
 
-        return schemaResult.data;
+        return {
+            id: schemaResult.data._id.toString(),
+            ...schemaResult.data,
+        };
     }
 
     /**

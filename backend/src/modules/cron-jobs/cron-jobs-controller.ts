@@ -108,7 +108,6 @@ const updateCronJob = async (req: Request<IdRouteParam, unknown, CronJobPayload>
             nextRun: utils.getNextRunDate(body.type, tmpStartDate),
             updatedAt: new Date(body.time),
             isActive: body.isActive,
-            taskFn: () => Promise.resolve(),
         };
 
         // Start a new transaction
@@ -118,7 +117,17 @@ const updateCronJob = async (req: Request<IdRouteParam, unknown, CronJobPayload>
         const updatedCronJob = await req.context.db.repository.cronJobs.update(payload, session);
 
         // Re-schedule the cron job
-        req.context.scheduler.schedule(payload);
+        const schedulePayload = {
+            id: updatedCronJob.id,
+            name: updatedCronJob.name,
+            time: updatedCronJob.time,
+            type: updatedCronJob.type,
+            startDate: updatedCronJob.startDate,
+            endDate: updatedCronJob.endDate,
+            taskFn: () => Promise.resolve(),
+        };
+
+        req.context.scheduler.schedule(schedulePayload);
 
         // Commit the transaction
         await session.commitTransaction();
@@ -212,7 +221,11 @@ const getCronJob = async (req: Request<IdRouteParam>, res: Response) => {
  */
 const getAllCronJobs = async (req: Request, res: Response) => {
     // Parse query params with defaults
+
+    // Limit refers to the number of cron jobs to return
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+
+    // Offset refers to the number of cron jobs to skip (e.g. if offset is 10, we skip the first 10 cron jobs)
     const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
 
     const cronJobs = await req.context.db.repository.cronJobs.getAll(limit, offset);

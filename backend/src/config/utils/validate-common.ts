@@ -6,6 +6,8 @@ import { ErrorMessage } from 'shared/enums/error-messages';
 import {
     accessTokenSecretSchema,
     baseRoutePathSchema,
+    dbRetryDelayMsSchema,
+    maxDbRetriesSchema,
     mongoDbNameSchema,
     mongoUriSchema,
     refreshTokenSecretSchema,
@@ -20,6 +22,8 @@ import {
  * - MONGO_URI (required, valid URL)
  * - MONGO_DB_NAME (required, non-empty string)
  * - BASE_ROUTE_PATH (required, non-empty string)
+ * - MAX_DB_RETRIES (optional, positive integer, default: 3)
+ * - DB_RETRY_DELAY_MS (optional, positive integer, default: 5000)
  *
  * @returns Validated common configuration
  * @throws SchemaValidationException if validation fails
@@ -65,11 +69,29 @@ export const validateCommonEnvironmentVariables = () => {
         });
     }
 
+    const maxDbRetriesResult = parseSchema(maxDbRetriesSchema, process.env.MAX_DB_RETRIES);
+
+    if (!maxDbRetriesResult.success) {
+        throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, {
+            issues: maxDbRetriesResult.issues,
+        });
+    }
+
+    const dbRetryDelayMsResult = parseSchema(dbRetryDelayMsSchema, process.env.DB_RETRY_DELAY_MS);
+
+    if (!dbRetryDelayMsResult.success) {
+        throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, {
+            issues: dbRetryDelayMsResult.issues,
+        });
+    }
+
     return {
         accessTokenSecret: accessTokenSecretResult.data,
         refreshTokenSecret: refreshTokenSecretResult.data,
         mongoURI: mongoUriResult.data,
         mongoDBName: mongoDbNameResult.data,
         basePath: baseRoutePathResult.data,
+        maxDbRetries: maxDbRetriesResult.data,
+        dbRetryDelayMs: dbRetryDelayMsResult.data,
     };
 };

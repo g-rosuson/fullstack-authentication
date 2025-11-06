@@ -1,14 +1,13 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
-import { LOGIN_ROUTE, REFRESH_ROUTE, REGISTER_ROUTE } from 'modules/auth/constants';
-import { accessTokenSchema, loginUserPayloadSchema } from 'modules/auth/schemas';
-import { registerUserPayloadSchema } from 'modules/shared/schemas/user';
+import { LOGIN_ROUTE, REFRESH_ROUTE, REGISTER_ROUTE } from './constants';
 
-// Determine registry
-const registry = new OpenAPIRegistry();
+import { registerUserPayloadSchema } from './schemas';
+import { accessTokenSchema, loginUserPayloadSchema } from './schemas';
 
-// Register paths
-registry.registerPath({
+const authRegistry = new OpenAPIRegistry();
+
+authRegistry.registerPath({
     method: 'post',
     path: LOGIN_ROUTE,
     responses: {
@@ -33,7 +32,7 @@ registry.registerPath({
     },
 });
 
-registry.registerPath({
+authRegistry.registerPath({
     method: 'post',
     path: REGISTER_ROUTE,
     responses: {
@@ -58,7 +57,7 @@ registry.registerPath({
     },
 });
 
-registry.registerPath({
+authRegistry.registerPath({
     method: 'get',
     path: REFRESH_ROUTE,
     responses: {
@@ -73,4 +72,4 @@ registry.registerPath({
     },
 });
 
-export default registry;
+export default authRegistry;

@@ -1,4 +1,6 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, MongoError } from 'mongodb';
+
+import dbConfig from 'aop/db/mongo/config';
 
 import type { MongoClientOptions } from './types';
 
@@ -26,11 +28,28 @@ import { MongoClientManager } from './';
  *    - Mock MongoClient constructor to avoid real database connections
  *    - Mock Db methods (command, collection) to test initialization behavior
  *    - Use mockRejectedValueOnce() for error scenario testing
+ *
+ * 5. DYNAMIC COLLECTION HANDLING: Tests are collection-agnostic and read from config.
+ *    - Tests automatically adapt to any number of collections in the configuration
+ *    - Helper functions generate mocks based on actual config values
+ *    - No need to update tests when adding/removing collections from config
+ *    - Ensures tests remain maintainable and scalable as collections grow
  */
 
-// Mock mongodb
+// Mock mongodb - collection methods
 const mockCreateIndex = vi.fn().mockResolvedValue('ok');
-const mockCollection = vi.fn(() => ({ createIndex: mockCreateIndex }));
+const mockDropIndex = vi.fn().mockResolvedValue(undefined);
+const mockIndexes = vi.fn().mockResolvedValue([]);
+
+// Create a factory function for collection mocks so each collection can have its own mock state
+const createMockCollection = (collectionName: string) => ({
+    createIndex: mockCreateIndex,
+    dropIndex: mockDropIndex,
+    indexes: mockIndexes,
+    collectionName,
+});
+
+const mockCollection = vi.fn((name: string) => createMockCollection(name));
 const mockCommand = vi.fn().mockResolvedValue({});
 const mockDb = { command: mockCommand, collection: mockCollection };
 
@@ -52,6 +71,52 @@ describe('MongoClientManager', () => {
     const testOptions: MongoClientOptions = {
         uri: 'mongodb://localhost:27017/test',
         dbName: 'test-database',
+    };
+
+    /**
+     * Helper: Get collections that should be indexed from configuration.
+     * Dynamically reads from config to ensure tests work with any number of collections.
+     *
+     * @returns Array of collection configuration items that have index: true
+     */
+    const getIndexedCollections = () => {
+        return Object.values(dbConfig.db.collection).filter(item => item.index);
+    };
+
+    /**
+     * Helper: Generate expected index name from config item.
+     * Follows MongoDB's naming pattern: {field}_{order} (e.g., email_1, name_1).
+     *
+     * @param item Collection configuration item with targetField and targetValue
+     * @returns Index name string following MongoDB pattern
+     */
+    const getIndexName = (item: { targetField: string; targetValue: number }) => {
+        return `${item.targetField}_${item.targetValue}`;
+    };
+
+    /**
+     * Helper: Generate mock index response for a collection based on configuration.
+     * Used to simulate different index states (exists/doesn't exist, correct/wrong options).
+     *
+     * @param item Collection configuration item with index settings
+     * @param exists Whether the index exists in the database
+     * @param correctUnique Whether the unique option matches config (default: true)
+     * @returns Array of index objects (empty if doesn't exist, or single index object if exists)
+     */
+    const createMockIndex = (
+        item: { targetField: string; targetValue: number; unique: boolean },
+        exists: boolean,
+        correctUnique: boolean = true
+    ) => {
+        if (!exists) return [];
+
+        return [
+            {
+                name: getIndexName(item),
+                key: { [item.targetField]: item.targetValue },
+                unique: correctUnique ? item.unique : !item.unique,
+            },
+        ];
     };
 
     describe('getInstance()', () => {
@@ -148,6 +213,210 @@ describe('MongoClientManager', () => {
             mockCreateIndex.mockRejectedValueOnce(new Error(errorMessage));
 
             await expect(dbInstance.connect()).rejects.toThrow(errorMessage);
+        });
+    });
+
+    /**
+     * Index Management Tests
+     *
+     * These tests verify the index initialization logic for all configured collections.
+     * Tests are dynamic and automatically adapt to any number of collections in the config.
+     * Each test scenario is verified across all collections that require indexing.
+     */
+    describe('initializeDb(): index management', () => {
+        let dbInstance: MongoClientManager;
+
+        beforeEach(() => {
+            // Reset singleton before each test to ensure clean state
+            (MongoClientManager as unknown as { instance: MongoClientManager | null }).instance = null;
+            dbInstance = MongoClientManager.getInstance(testOptions);
+
+            // Reset all mocks
+            vi.clearAllMocks();
+        });
+
+        it('should create index when it does not exist', async () => {
+            // Mock: no indexes exist for any collections
+            mockIndexes.mockImplementation(() => Promise.resolve([]));
+
+            await dbInstance.connect();
+
+            // Verify createIndex was called for all configured collections
+            expect(mockCreateIndex).toHaveBeenCalled();
+            expect(mockDropIndex).not.toHaveBeenCalled();
+        });
+
+        it('should skip creating index when it already exists with correct options', async () => {
+            // Mock: indexes exist with correct unique options for all configured collections
+            const collections = getIndexedCollections();
+            let callCount = 0;
+
+            mockIndexes.mockImplementation(() => {
+                const item = collections[callCount];
+                callCount++;
+                // Return mock index that exists with correct options matching config
+                return Promise.resolve(createMockIndex(item, true, true));
+            });
+
+            await dbInstance.connect();
+
+            // Verify createIndex was not called for any collection (all indexes already exist correctly)
+            expect(mockCreateIndex).not.toHaveBeenCalled();
+            expect(mockDropIndex).not.toHaveBeenCalled();
+        });
+
+        it('should recreate index when it exists with wrong unique option', async () => {
+            // Mock: first collection index exists but with wrong unique option (conflict scenario)
+            // Other collections don't have indexes yet
+            const collections = getIndexedCollections();
+            const firstCollection = collections[0];
+            let callCount = 0;
+
+            mockIndexes.mockImplementation(() => {
+                const item = collections[callCount];
+                callCount++;
+                if (callCount === 1) {
+                    // First collection - index exists with wrong unique option (should trigger recreation)
+                    return Promise.resolve(createMockIndex(item, true, false));
+                } else {
+                    // Other collections - no index exists yet
+                    return Promise.resolve(createMockIndex(item, false));
+                }
+            });
+
+            await dbInstance.connect();
+
+            // Verify dropIndex and createIndex were called for first collection with conflict
+            expect(mockDropIndex).toHaveBeenCalledWith(getIndexName(firstCollection));
+            expect(mockCreateIndex).toHaveBeenCalledWith(
+                { [firstCollection.targetField]: firstCollection.targetValue },
+                { unique: firstCollection.unique, name: getIndexName(firstCollection) }
+            );
+        });
+
+        it('should handle race condition when index is created between check and create', async () => {
+            // Mock: Simulates race condition where index is created between our check and create attempt
+            // First collection's createIndex throws code 86 (IndexKeySpecsConflict)
+            // Other collections succeed normally
+            const collections = getIndexedCollections();
+            const firstCollection = collections[0];
+            let callCount = 0;
+
+            mockIndexes.mockImplementation(() => {
+                const item = collections[callCount];
+                callCount++;
+                // No indexes exist initially (but one gets created concurrently)
+                return Promise.resolve(createMockIndex(item, false));
+            });
+
+            // Only the first createIndex call should fail with conflict (simulating race condition)
+            let createIndexCallCount = 0;
+            mockCreateIndex.mockImplementation(() => {
+                createIndexCallCount++;
+                if (createIndexCallCount === 1) {
+                    // First createIndex call fails with conflict (code 86 = IndexKeySpecsConflict)
+                    const mongoError = new Error('Index conflict') as MongoError;
+                    mongoError.code = 86;
+                    return Promise.reject(mongoError);
+                }
+                // Subsequent calls succeed (after conflict resolution)
+                return Promise.resolve('ok');
+            });
+
+            await dbInstance.connect();
+
+            // Verify conflict was handled: drop existing index, then recreate
+            // First collection: 1 failed attempt + 1 successful recreation after drop = 2 calls
+            // Other collections: 1 successful creation each
+            const expectedCalls = 1 + 1 + (collections.length - 1); // Failed once, recreated once, other collections once each
+            expect(mockDropIndex).toHaveBeenCalledWith(getIndexName(firstCollection));
+            expect(mockCreateIndex).toHaveBeenCalledTimes(expectedCalls);
+        });
+
+        it('should handle dropIndex failure gracefully when recreating index', async () => {
+            // Mock: First collection index exists with wrong options (needs recreation)
+            // But dropIndex fails (index may have been dropped concurrently or doesn't exist)
+            const collections = getIndexedCollections();
+            const firstCollection = collections[0];
+            let callCount = 0;
+
+            mockIndexes.mockImplementation(() => {
+                const item = collections[callCount];
+                callCount++;
+                if (callCount === 1) {
+                    // First collection - index exists with wrong unique option (needs recreation)
+                    return Promise.resolve(createMockIndex(item, true, false));
+                } else {
+                    // Other collections - no index exists yet
+                    return Promise.resolve(createMockIndex(item, false));
+                }
+            });
+
+            // dropIndex fails (index may have been dropped concurrently or doesn't exist)
+            mockDropIndex.mockRejectedValueOnce(new Error('Index not found'));
+
+            await dbInstance.connect();
+
+            // Verify it continued with recreation despite dropIndex failure
+            // This ensures resilience when index state changes between check and drop
+            expect(mockDropIndex).toHaveBeenCalledWith(getIndexName(firstCollection));
+            expect(mockCreateIndex).toHaveBeenCalled(); // Should still create index
+        });
+
+        it('should throw error when index creation fails with non-conflict error', async () => {
+            // Mock: no indexes exist for all configured collections
+            mockIndexes.mockImplementation(() => Promise.resolve([]));
+
+            // createIndex fails with non-conflict error on first call
+            // This tests that non-conflict errors are properly propagated
+            const errorMessage = 'Database connection lost';
+            mockCreateIndex.mockRejectedValueOnce(new Error(errorMessage));
+
+            await expect(dbInstance.connect()).rejects.toThrow(errorMessage);
+        });
+
+        it('should process multiple collections with different index states', async () => {
+            // Mock: Simulates mixed state where some collections have indexes and others don't
+            // First collection has correct index (should be skipped), others need creation
+            const collections = getIndexedCollections();
+            let callCount = 0;
+
+            mockIndexes.mockImplementation(() => {
+                const item = collections[callCount];
+                callCount++;
+                if (callCount === 1) {
+                    // First collection - index exists correctly (should be skipped)
+                    return Promise.resolve(createMockIndex(item, true, true));
+                } else {
+                    // Other collections - no index exists (should be created)
+                    return Promise.resolve(createMockIndex(item, false));
+                }
+            });
+
+            await dbInstance.connect();
+
+            // Verify: All collections checked, but only collections without indexes were created
+            expect(mockIndexes).toHaveBeenCalledTimes(collections.length);
+            expect(mockCreateIndex).toHaveBeenCalledTimes(collections.length - 1); // Only for collections without index
+        });
+
+        it('should use explicit index names following MongoDB pattern', async () => {
+            // Mock: No indexes exist for any configured collections
+            const collections = getIndexedCollections();
+            mockIndexes.mockImplementation(() => Promise.resolve([]));
+
+            await dbInstance.connect();
+
+            // Verify all indexes use explicit names following MongoDB pattern: {field}_{order}
+            // This ensures predictable index names and avoids auto-generated name conflicts
+            collections.forEach(item => {
+                expect(mockCreateIndex).toHaveBeenCalledWith(
+                    { [item.targetField]: item.targetValue },
+                    expect.objectContaining({
+                        name: getIndexName(item), // Pattern: field_order (e.g., email_1, name_1)
+                    })
+                );
+            });
         });
     });
 

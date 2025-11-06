@@ -2,8 +2,6 @@ import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
-import { CreateUserPayload, RegisterUserPayload } from 'modules/shared/types/user';
-
 import { TokenException, UnauthorizedException } from 'aop/exceptions';
 import { parseSchema } from 'lib/validation';
 
@@ -11,6 +9,7 @@ import { REFRESH_TOKEN_COOKIE_NAME } from './constants';
 import utils from './utils';
 import config from 'config';
 
+import { CreateUserPayload, RegisterUserPayload } from './types';
 import { JwtPayload, LoginUserPayload } from './types';
 import { ErrorMessage } from 'shared/enums/error-messages';
 import { HttpStatusCode } from 'shared/enums/http-status-codes';
@@ -37,7 +36,7 @@ const register = async (req: Request<unknown, unknown, RegisterUserPayload>, res
     };
 
     // Note: Collection is indexed so duplicate emails will throw a duplicate key error
-    const insertResponse = await req.context.db.user.create(newUser);
+    const insertResponse = await req.context.db.repository.users.create(newUser);
 
     // Create JWT tokens
     const tokenPayload: JwtPayload = {
@@ -66,7 +65,7 @@ const login = async (req: Request<unknown, unknown, LoginUserPayload>, res: Resp
     const { email, password } = req.body;
 
     // Get user by email
-    const userDocument = await req.context.db.user.getByEmail(email);
+    const userDocument = await req.context.db.repository.users.getByEmail(email);
 
     // Validate if user exists
     if (!userDocument) {

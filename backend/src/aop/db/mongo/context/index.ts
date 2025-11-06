@@ -1,35 +1,47 @@
-import { Db } from 'mongodb';
+import type { Transaction } from './types';
+import type { Db } from 'mongodb';
 
+import { CronJobRepository } from '../repository/cron-job';
 import { UserRepository } from '../repository/user';
 
 /**
- * DbContext serves as the main database abstraction layer for the application.
- * It encapsulates the MongoDB database instance and exposes domain-specific repositories
- * instead of raw collections, promoting clean architecture and separation of concerns.
+ * DbContext is the primary abstraction layer for all database operations in the application.
+ * It wraps the core MongoDB database instance, provides access to domain-centric repository classes,
+ * and exposes transaction utilities for supporting advanced data operations like atomic multi-step actions.
  *
  * Key responsibilities:
- * - Wraps the MongoDB Db instance
- * - Provides access to domain repositories (e.g., user, orders, etc.)
- * - Maintains consistent database access patterns across the application
- * - Enables easy testing through dependency injection
+ * - Provides a strongly-typed interface to domain repositories (users, cronJobs, etc.)
+ * - Handles MongoDB transaction/session management for atomicity and data consistency
+ * - Facilitates clean, testable architecture by isolating database infrastructure concerns
+ * - Promotes consistent database access patterns throughout the project
  *
- * Usage: Access via req.context.db in Express middleware/routes
- * Example: req.context.db.user.getByEmail('user@example.com')
+ * Usage: Available as req.context.db within Express middleware/routes
+ * Example: req.context.db.repository.users.getByEmail('user@example.com')
+ * Example (transaction): const session = req.context.db.transaction.startSession();
  */
 export class DbContext {
     /** The underlying MongoDB database instance */
     private readonly db: Db;
-    /** Repository for user-related database operations */
-    public readonly user: UserRepository;
+    /** Repository for database collections operations */
+    public readonly repository: {
+        users: UserRepository;
+        cronJobs: CronJobRepository;
+    };
+    /** Transaction for database operations */
+    public readonly transaction: Transaction;
 
     /**
-     * Constructs a new DbContext instance.
-     * Initializes all domain repositories with the provided database instance.
-     * @param db The MongoDB Db instance to wrap and provide to repositories
+     * Creates a new DbContext instance.
+     * @param db The MongoDB Db instance
+     * @param transaction The transaction for database operations
      */
-    constructor(db: Db) {
+    constructor(db: Db, transaction: Transaction) {
         this.db = db;
-        this.user = new UserRepository(db);
+        this.repository = {
+            users: new UserRepository(db),
+            cronJobs: new CronJobRepository(db),
+        };
+        this.transaction = transaction;
     }
 
     /**

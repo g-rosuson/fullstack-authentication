@@ -33,4 +33,19 @@ const jwtPayloadSchema = z
     })
     .openapi('JwtPayload');
 
-export { accessTokenSchema, jwtPayloadSchema, loginUserPayloadSchema, passwordSchema };
+const registerUserPayloadSchema = z
+    .object({
+        firstName: z.string(),
+        lastName: z.string(),
+        email: z.string().email(),
+        password: passwordSchema,
+        confirmationPassword: passwordSchema,
+    })
+    // Check if passwords match
+    .refine(data => data.password === data.confirmationPassword, {
+        path: ['confirmationPassword'],
+        message: 'Passwords do not match',
+    })
+    .openapi('RegisterUserPayload');
+
+export { accessTokenSchema, jwtPayloadSchema, loginUserPayloadSchema, passwordSchema, registerUserPayloadSchema };

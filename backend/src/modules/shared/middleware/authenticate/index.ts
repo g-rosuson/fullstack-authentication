@@ -44,4 +44,4 @@ const authenticate = async (req: Request, _res: Response, next: NextFunction) =>
     next();
 };
 
-export default authenticate;
+export { authenticate };

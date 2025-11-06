@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { JsonWebTokenError } from 'jsonwebtoken';
 import { MongoError } from 'mongodb';
 
@@ -33,15 +33,17 @@ class ErrorHandlerMiddleware {
      * @param error The error that occurred
      * @param req Express request object
      * @param res Express response object
+     * @param next Express next function (required for Express to recognize this as error middleware)
      */
-    public handle = (error: Error, req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    public handle = (error: Error, req: Request, res: Response, next: NextFunction) => {
         // Skip if a response has already been sent
         if (res.headersSent) {
             logger.warn('Already sent response and could not handle error', { error });
             return;
         }
 
-        const userId = req.context.user.id;
+        const userId = req.context.user?.id || '';
 
         // Handle application exceptions
         if (error instanceof BaseException) {

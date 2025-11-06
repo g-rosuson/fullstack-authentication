@@ -37,6 +37,8 @@ describe('validateCommonEnvironmentVariables', () => {
                 mongoURI: mongoUriValue,
                 mongoDBName: mongoDbNameValue,
                 basePath: baseRoutePathValue,
+                maxDbRetries: 3,
+                dbRetryDelayMs: 5000,
             });
         });
     });

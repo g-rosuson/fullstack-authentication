@@ -53,7 +53,6 @@ export const initializeDatabase = async () => {
                     type: cronJob.type,
                     startDate: cronJob.startDate,
                     endDate: cronJob.endDate,
-                    // TODO: I assume we need to have a job type ("job-scraper" etc). And depending on the type, we invoke callback methods from different services.
                     taskFn: () => Promise.resolve(),
                 });
             }

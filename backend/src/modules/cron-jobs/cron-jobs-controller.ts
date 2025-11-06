@@ -48,7 +48,6 @@ const createCronJob = async (req: Request<unknown, unknown, CronJobPayload>, res
         const createdCronJob = await req.context.db.repository.cronJobs.create(payload, session);
 
         // Schedule the cron job
-        // TODO: I assume we need to have a job type ("job-scraper" etc). And depending on the type, we invoke callback methods from different services.
         const schedulePayload = {
             id: createdCronJob.id,
             name: createdCronJob.name,

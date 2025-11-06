@@ -57,12 +57,22 @@ describe('retryWithFixedInterval', () => {
 
         const options: RetryOptions = { maxAttempts: 2, delayMs: 1000 };
 
+        // Start the retry logic — this immediately returns a promise.
+        // ⚠ This promise may reject later when timers run.
         const resultPromise = retryWithFixedInterval(mockFn, options);
 
-        // Fast-forward timers to handle delays
+        // Attach the `.rejects` expectation *before* the promise has a chance to reject.
+        // This prevents an "Unhandled Rejection" warning from Vitest,
+        // because the promise now has a rejection handler attached.
+        const expectPromise = expect(resultPromise).rejects.toThrow('Persistent failure');
+
+        // Fast-forward all timers so the retry attempts complete.
         await vi.runAllTimersAsync();
 
-        await expect(resultPromise).rejects.toThrow('Persistent failure');
+        // Wait for the expectation to resolve (i.e., confirm the promise rejected as expected).
+        await expectPromise;
+
+        // Ensure the retry logic actually executed the expected number of times.
         expect(mockFn).toHaveBeenCalledTimes(2);
     });
 

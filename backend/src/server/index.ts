@@ -6,6 +6,7 @@ import authenticationRoutes from 'modules/auth/auth-routing';
 import cronJobsRoutes from 'modules/cron-jobs/cron-jobs-routing';
 import documentationRoute from 'modules/docs/docs-routing';
 
+// import { authenticate } from 'modules/shared/middleware/authenticate';
 import { exceptionsMiddleware } from 'aop/exceptions';
 import http from 'aop/http';
 
@@ -28,17 +29,20 @@ const init = async () => {
     server.use(http.context.middleware);
 
     // Routes:
-    // Documentation
-    server.use(config.basePath, documentationRoute);
-
     // Authentication
     server.use(config.basePath, authenticationRoutes);
+
+    // Authenticate
+    // server.use(config.basePath, authenticate);
+
+    // Documentation
+    server.use(config.basePath, documentationRoute);
 
     // Cron jobs
     server.use(config.basePath, cronJobsRoutes);
 
     // Add exception middleware
-    server.use(exceptionsMiddleware);
+    server.use(exceptionsMiddleware());
 
     return server;
 };

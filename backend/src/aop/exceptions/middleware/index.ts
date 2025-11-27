@@ -43,7 +43,7 @@ class ErrorHandlerMiddleware {
             return;
         }
 
-        const userId = req.context.user?.id || '';
+        const userId = req.context?.user?.id || '';
 
         // Handle application exceptions
         if (error instanceof BaseException) {

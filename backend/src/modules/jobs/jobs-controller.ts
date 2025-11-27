@@ -1,0 +1,278 @@
+import { Request, Response } from 'express';
+
+import { BusinessLogicException } from 'aop/exceptions';
+import { logger } from 'aop/logging';
+
+import utils from './utils';
+
+import { CreateJobPayload, UpdateJobPayload } from './types';
+import { ErrorMessage } from 'shared/enums/error-messages';
+import { HttpStatusCode } from 'shared/enums/http-status-codes';
+import { IdRouteParam } from 'shared/types';
+
+/**
+ * Creates a new job in the database and if defined, schedules it to run at a later time.
+ *
+ * @param req Express request object with typed body
+ * @param res Express response object
+ */
+const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: Response) => {
+    /**
+     * Start a new session for the transaction so we can rollback the
+     * transaction if the cron job fails to schedule.
+     */
+    const session = req.context.db.transaction.startSession();
+
+    try {
+        // Start a new transaction
+        session.startTransaction();
+
+        // Determine body, time and schedule
+        const body = req.body;
+        const timestamp = new Date(body.timestamp);
+        let schedule = null;
+
+        // Create the schedule object if it's defined
+        if (body.schedule) {
+            schedule = {
+                ...body.schedule,
+                endDate: body.schedule.endDate ? new Date(body.schedule.endDate) : null,
+                nextRun: utils.getNextRunDate(body.schedule.type, body.schedule.startDate),
+                lastRun: null,
+            };
+        }
+
+        // Create the job document
+        const createJobPayload = {
+            name: body.name,
+            tools: body.tools.map(tool => ({
+                ...tool,
+                targets: tool.targets.map(item => ({
+                    ...item,
+                    id: crypto.randomUUID(),
+                })),
+                results: null,
+                errors: null,
+            })),
+            schedule,
+            createdAt: timestamp,
+            updatedAt: null,
+        };
+
+        const createdJob = await req.context.db.repository.jobs.create(createJobPayload, session);
+
+        // Schedule the job if it has a schedule
+        if (createdJob.schedule) {
+            req.context.scheduler.schedule({
+                id: createdJob.id,
+                name: createdJob.name,
+                timestamp,
+                type: createdJob.schedule.type,
+                startDate: createdJob.schedule.startDate,
+                endDate: createdJob.schedule.endDate,
+            });
+
+            // Register the task with the delegator
+            req.context.delegator.register({
+                jobId: createdJob.id,
+                name: createdJob.name,
+                tools: createdJob.tools,
+            });
+        } else {
+            // Delegate the job immediately when it has no schedule
+            req.context.delegator.delegate({
+                jobId: createdJob.id,
+                name: createdJob.name,
+                tools: createdJob.tools,
+            });
+        }
+
+        // Commit the transaction
+        await session.commitTransaction();
+
+        // Respond with the created job
+        res.status(HttpStatusCode.CREATED).json({
+            success: true,
+            data: createdJob,
+        });
+    } catch (error) {
+        // Abort the transaction if there's an error
+        await session.abortTransaction();
+
+        logger.error('Failed to create job', { error: error as Error });
+
+        // Re-throw the error to be handled by the error middleware
+        throw error;
+    } finally {
+        await session.endSession();
+    }
+};
+
+/**
+ * Updates an existing job by ID.
+ *
+ * @param req Express request object with typed params and body
+ * @param res Express response object
+ */
+const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, res: Response) => {
+    /**
+     * Start a new session for the transaction so we can rollback the
+     * transaction if the cron job fails to schedule
+     */
+    const session = req.context.db.transaction.startSession();
+
+    try {
+        // Start a new transaction
+        session.startTransaction();
+
+        // Don't allow updating a job if its tools are running
+        if (req.context.delegator.runningJobs.has(req.params.id)) {
+            throw new BusinessLogicException(ErrorMessage.JOBS_CANNOT_BE_UPDATED_WHILE_RUNNING);
+        }
+
+        // Determine body, time and schedule
+        const body = req.body;
+        const timestamp = new Date(body.timestamp);
+        let schedule = null;
+
+        // Create the schedule object if it's defined
+        if (body.schedule) {
+            schedule = {
+                ...body.schedule,
+                endDate: body.schedule.endDate ? new Date(body.schedule.endDate) : null,
+                nextRun: utils.getNextRunDate(body.schedule.type, body.schedule.startDate),
+                lastRun: null,
+            };
+        }
+
+        // Determine job document
+        const updateJobPayload = {
+            id: req.params.id,
+            name: body.name,
+            schedule,
+            tools: body.tools.map(tool => ({
+                ...tool,
+                targets: tool.targets.map(item => ({
+                    ...item,
+                    // Add an ID for new targets
+                    id: item.id || crypto.randomUUID(),
+                })),
+            })),
+            updatedAt: timestamp,
+        };
+
+        // Update the job in the database
+        const updatedJob = await req.context.db.repository.jobs.update(updateJobPayload, session);
+
+        // Schedule a cron job if the job has a schedule
+        if (updatedJob.schedule) {
+            // Note: .schedule() destroys an existing cron job before scheduling a new one
+            req.context.scheduler.schedule({
+                name: updatedJob.name,
+                timestamp,
+                type: updatedJob.schedule.type,
+                startDate: updatedJob.schedule.startDate,
+                endDate: updatedJob.schedule.endDate,
+                id: updatedJob.id,
+            });
+
+            // Note: .register() replaces an existing task with the new one
+            req.context.delegator.register({
+                jobId: updatedJob.id,
+                name: updatedJob.name,
+                tools: updatedJob.tools,
+            });
+        } else {
+            // Delegate the job immediately when it has no schedule
+            req.context.delegator.delegate({
+                jobId: updatedJob.id,
+                name: updatedJob.name,
+                tools: updatedJob.tools,
+            });
+        }
+
+        // Commit the transaction
+        await session.commitTransaction();
+
+        // Respond with the updated job
+        res.status(HttpStatusCode.OK).json({
+            success: true,
+            data: updatedJob,
+        });
+    } catch (error) {
+        // Abort the transaction if there's an error
+        await session.abortTransaction();
+
+        logger.error('Failed to update cron job', { error: error as Error });
+
+        // Re-throw the error to be handled by the error middleware
+        throw error;
+    } finally {
+        await session.endSession();
+    }
+};
+
+/**
+ * Deletes a job by ID.
+ *
+ * @param req Express request object with typed params
+ * @param res Express response object
+ */
+const deleteJob = async (req: Request<IdRouteParam>, res: Response) => {
+    const { id } = req.params;
+
+    // Delete the job from the database
+    const result = await req.context.db.repository.jobs.delete(id);
+
+    // Respond with the deleted job
+    res.status(HttpStatusCode.OK).json({
+        success: true,
+        data: { ...result, id },
+    });
+};
+
+/**
+ * Retrieves a single job by ID.
+ *
+ * @param req Express request object with typed params
+ * @param res Express response object
+ */
+const getJob = async (req: Request<IdRouteParam>, res: Response) => {
+    const { id } = req.params;
+
+    const job = await req.context.db.repository.jobs.getById(id);
+
+    res.status(HttpStatusCode.OK).json({
+        success: true,
+        data: job,
+    });
+};
+
+/**
+ * Retrieves all jobs with pagination.
+ *
+ * @param req Express request object with query params
+ * @param res Express response object
+ */
+const getAllJobs = async (req: Request, res: Response) => {
+    // Parse query params with defaults
+    // Limit refers to the number of jobs to return
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 0;
+
+    // Offset refers to the number of jobs to skip (e.g. if offset is 10, we skip the first 10 jobs)
+    const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
+
+    const jobs = await req.context.db.repository.jobs.getAll(limit, offset);
+
+    res.status(HttpStatusCode.OK).json({
+        success: true,
+        data: {
+            limit,
+            offset,
+            count: jobs.length,
+            jobs,
+        },
+    });
+};
+
+export { createJob, deleteJob, getAllJobs, getJob, updateJob };

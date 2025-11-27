@@ -31,3 +31,17 @@ export class ResourceNotFoundException extends BaseException {
         super(message, HttpStatusCode.NOT_FOUND, ErrorCode.NOT_FOUND_ERROR, context);
     }
 }
+
+/**
+ * Exception thrown when a business logic rule prevents an operation from being performed.
+ * Used when an operation cannot be completed due to the current state of a resource or business constraints.
+ */
+export class BusinessLogicException extends BaseException {
+    /**
+     * @param message Human-readable error message
+     * @param context Additional context information (optional)
+     */
+    constructor(message: string, context: ExceptionContext = {}) {
+        super(message, HttpStatusCode.UNPROCESSABLE_ENTITY, ErrorCode.BUSINESS_LOGIC_ERROR, context);
+    }
+}

@@ -1,5 +1,6 @@
 import { MongoClientManager } from 'aop/db/mongo/client';
-import dbConfig from 'aop/db/mongo/config';
+import { DbContext } from 'aop/db/mongo/context';
+import { Delegator } from 'aop/delegator';
 import { logger } from 'aop/logging';
 import { Scheduler } from 'aop/scheduler';
 
@@ -34,31 +35,47 @@ export const initializeDatabase = async () => {
 
     logger.info('Database connection established successfully');
 
-    // Check if all jobs are scheduled in case the server crashed
+    /**
+     * Check if all cron jobs are scheduled in case the server crashed.
+     */
     logger.info('Checking if all cron jobs are scheduled');
 
-    // Get all persisted cron jobs
-    const persistedCronJobs = await db.collection(dbConfig.db.collection.cronJobs.name).find({}).toArray();
+    // Create a new database context
+    const transaction = {
+        startSession: () => mongoManager.startSession(),
+    };
 
-    if (persistedCronJobs.length) {
+    const dbContext = new DbContext(db, transaction);
+
+    // Get all persisted jobs
+    const persistedJobs = await dbContext.repository.jobs.getAll(0, 0);
+
+    if (persistedJobs.length) {
         // Initialize scheduler instance
         const schedulerInstance = Scheduler.getInstance();
 
-        for (const cronJob of persistedCronJobs) {
-            if (cronJob.isActive) {
+        // Initialize delegator instance
+        const delegatorInstance = Delegator.getInstance();
+
+        for (const job of persistedJobs) {
+            if (job.schedule) {
                 schedulerInstance.schedule({
-                    id: cronJob._id.toString(),
-                    name: cronJob.name,
-                    time: cronJob.time,
-                    type: cronJob.type,
-                    startDate: cronJob.startDate,
-                    endDate: cronJob.endDate,
-                    taskFn: () => Promise.resolve(),
+                    id: job._id.toString(),
+                    name: job.name,
+                    timestamp: job.createdAt,
+                    type: job.schedule.type,
+                    startDate: job.schedule.startDate,
+                    endDate: job.schedule.endDate,
+                });
+            } else {
+                // Delegate the job immediately when it has no schedule
+                delegatorInstance.delegate({
+                    jobId: job._id.toString(),
+                    name: job.name,
+                    tools: job.tools,
                 });
             }
         }
-
-        logger.info(`Scheduled ${persistedCronJobs.length} cron jobs successfully`);
     }
 
     logger.info('Database initialization completed successfully');

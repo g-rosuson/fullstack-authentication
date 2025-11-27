@@ -9,7 +9,9 @@ import {
     dbRetryDelayMsSchema,
     maxDbRetriesSchema,
     mongoDbNameSchema,
+    mongoJobsCollectionNameSchema,
     mongoUriSchema,
+    mongoUserCollectionNameSchema,
     refreshTokenSecretSchema,
 } from '../schemas';
 
@@ -21,6 +23,8 @@ import {
  * - REFRESH_TOKEN_SECRET (required, non-empty string)
  * - MONGO_URI (required, valid URL)
  * - MONGO_DB_NAME (required, non-empty string)
+ * - MONGO_USER_COLLECTION_NAME (required, non-empty string)
+ * - MONGO_JOBS_COLLECTION_NAME (required, non-empty string)
  * - BASE_ROUTE_PATH (required, non-empty string)
  * - MAX_DB_RETRIES (optional, positive integer, default: 3)
  * - DB_RETRY_DELAY_MS (optional, positive integer, default: 5000)
@@ -82,6 +86,28 @@ export const validateCommonEnvironmentVariables = () => {
     if (!dbRetryDelayMsResult.success) {
         throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, {
             issues: dbRetryDelayMsResult.issues,
+        });
+    }
+
+    const mongoUserCollectionNameResult = parseSchema(
+        mongoUserCollectionNameSchema,
+        process.env.MONGO_USER_COLLECTION_NAME
+    );
+
+    if (!mongoUserCollectionNameResult.success) {
+        throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, {
+            issues: mongoUserCollectionNameResult.issues,
+        });
+    }
+
+    const mongoJobsCollectionNameResult = parseSchema(
+        mongoJobsCollectionNameSchema,
+        process.env.MONGO_JOBS_COLLECTION_NAME
+    );
+
+    if (!mongoJobsCollectionNameResult.success) {
+        throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, {
+            issues: mongoJobsCollectionNameResult.issues,
         });
     }
 

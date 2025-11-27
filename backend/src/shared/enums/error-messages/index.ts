@@ -17,14 +17,18 @@ export enum ErrorMessage {
     DATABASE_ERROR = 'Database error',
     TOKEN_ERROR = 'Token error',
     UNEXPECTED_ERROR = 'Unexpected error',
-    CRON_JOB_SCHEMA_VALIDATION_FAILED = 'Cron job schema validation failed',
-    CRON_JOB_NOT_FOUND_IN_DATABASE = 'Cron job not found in database',
-    CRON_JOB_NOT_FOUND_IN_MEMORY = 'Cron job not found in memory',
-    CRON_JOB_START_DATE_IN_FUTURE = 'Start date must be in the future',
-    CRON_JOB_START_DATE_COME_BEFORE_END_DATE = 'Start date must come before end date',
+    JOBS_SCHEMA_VALIDATION_FAILED = 'Job schema validation failed',
+    JOBS_NOT_FOUND_IN_DATABASE = 'Jobs not found in database',
+    JOBS_NOT_FOUND_IN_MEMORY = 'Job not found in memory',
+    JOBS_START_DATE_IN_FUTURE = 'Start date must be in the future',
+    JOBS_START_DATE_COME_BEFORE_END_DATE = 'Start date must come before end date',
+    JOBS_ONCE_TYPE_CANNOT_HAVE_END_DATE = 'Jobs schedule type "once" cannot have an end date',
+    JOBS_CANNOT_BE_UPDATED_WHILE_RUNNING = 'Cannot update a job while it is running',
     DATABASE_OPERATION_FAILED_ERROR = 'Database operation failed',
     MONGO_CLIENT_MANAGER_INSTANCE_NOT_FOUND = 'Options are required to create a new MongoClientManager instance',
     MONGO_CLIENT_NOT_CONNECTED = 'MongoClient is not connected',
+    DELEGATOR_TASK_NOT_FOUND_IN_MEMORY = 'Delegator task not found in memory',
+    DELEGATOR_COULD_NOT_FIND_SCHEDULED_TASK = 'Delegator could not find scheduled task',
 }
 
 /**
@@ -43,4 +47,6 @@ export enum EnvErrorMessage {
     PROD_DOMAIN_REQUIRED = 'PROD_DOMAIN is required',
     MAX_DB_RETRIES_INVALID = 'MAX_DB_RETRIES must be a positive integer',
     DB_RETRY_DELAY_MS_INVALID = 'DB_RETRY_DELAY_MS must be a positive integer',
+    MONGO_USER_COLLECTION_NAME_REQUIRED = 'MONGO_USER_COLLECTION_NAME is required',
+    MONGO_JOBS_COLLECTION_NAME_REQUIRED = 'MONGO_JOBS_COLLECTION_NAME is required',
 }

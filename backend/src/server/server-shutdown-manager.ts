@@ -178,7 +178,7 @@ export class ShutdownManager {
             for (const job of allJobs) {
                 try {
                     scheduler.stop(job.id);
-                    logger.info(`Stopped cron job: ${job.cronTask.name}`);
+                    logger.info(`Stopped cron job: ${job.cronTask?.name || job.id}`);
                 } catch (error) {
                     logger.warn(`Failed to stop cron job ${job.id}`, { error: error as Error });
                 }

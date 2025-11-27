@@ -41,7 +41,7 @@ const validateJobSchedule = (
         });
     }
 
-    if (payload.schedule?.type === 'once' && !payload.schedule?.endDate) {
+    if (payload.schedule?.type === 'once' && payload.schedule?.endDate) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: ErrorMessage.JOBS_ONCE_TYPE_CANNOT_HAVE_END_DATE,

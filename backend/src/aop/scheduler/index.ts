@@ -153,7 +153,7 @@ export class Scheduler {
 
         logger.info(
             isOfTypeOnce
-                ? `Scheduled once job to execute at ${startDate.toISOString()}: ${payload.name}`
+                ? `Scheduled a job of type "once" to execute at ${startDate.toISOString()}: ${payload.name}`
                 : `Scheduled cron-job to start at ${startDate.toISOString()}: ${payload.name} with expression: ${cronExpression}`
         );
 

@@ -38,7 +38,7 @@ export const initializeDatabase = async () => {
     /**
      * Check if all cron jobs are scheduled in case the server crashed.
      */
-    logger.info('Checking if all cron jobs are scheduled');
+    logger.info('Checking if all jobs are scheduled or delegated');
 
     // Create a new database context
     const transaction = {
@@ -60,7 +60,7 @@ export const initializeDatabase = async () => {
         for (const job of persistedJobs) {
             if (job.schedule) {
                 schedulerInstance.schedule({
-                    id: job._id.toString(),
+                    id: job.id,
                     name: job.name,
                     timestamp: job.createdAt,
                     type: job.schedule.type,
@@ -70,7 +70,7 @@ export const initializeDatabase = async () => {
             } else {
                 // Delegate the job immediately when it has no schedule
                 delegatorInstance.delegate({
-                    jobId: job._id.toString(),
+                    jobId: job.id,
                     name: job.name,
                     tools: job.tools,
                 });

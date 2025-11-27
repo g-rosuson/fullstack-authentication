@@ -131,15 +131,24 @@ class JobRepository {
     async getAll(limit: number, offset: number) {
         const jobDocuments = await this.db.collection(this.collectionName).find().skip(offset).limit(limit).toArray();
 
-        return jobDocuments.map(doc => {
-            const result = parseSchema(jobDocumentSchema, doc);
+        const mappedJobs = [];
+
+        for (const jobDocument of jobDocuments) {
+            const result = parseSchema(jobDocumentSchema, jobDocument);
 
             if (!result.success) {
                 throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, { issues: result.issues });
             }
 
-            return result.data;
-        });
+            const mappedJob = {
+                id: result.data._id.toString(),
+                ...result.data,
+            };
+
+            mappedJobs.push(mappedJob);
+        }
+
+        return mappedJobs;
     }
 }
 

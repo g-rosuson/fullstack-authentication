@@ -9,7 +9,7 @@ import { ErrorMessage } from 'shared/enums/error-messages';
 
 import type { CreateUserPayload } from './types';
 
-import { userDocumentSchema } from 'shared/schemas/db/documents/user';
+import { userDocumentSchema } from './schemas';
 
 /**
  * UserRepository encapsulates all user-related database operations.

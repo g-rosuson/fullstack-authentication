@@ -88,17 +88,18 @@ export class Delegator {
      * For each target in the tool's configuration, this method:
      * - Executes the appropriate tool handler from the registry
      * - Collects successful results and errors separately
-     * - Emits job-target-event for each target execution
+     * - Emits job-target-event for each target execution (includes jobId for event correlation)
      *
      * Tool execution errors are caught gracefully by the tool handlers and returned in the
      * errors array rather than being thrown. This allows partial success scenarios where
      * some targets succeed while others fail.
      *
+     * @param jobId The unique identifier of the job this tool belongs to
      * @param tool The tool to execute, typed as ToolMap[T] for type safety
      * @returns An object containing arrays of results and errors from all target executions
      *          (never throws - all errors are collected in the errors array)
      */
-    private async executeTool<T extends ToolType>(tool: ToolMap[T]) {
+    private async executeTool<T extends ToolType>(jobId: string, tool: ToolMap[T]) {
         const errors: TargetError[] = [];
         const results: ToolResultMap[T][] = [];
 
@@ -118,6 +119,7 @@ export class Delegator {
 
             // Emit event for each target execution to allow external monitoring
             this.eventBus.emit('job-target-event', {
+                jobId,
                 targetId: config.id,
                 error: result.error,
                 result: result.output,
@@ -165,7 +167,7 @@ export class Delegator {
             for (let toolIndex = 0; toolIndex < tmpTask.tools.length; toolIndex++) {
                 const toolConfig = tmpTask.tools[toolIndex];
 
-                const { results, errors } = await this.executeTool(toolConfig);
+                const { results, errors } = await this.executeTool(task.jobId, toolConfig);
 
                 // Type assertion is safe: toolConfig.type is a discriminated union literal ('scraper' | 'email'),
                 // which guarantees executeTool runs the correct tool at runtime. The assertion tells TS what we know to be true.

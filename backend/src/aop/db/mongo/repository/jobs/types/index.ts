@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { cronJobTypeSchema, emailToolSchema, scraperToolSchema } from 'shared/schemas/jobs';
+import { cronJobTypeSchema, scraperToolSchema } from 'shared/schemas/jobs';
 
 /**
  * A scraper tool.
@@ -8,14 +8,9 @@ import { cronJobTypeSchema, emailToolSchema, scraperToolSchema } from 'shared/sc
 type ScraperTool = z.infer<typeof scraperToolSchema>;
 
 /**
- * An email tool.
- */
-type EmailTool = z.infer<typeof emailToolSchema>;
-
-/**
  * A union of all available tool types.
  */
-type Tool = ScraperTool | EmailTool;
+type Tool = ScraperTool;
 
 /**
  * A create job payload schema.

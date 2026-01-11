@@ -31,7 +31,7 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
         const body = req.body;
         const timestamp = new Date(body.timestamp);
         let schedule = null;
-
+        body.tools;
         // Create the schedule object if it's defined
         if (body.schedule) {
             schedule = {
@@ -49,10 +49,9 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
+                    results: null,
                     id: crypto.randomUUID(),
                 })),
-                results: null,
-                errors: null,
             })),
             schedule,
             createdAt: timestamp,
@@ -154,6 +153,7 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
+                    results: null,
                     // Add an ID for new targets
                     id: item.id || crypto.randomUUID(),
                 })),

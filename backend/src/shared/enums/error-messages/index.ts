@@ -27,8 +27,8 @@ export enum ErrorMessage {
     DATABASE_OPERATION_FAILED_ERROR = 'Database operation failed',
     MONGO_CLIENT_MANAGER_INSTANCE_NOT_FOUND = 'Options are required to create a new MongoClientManager instance',
     MONGO_CLIENT_NOT_CONNECTED = 'MongoClient is not connected',
-    DELEGATOR_TASK_NOT_FOUND_IN_MEMORY = 'Delegator task not found in memory',
-    DELEGATOR_COULD_NOT_FIND_SCHEDULED_TASK = 'Delegator could not find scheduled task',
+    DELEGATOR_JOB_NOT_FOUND_IN_MEMORY = 'Delegator job not found in memory',
+    DELEGATOR_COULD_NOT_FIND_SCHEDULED_JOB = 'Delegator could not find scheduled job',
 }
 
 /**

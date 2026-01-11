@@ -1,36 +1,38 @@
 import z from 'zod';
 
 /**
- * A result schema for a target.
+ * A cron job type schema.
  */
-const resultSchema = z.object({
-    targetId: z.string(),
-    output: z.object({}),
-});
-
 const cronJobTypeSchema = z.enum(['once', 'daily', 'weekly', 'monthly', 'yearly']);
 
 /**
- * An error schema for a target.
+ * A result error schema.
  */
-const targetErrorSchema = z.object({
-    targetId: z.string(),
+const resultErrorSchema = z.object({
     message: z.string(),
 });
 
 /**
  * A scraper result schema.
  */
-const scraperResultSchema = resultSchema.extend({
-    target: z.string().url(),
-    keywords: z.array(z.string()),
-    maxPages: z.number().positive(),
+const scraperResultSchema = z.object({
+    // Due to navigation a target result can have a different url than the parent target
+    url: z.string().url(),
+    result: z
+        .object({
+            title: z.string(),
+            description: z.string(),
+        })
+        .nullable(),
+    error: resultErrorSchema.nullable(),
 });
 
 /**
  * A scraper target schema.
  */
 const scraperTargetSchema = z.object({
+    // Results contains error and result
+    results: z.array(scraperResultSchema).nullable(),
     keywords: z.array(z.string()).optional(),
     maxPages: z.number().positive().optional(),
     target: z.string().url(),
@@ -45,52 +47,16 @@ const scraperToolSchema = z.object({
     targets: z.array(scraperTargetSchema),
     keywords: z.array(z.string()),
     maxPages: z.number().positive(),
-    results: z.array(scraperResultSchema).nullable(),
-    errors: z.array(targetErrorSchema).nullable(),
 });
 
 /**
- * An email result schema.
+ * A tool targets schema.
  */
-const emailResultSchema = resultSchema.extend({
-    target: z.string().email(),
-    subject: z.string(),
-    body: z.string(),
-});
-
-/**
- * An email target schema.
- */
-const emailTargetSchema = z.object({
-    subject: z.string().optional(),
-    body: z.string().optional(),
-    target: z.string().email(),
-    id: z.string(),
-});
-
-/**
- * A email tool schema.
- */
-const emailToolSchema = z.object({
-    type: z.literal('email'),
-    targets: z.array(emailTargetSchema),
-    subject: z.string(),
-    body: z.string(),
-    results: z.array(emailResultSchema).nullable(),
-    errors: z.array(targetErrorSchema).nullable(),
-});
+const toolTargetsSchema = z.array(scraperTargetSchema);
 
 /**
  * A tool has targets and the configuration of the members vary depending on the tool type.
  */
-const toolSchema = z.union([scraperToolSchema, emailToolSchema]);
+const toolSchema = scraperToolSchema;
 
-export {
-    cronJobTypeSchema,
-    targetErrorSchema,
-    scraperResultSchema,
-    emailResultSchema,
-    scraperToolSchema,
-    emailToolSchema,
-    toolSchema,
-};
+export { resultErrorSchema, cronJobTypeSchema, scraperResultSchema, scraperToolSchema, toolSchema, toolTargetsSchema };

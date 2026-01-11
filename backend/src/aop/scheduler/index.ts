@@ -122,7 +122,7 @@ export class Scheduler {
         if (payload.type !== 'once') {
             // Format the cron expression and create task only for recurring jobs
             cronExpression = this.formatCronExpression({ startDate, type: payload.type });
-            cronTask = cron.createTask(cronExpression, () => delegator.delegateScheduledTask(cronJobId));
+            cronTask = cron.createTask(cronExpression, () => delegator.delegateScheduledJob(cronJobId));
         }
 
         const newCronJob: CronJob = {
@@ -140,7 +140,7 @@ export class Scheduler {
         newCronJob.metadata.startTimeoutId = setTimeout(() => {
             if (isOfTypeOnce) {
                 // For 'once' jobs, execute immediately via delegator
-                delegator.delegateScheduledTask(cronJobId);
+                delegator.delegateScheduledJob(cronJobId);
                 logger.info(`Executed once job: ${payload.name} immediately at scheduled time`);
                 this.delete(cronJobId);
             } else {

@@ -1,5 +1,12 @@
 import type { ExecuteFunction } from '../../types';
 
+import { PlaywrightCrawler, RequestQueue } from 'crawlee';
+
+// TODO: 1. How can we return the results and errors from a target, before continuing to the next target?
+// TODO: And handle pagination?
+
+// TODO: jobs.ch uses url state to render content: https://www.jobs.ch/en/vacancies/?term=frontend%20developer
+
 /**
  * Scraper tool handler for executing web scraping job operations.
  *
@@ -32,21 +39,33 @@ class Scraper {
      * @param config - Target-specific configuration that can override tool defaults
      * @returns Promise resolving to the scraping execution result with output, metadata, and timestamp
      */
-    async execute({ tool, config }: Parameters<ExecuteFunction<'scraper'>>[0]): ReturnType<ExecuteFunction<'scraper'>> {
-        const hasKeywordsOverride = !!config.keywords?.length;
-        const hasMaxPagesOverride = config.maxPages && config.maxPages > 0;
+    async execute({ tool }: Parameters<ExecuteFunction<'scraper'>>[0]): ReturnType<ExecuteFunction<'scraper'>> {
+        const requests = tool.targets.map(target => ({
+            url: target.target,
+            metadata: {
+                keywords: target.keywords || tool.keywords,
+            },
+            targetId: target.id,
+        }));
 
-        const error = null;
+        const requestQueue = await RequestQueue.open();
+        await requestQueue.addRequests(requests);
 
-        return {
-            output: {},
-            targetId: config.id,
-            target: config.target,
-            keywords: hasKeywordsOverride ? config.keywords! : tool.keywords,
-            maxPages: hasMaxPagesOverride ? config.maxPages! : tool.maxPages,
-            error,
-            timestamp: Date.now(),
-        };
+        const crawler = new PlaywrightCrawler({
+            requestQueue,
+            async requestHandler({ page, request }) {
+                await page.goto(request.url);
+
+                // Find search input and enter keywords if provided
+                const keywords = request.userData?.keywords as string[] | undefined;
+
+                if (keywords && keywords.length > 0) {
+                    // const searchQuery = keywords.join(' ');
+                }
+            },
+        });
+
+        await crawler.run();
     }
 }
 

@@ -2,26 +2,9 @@ import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 
 import { validateJobSchedule } from './schemas-validators';
-import { cronJobTypeSchema, emailResultSchema, scraperResultSchema, targetErrorSchema } from 'shared/schemas/jobs';
+import { cronJobTypeSchema, resultErrorSchema, scraperResultSchema } from 'shared/schemas/jobs';
 
 extendZodWithOpenApi(z);
-
-/**
- * An email tool payload schema.
- */
-const emailToolPayloadSchema = z.object({
-    type: z.literal('email'),
-    targets: z.array(
-        z.object({
-            target: z.string().email(),
-            subject: z.string().optional(),
-            body: z.string().optional(),
-            id: z.string().optional(),
-        })
-    ),
-    subject: z.string(),
-    body: z.string(),
-});
 
 /**
  * A scraper tool payload schema.
@@ -54,7 +37,7 @@ const createJobPayloadSchema = z
                 endDate: z.coerce.date().nullable(),
             })
             .nullable(),
-        tools: z.array(z.union([scraperToolPayloadSchema, emailToolPayloadSchema])).min(1),
+        tools: z.array(scraperToolPayloadSchema).min(1),
     })
     .superRefine(validateJobSchedule)
     .openapi('CreateJobPayload');
@@ -64,15 +47,7 @@ const createJobPayloadSchema = z
  */
 const updateScraperToolPayloadSchema = scraperToolPayloadSchema.extend({
     results: z.array(scraperResultSchema).nullable(),
-    errors: z.array(targetErrorSchema).nullable(),
-});
-
-/**
- * A email tool payload schema for updating a job.
- */
-const updateEmailToolPayloadSchema = emailToolPayloadSchema.extend({
-    results: z.array(emailResultSchema).nullable(),
-    errors: z.array(targetErrorSchema).nullable(),
+    errors: z.array(resultErrorSchema).nullable(),
 });
 
 /**
@@ -89,7 +64,7 @@ const updateJobPayloadSchema = z
                 endDate: z.coerce.date().nullable(),
             })
             .nullable(),
-        tools: z.array(z.union([updateScraperToolPayloadSchema, updateEmailToolPayloadSchema])).min(1),
+        tools: z.array(updateScraperToolPayloadSchema).min(1),
     })
     .superRefine(validateJobSchedule)
     .openapi('UpdateJobPayload');

@@ -1,12 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { z } from 'zod';
 
-import { emailToolSchema, scraperToolSchema, targetErrorSchema } from 'shared/schemas/jobs';
-
-/**
- * A target error.
- */
-type TargetError = z.infer<typeof targetErrorSchema>;
+import { scraperResultSchema, scraperToolSchema } from 'shared/schemas/jobs';
 
 /**
  * A scraper tool.
@@ -14,20 +9,14 @@ type TargetError = z.infer<typeof targetErrorSchema>;
 type ScraperTool = z.infer<typeof scraperToolSchema>;
 
 /**
- * An email tool.
- */
-type EmailTool = z.infer<typeof emailToolSchema>;
-
-/**
  * A union of all available tool types.
  */
-type Tool = ScraperTool | EmailTool;
+type Tool = ScraperTool;
 
 /**
- * Represents a task containing one or more tools to be executed.
- * A task groups related tool executions under a single job identifier.
+ * Represents a job containing one or more tools to be executed.
  */
-type Task = {
+type Job = {
     jobId: string;
     name: string;
     tools: Tool[];
@@ -39,41 +28,6 @@ type Task = {
  */
 type ToolMap = {
     scraper: ScraperTool;
-    email: EmailTool;
-};
-
-/**
- * Configuration map for executing each tool type.
- * Each tool type has its own configuration structure that matches its specific requirements.
- */
-type ExecuteConfigMap = {
-    scraper: { id: string; target: string; keywords?: string[]; maxPages?: number };
-    email: { id: string; target: string; subject?: string; body?: string };
-};
-
-/**
- * Result map defining the structure of execution results for each tool type.
- * Each result includes output data, metadata, error information, and a timestamp.
- */
-type ToolResultMap = {
-    scraper: {
-        output: object;
-        targetId: string;
-        target: string;
-        keywords: string[];
-        maxPages: number;
-        error: { message: string; targetId: string } | null;
-        timestamp: number;
-    };
-    email: {
-        output: object;
-        targetId: string;
-        target: string;
-        subject: string;
-        body: string;
-        error: { message: string; targetId: string } | null;
-        timestamp: number;
-    };
 };
 
 /**
@@ -88,24 +42,26 @@ type ToolRegistry = {
 
 /**
  * Union type of all available tool type keys.
- * Currently: 'scraper' | 'email'
  */
 type ToolType = keyof ToolMap;
 
 /**
- * Function signature for executing a tool of a specific type.
- *
- * @template T - The tool type key (e.g., 'scraper' | 'email')
- * @param tool - The tool instance to execute, typed as ToolMap[T]
- * @param config - The execution configuration, typed as ExecuteConfigMap[T]
- * @returns A promise resolving to the tool's result, typed as ToolResultMap[T]
+ * A target result.
+ */
+type TargetResult = {
+    targetId: string;
+    results: z.infer<typeof scraperResultSchema>[];
+};
+
+/**
+ * A function to execute a tool.
  */
 type ExecuteFunction<T extends ToolType> = ({
     tool,
-    config,
+    onTargetFinish,
 }: {
     tool: ToolMap[T];
-    config: ExecuteConfigMap[T];
-}) => Promise<ToolResultMap[T]>;
+    onTargetFinish: (targetResult: TargetResult) => void;
+}) => Promise<void>;
 
-export type { ExecuteFunction, ToolResultMap, ToolType, ToolRegistry, ToolMap, Task, TargetError };
+export type { ExecuteFunction, TargetResult, ToolType, ToolRegistry, ToolMap, Job };

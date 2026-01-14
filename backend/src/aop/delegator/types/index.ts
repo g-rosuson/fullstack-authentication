@@ -50,7 +50,7 @@ type ToolType = keyof ToolMap;
  */
 type TargetResult = {
     targetId: string;
-    results: z.infer<typeof scraperResultSchema>[];
+    results: z.infer<typeof scraperResultSchema>[] | null;
 };
 
 /**

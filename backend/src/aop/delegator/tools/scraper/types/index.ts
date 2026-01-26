@@ -1,24 +1,29 @@
-import type constants from '../constants';
-import type { descriptionSectionSchema, informationItemSchema } from 'shared/schemas/jobs';
 import type { z } from 'zod';
 
-type PlatformConfigKey = keyof typeof constants.platformConfiguration;
+import { requestUserDataSchema } from '../schemas';
+import { descriptionSectionSchema, informationItemSchema } from 'shared/schemas/jobs';
 
-type PlatformConfiguration = (typeof constants.platformConfiguration)[PlatformConfigKey];
-
+/**
+ * A description section type.
+ */
 type DescriptionSection = z.infer<typeof descriptionSectionSchema>;
 
+/**
+ * An information item type.
+ */
 type InformationItem = z.infer<typeof informationItemSchema>;
 
+/**
+ * A request user data type.
+ */
+type RequestUserData = z.infer<typeof requestUserDataSchema>;
+
+/**
+ * A scraper request interface.
+ */
 interface Request {
     url: string;
-    label: string;
-    userData: {
-        targetId: string;
-        platformConfiguration: PlatformConfiguration;
-        keywords: string[];
-        maxPages: number;
-    };
+    userData: RequestUserData;
 }
 
-export type { DescriptionSection, InformationItem, PlatformConfigKey, PlatformConfiguration, Request };
+export type { DescriptionSection, InformationItem, Request, RequestUserData };

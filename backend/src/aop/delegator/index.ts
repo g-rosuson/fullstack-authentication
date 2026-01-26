@@ -84,7 +84,7 @@ export class Delegator {
 
             // Ensure the target exists - this should never happen if tool execution is correct
             if (!targetToUpdate) {
-                throw new InternalException('Target not found');
+                throw new InternalException(ErrorMessage.UNEXPECTED_ERROR, { jobId });
             }
 
             // Update the target with its execution results

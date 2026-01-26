@@ -79,11 +79,21 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
             });
         } else {
             // Delegate the job immediately when it has no schedule
-            req.context.delegator.delegate({
-                jobId: createdJob.id,
-                name: createdJob.name,
-                tools: createdJob.tools,
-            });
+            req.context.delegator
+                .delegate({
+                    jobId: createdJob.id,
+                    name: createdJob.name,
+                    tools: createdJob.tools,
+                    /**
+                     * The "forwardAsyncError" middleware only catches errors from the promise
+                     * chain that the route handler returns. And since this is a fire-and-forget
+                     * promise, we need to explicitly catch the error.
+                     */
+                })
+                .catch(error => {
+                    // TODO: Add proper error logging.
+                    logger.error('Failed to delegate job', { error: error as Error });
+                });
         }
 
         // Commit the transaction

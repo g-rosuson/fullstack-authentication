@@ -13,19 +13,41 @@ const resultErrorSchema = z.object({
 });
 
 /**
+ * A description section schema.
+ */
+const descriptionSectionSchema = z.object({
+    title: z.string().optional(),
+    blocks: z.array(z.string()),
+});
+
+/**
+ * An information item schema.
+ */
+const informationItemSchema = z.object({
+    label: z.string(),
+    value: z.string(),
+});
+
+/**
  * A scraper result schema.
  */
 const scraperResultSchema = z.object({
-    // Due to navigation a target result can have a different url than the parent target
-    url: z.string().url(),
     result: z
         .object({
+            url: z.string().url(),
             title: z.string(),
-            description: z.string(),
+            description: z.array(descriptionSectionSchema),
+            information: z.array(informationItemSchema),
         })
         .nullable(),
     error: resultErrorSchema.nullable(),
 });
+
+/**
+ * A platform target schema.
+ * Platform identifier - extendable: 'linkedin', 'indeed', etc.
+ */
+const targetSchema = z.enum(['jobs-ch']);
 
 /**
  * A scraper target schema.
@@ -35,7 +57,7 @@ const scraperTargetSchema = z.object({
     results: z.array(scraperResultSchema).nullable(),
     keywords: z.array(z.string()).optional(),
     maxPages: z.number().positive().optional(),
-    target: z.string().url(),
+    target: targetSchema,
     id: z.string(),
 });
 
@@ -59,4 +81,14 @@ const toolTargetsSchema = z.array(scraperTargetSchema);
  */
 const toolSchema = scraperToolSchema;
 
-export { resultErrorSchema, cronJobTypeSchema, scraperResultSchema, scraperToolSchema, toolSchema, toolTargetsSchema };
+export {
+    descriptionSectionSchema,
+    informationItemSchema,
+    resultErrorSchema,
+    cronJobTypeSchema,
+    targetSchema,
+    scraperResultSchema,
+    scraperToolSchema,
+    toolSchema,
+    toolTargetsSchema,
+};

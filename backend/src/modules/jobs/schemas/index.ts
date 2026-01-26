@@ -2,7 +2,7 @@ import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 
 import { validateJobSchedule } from './schemas-validators';
-import { cronJobTypeSchema, resultErrorSchema, scraperResultSchema } from 'shared/schemas/jobs';
+import { cronJobTypeSchema, resultErrorSchema, scraperResultSchema, targetSchema } from 'shared/schemas/jobs';
 
 extendZodWithOpenApi(z);
 
@@ -13,8 +13,8 @@ const scraperToolPayloadSchema = z.object({
     type: z.literal('scraper'),
     targets: z.array(
         z.object({
-            target: z.string().url(),
-            keywords: z.array(z.string()).optional(),
+            target: targetSchema,
+            keywords: z.array(z.string()).min(1).optional(),
             maxPages: z.number().positive().optional(),
             id: z.string().optional(),
         })
@@ -44,6 +44,7 @@ const createJobPayloadSchema = z
 
 /**
  * A scraper tool payload schema for updating a job.
+ * @private
  */
 const updateScraperToolPayloadSchema = scraperToolPayloadSchema.extend({
     results: z.array(scraperResultSchema).nullable(),

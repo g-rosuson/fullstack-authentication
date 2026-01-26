@@ -5,11 +5,11 @@
  * @returns The camelCase version of the string (e.g., 'jobsCh')
  *
  * @example
- * kebabToCamel('jobs-ch') // returns 'jobsCh'
- * kebabToCamel('my-target') // returns 'myTarget'
+ * kebabToCamelCase('jobs-ch') // returns 'jobsCh'
+ * kebabToCamelCase('my-target') // returns 'myTarget'
  */
-const kebabToCamel = (str: string): string => {
+const kebabToCamelCase = (str: string): string => {
     return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 };
 
-export { kebabToCamel };
+export { kebabToCamelCase };

@@ -29,6 +29,10 @@ const maxDbRetriesSchema = z.coerce.number().int().positive(EnvErrorMessage.MAX_
 
 const dbRetryDelayMsSchema = z.coerce.number().int().positive(EnvErrorMessage.DB_RETRY_DELAY_MS_INVALID).default(5000);
 
+const mongoUserCollectionNameSchema = z.string().min(1, EnvErrorMessage.MONGO_USER_COLLECTION_NAME_REQUIRED);
+
+const mongoJobsCollectionNameSchema = z.string().min(1, EnvErrorMessage.MONGO_JOBS_COLLECTION_NAME_REQUIRED);
+
 export {
     nodeEnvSchema,
     devClientUrlSchema,
@@ -42,4 +46,6 @@ export {
     baseRoutePathSchema,
     maxDbRetriesSchema,
     dbRetryDelayMsSchema,
+    mongoUserCollectionNameSchema,
+    mongoJobsCollectionNameSchema,
 };

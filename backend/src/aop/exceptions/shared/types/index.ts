@@ -11,6 +11,7 @@ export interface ExceptionContext {
     error?: Error;
     issues?: ValidationIssue[];
     userId?: string;
+    jobId?: string;
 }
 
 /**

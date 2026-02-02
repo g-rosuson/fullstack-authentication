@@ -10,7 +10,7 @@ export { InputValidationException, SchemaValidationException } from './errors/va
 export { TokenException, UnauthorizedException } from './errors/authentication';
 
 // Resource-related exceptions
-export { ConflictException, ResourceNotFoundException } from './errors/resource';
+export { BusinessLogicException, ConflictException, ResourceNotFoundException } from './errors/resource';
 
 // Database exceptions
 export { DatabaseException } from './errors/database';

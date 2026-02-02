@@ -3,8 +3,8 @@ import cors from 'cors';
 import express from 'express';
 
 import authenticationRoutes from 'modules/auth/auth-routing';
-import cronJobsRoutes from 'modules/cron-jobs/cron-jobs-routing';
 import documentationRoute from 'modules/docs/docs-routing';
+import jobsRoutes from 'modules/jobs/jobs-routing';
 
 // import { authenticate } from 'modules/shared/middleware/authenticate';
 import { exceptionsMiddleware } from 'aop/exceptions';
@@ -38,10 +38,10 @@ const init = async () => {
     // Documentation
     server.use(config.basePath, documentationRoute);
 
-    // Cron jobs
-    server.use(config.basePath, cronJobsRoutes);
+    // Jobs
+    server.use(config.basePath, jobsRoutes);
 
-    // Add exception middleware
+    // Exception middleware
     server.use(exceptionsMiddleware());
 
     return server;

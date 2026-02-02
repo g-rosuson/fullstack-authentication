@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { userDocumentSchema } from 'shared/schemas/db/documents/user';
+import { userDocumentSchema } from '../schemas';
 
 type __UserDocument = z.infer<typeof userDocumentSchema>;
 type __PickedUserDocument = Pick<__UserDocument, 'firstName' | 'lastName' | 'password' | 'email'>;

@@ -1,20 +1,29 @@
 import { ScheduledTask } from 'node-cron';
 import { z } from 'zod';
 
-import { cronJobDocumentSchema } from 'shared/schemas/db/documents/cron-job';
+import { cronJobTypeSchema } from 'shared/schemas/jobs';
 
-type __CronJobDocument = z.infer<typeof cronJobDocumentSchema>;
-type __PickedCronJobDocument = Pick<__CronJobDocument, 'name' | 'time' | 'type' | 'startDate' | 'endDate'>;
+interface FormatCronExpressionPayload {
+    startDate: Date;
+    type: Exclude<z.infer<typeof cronJobTypeSchema>, 'once'>;
+}
 
-type ScheduleCronJobPayload = __PickedCronJobDocument & { id: string } & { taskFn: () => Promise<void> };
-type FormatCronExpressionPayload = Pick<__CronJobDocument, 'startDate' | 'type'>;
+interface SchedulePayload {
+    id: string;
+    name: string;
+    type: z.infer<typeof cronJobTypeSchema>;
+    timestamp: Date;
+    startDate: Date;
+    endDate: Date | null;
+}
 
 interface CronJob {
-    cronTask: ScheduledTask;
+    endDate: Date | null;
+    cronTask: ScheduledTask | undefined;
     metadata: {
         startTimeoutId: NodeJS.Timeout | undefined;
         stopTimeoutId: NodeJS.Timeout | undefined;
     };
 }
 
-export type { CronJob, ScheduleCronJobPayload, FormatCronExpressionPayload };
+export type { CronJob, SchedulePayload, FormatCronExpressionPayload };

@@ -18,13 +18,13 @@ const config = {
                 // Whether to create an index for this collection at startup
                 index: true,
             },
-            cronJobs: {
-                name: process.env.MONGO_CRON_JOBS_COLLECTION_NAME!,
+            jobs: {
+                name: process.env.MONGO_JOBS_COLLECTION_NAME!,
                 // Field to create index on (e.g., 'name')
                 targetField: 'name',
                 // Index sort order: 1 for ascending, -1 for descending
                 targetValue: 1,
-                // Whether the index should enforce uniqueness
+                // Enforce unique job names for clear identification in dashboards
                 unique: true,
                 // Whether to create an index for this collection at startup
                 index: true,

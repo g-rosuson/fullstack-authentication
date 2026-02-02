@@ -1,7 +1,7 @@
 import type { Transaction } from './types';
 import type { Db } from 'mongodb';
 
-import { CronJobRepository } from '../repository/cron-job';
+import { JobRepository } from '../repository/jobs';
 import { UserRepository } from '../repository/user';
 
 /**
@@ -10,7 +10,7 @@ import { UserRepository } from '../repository/user';
  * and exposes transaction utilities for supporting advanced data operations like atomic multi-step actions.
  *
  * Key responsibilities:
- * - Provides a strongly-typed interface to domain repositories (users, cronJobs, etc.)
+ * - Provides a strongly-typed interface to domain repositories (users, jobs, etc.)
  * - Handles MongoDB transaction/session management for atomicity and data consistency
  * - Facilitates clean, testable architecture by isolating database infrastructure concerns
  * - Promotes consistent database access patterns throughout the project
@@ -25,7 +25,7 @@ export class DbContext {
     /** Repository for database collections operations */
     public readonly repository: {
         users: UserRepository;
-        cronJobs: CronJobRepository;
+        jobs: JobRepository;
     };
     /** Transaction for database operations */
     public readonly transaction: Transaction;
@@ -39,7 +39,7 @@ export class DbContext {
         this.db = db;
         this.repository = {
             users: new UserRepository(db),
-            cronJobs: new CronJobRepository(db),
+            jobs: new JobRepository(db),
         };
         this.transaction = transaction;
     }

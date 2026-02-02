@@ -1,10 +1,9 @@
 import cron from 'node-cron';
 
-import { ResourceNotFoundException } from 'aop/exceptions';
+import { Delegator } from 'aop/delegator';
 import { logger } from 'aop/logging';
 
-import { CronJob, FormatCronExpressionPayload, ScheduleCronJobPayload } from './types';
-import { ErrorMessage } from 'shared/enums/error-messages';
+import { CronJob, FormatCronExpressionPayload, SchedulePayload } from './types';
 
 /**
  * Singleton scheduler service that manages cron jobs using node-cron.
@@ -72,6 +71,7 @@ export class Scheduler {
 
             case 'yearly':
                 // Run every year on the date specified in startDate at specified time
+                // Note: weekday is '*' because we want the specific calendar date, not a weekday-based rule
                 return `${minute} ${hour} ${monthDay} ${month} *`;
         }
     }
@@ -90,29 +90,42 @@ export class Scheduler {
      *
      * @param payload - The cron job payload
      */
-    schedule(payload: ScheduleCronJobPayload) {
+    schedule(payload: SchedulePayload) {
         const cronJobId = payload.id;
         const startDate = payload.startDate;
         const endDate = payload.endDate;
-        const now = new Date(payload.time);
+        const now = new Date(payload.timestamp);
 
         // Delete an existing job and task if it exists
-        // Note: This will happen when updating a cron job
         const cronJob = this.cronJobs.get(cronJobId);
 
         if (cronJob) {
-            // Destroy the cron task from node-cron
-            cronJob.cronTask.destroy();
+            // Destroy the cron task from node-cron if it exists
+            if (cronJob.cronTask) {
+                cronJob.cronTask.destroy();
+            }
 
             // Delete the job from map and clear any pending timeouts
             this.delete(cronJobId);
         }
 
-        // Format the cron expression
-        const cronExpression = this.formatCronExpression({ startDate, type: payload.type });
+        // Get an instance of the delegator
+        const delegator = Delegator.getInstance();
 
-        // Only "schedule" the task
-        const cronTask = cron.createTask(cronExpression, payload.taskFn, { name: payload.name });
+        // For 'once' jobs, we don't need a cronTask or cronExpression
+        const isOfTypeOnce = payload.type === 'once';
+        let cronTask: ReturnType<typeof cron.createTask> | undefined;
+        let cronExpression: string | undefined;
+
+        if (payload.type !== 'once') {
+            // Format the cron expression and create task only for recurring jobs
+            cronExpression = this.formatCronExpression({ startDate, type: payload.type });
+
+            cronTask = cron.createTask(cronExpression, () => {
+                // TODO: Pass schedule/executions context from the cron task callback parameters to the handler
+                delegator.delegateScheduledJob(cronJobId);
+            });
+        }
 
         const newCronJob: CronJob = {
             cronTask,
@@ -120,27 +133,39 @@ export class Scheduler {
                 startTimeoutId: undefined,
                 stopTimeoutId: undefined,
             },
+            endDate,
         };
 
-        // Calculate the time to start the cron job
+        // Calculate the time to start the job
         const msToStart = startDate.getTime() - now.getTime();
 
         newCronJob.metadata.startTimeoutId = setTimeout(() => {
-            cronTask.start();
-
-            logger.info(`Started cron-job: ${payload.name} with expression: ${cronExpression}`);
+            if (isOfTypeOnce) {
+                // For 'once' jobs, execute immediately via delegator
+                // TODO: Pass custom schedule/executions context to the handler
+                delegator.delegateScheduledJob(cronJobId);
+                logger.info(`Executed once job: ${payload.name} immediately at scheduled time`);
+                this.delete(cronJobId);
+            } else {
+                cronTask!.start();
+                logger.info(
+                    `Started cron-job: ${payload.name} with expression: ${cronExpression} (type: ${payload.type})`
+                );
+            }
         }, msToStart);
 
         logger.info(
-            `Scheduled cron-job to start at ${startDate.toISOString()}: ${payload.name} with expression: ${cronExpression}`
+            isOfTypeOnce
+                ? `Scheduled a job of type "once" to execute at ${startDate.toISOString()}: ${payload.name}`
+                : `Scheduled cron-job to start at ${startDate.toISOString()}: ${payload.name} with expression: ${cronExpression}`
         );
 
-        // Calculate the time to stop the cron job
-        if (endDate) {
+        // Calculate the time to stop the cron job (skip for 'once' jobs)
+        if (endDate && !isOfTypeOnce) {
             const msToEnd = endDate.getTime() - now.getTime();
 
             newCronJob.metadata.stopTimeoutId = setTimeout(() => {
-                cronTask.stop();
+                cronTask!.stop();
 
                 logger.info(`Stopped cron-job with name: "${payload.name}" and id: "${cronJobId}" (end time reached)`);
             }, msToEnd);
@@ -158,22 +183,24 @@ export class Scheduler {
      * start/stop timeouts and destroys the underlying cron task.
      *
      * @param cronJobId - The cron job id to delete
-     * @throws Error if the cron job is not found in memory
      */
     delete(cronJobId: string) {
         const cronJobById = this.cronJobs.get(cronJobId);
 
         if (!cronJobById) {
-            throw new ResourceNotFoundException(ErrorMessage.CRON_JOB_NOT_FOUND_IN_MEMORY);
+            // TODO: Add to Sentry
+            logger.error(`Cannot find cron-job with id: "${cronJobId}" to delete`, {});
+        } else {
+            clearTimeout(cronJobById.metadata.startTimeoutId);
+            clearTimeout(cronJobById.metadata.stopTimeoutId);
+
+            if (cronJobById.cronTask) {
+                cronJobById.cronTask.destroy();
+            }
+
+            this.cronJobs.delete(cronJobId);
+            logger.info(`Deleted cron-job with id "${cronJobId}"`);
         }
-
-        clearTimeout(cronJobById.metadata.startTimeoutId);
-        clearTimeout(cronJobById.metadata.stopTimeoutId);
-
-        cronJobById.cronTask.destroy();
-        this.cronJobs.delete(cronJobId);
-
-        logger.info(`Deleted cron-job with name: "${cronJobById.cronTask.name}" and id "${cronJobId}"`);
     }
 
     /**
@@ -182,24 +209,25 @@ export class Scheduler {
      * The job can be restarted later by calling schedule() again.
      *
      * @param cronJobId - The cron job id to stop
-     * @throws Error if the cron job is not found in memory
      */
     stop(cronJobId: string) {
         const cronJobById = this.cronJobs.get(cronJobId);
 
         if (!cronJobById) {
-            throw new ResourceNotFoundException(ErrorMessage.CRON_JOB_NOT_FOUND_IN_MEMORY);
+            logger.error(`Cannot find cron-job with id: "${cronJobId}" to stop`, {});
+        } else {
+            clearTimeout(cronJobById.metadata.stopTimeoutId);
+            clearTimeout(cronJobById.metadata.startTimeoutId);
+
+            cronJobById.metadata.stopTimeoutId = undefined;
+            cronJobById.metadata.startTimeoutId = undefined;
+
+            if (cronJobById.cronTask) {
+                cronJobById.cronTask.stop();
+            }
+
+            logger.info(`Stopped cron-job with id: "${cronJobId}"`);
         }
-
-        clearTimeout(cronJobById.metadata.stopTimeoutId);
-        clearTimeout(cronJobById.metadata.startTimeoutId);
-
-        cronJobById.metadata.stopTimeoutId = undefined;
-        cronJobById.metadata.startTimeoutId = undefined;
-
-        cronJobById.cronTask.stop();
-
-        logger.info(`Stopped cron-job with name: "${cronJobById.cronTask.name}" and id: "${cronJobId}"`);
     }
 
     /**

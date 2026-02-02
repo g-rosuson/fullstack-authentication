@@ -50,15 +50,31 @@ const scraperResultSchema = z.object({
 const targetSchema = z.enum(['jobs-ch']);
 
 /**
- * A scraper target schema.
+ * A base target schema.
  */
-const scraperTargetSchema = z.object({
-    // Results contains error and result
+const baseTargetSchema = z.object({
     results: z.array(scraperResultSchema).nullable(),
-    keywords: z.array(z.string()).optional(),
-    maxPages: z.number().positive().optional(),
     target: targetSchema,
     id: z.string(),
+});
+
+/**
+ * A scraper target schema.
+ */
+const scraperTargetSchema = baseTargetSchema.extend({
+    keywords: z.array(z.string()).optional(),
+    maxPages: z.number().positive().optional(),
+});
+
+/**
+ * A schedule schema.
+ */
+const scheduleSchema = z.object({
+    type: cronJobTypeSchema,
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date().nullable(),
+    nextRun: z.coerce.date(),
+    lastRun: z.coerce.date().nullable(),
 });
 
 /**
@@ -81,6 +97,18 @@ const toolTargetsSchema = z.array(scraperTargetSchema);
  */
 const toolSchema = scraperToolSchema;
 
+/**
+ * A execution payload schema.
+ */
+const executionSchema = z.object({
+    schedule: z.object({
+        type: cronJobTypeSchema.nullable(),
+        delegatedAt: z.coerce.date(),
+        finishedAt: z.coerce.date().nullable(),
+    }),
+    tools: z.array(scraperToolSchema).min(1),
+});
+
 export {
     descriptionSectionSchema,
     informationItemSchema,
@@ -91,4 +119,6 @@ export {
     scraperToolSchema,
     toolSchema,
     toolTargetsSchema,
+    scheduleSchema,
+    executionSchema,
 };

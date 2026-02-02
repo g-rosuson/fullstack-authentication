@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { z } from 'zod';
 
-import { scraperResultSchema, scraperToolSchema } from 'shared/schemas/jobs';
+import { scheduleSchema, scraperResultSchema, scraperToolSchema } from 'shared/schemas/jobs';
 
 /**
  * A scraper tool.
@@ -16,11 +16,12 @@ type Tool = ScraperTool;
 /**
  * Represents a job containing one or more tools to be executed.
  */
-type Job = {
+interface Job {
     jobId: string;
     name: string;
     tools: Tool[];
-};
+    schedule: z.infer<typeof scheduleSchema> | null;
+}
 
 /**
  * Maps tool type keys to their corresponding tool implementations.

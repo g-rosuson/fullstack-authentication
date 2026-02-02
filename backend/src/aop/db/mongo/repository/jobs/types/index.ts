@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { cronJobTypeSchema, scraperToolSchema } from 'shared/schemas/jobs';
+import { jobDocumentSchema } from '../schemas';
+import { scheduleSchema, scraperToolSchema } from 'shared/schemas/jobs';
 
 /**
  * A scraper tool.
@@ -17,13 +18,7 @@ type Tool = ScraperTool;
  */
 interface CreateJobPayload {
     name: string;
-    schedule: {
-        type: z.infer<typeof cronJobTypeSchema>;
-        startDate: Date;
-        endDate: Date | null;
-        nextRun: Date;
-        lastRun: Date | null;
-    } | null;
+    schedule: z.infer<typeof scheduleSchema> | null;
     tools: Tool[];
     createdAt: Date;
 }
@@ -34,15 +29,14 @@ interface CreateJobPayload {
 interface UpdateJobPayload {
     id: string;
     name?: string;
-    schedule?: {
-        type: z.infer<typeof cronJobTypeSchema>;
-        startDate?: Date;
-        endDate?: Date | null;
-        nextRun?: Date;
-        lastRun?: Date | null;
-    } | null;
+    schedule: z.infer<typeof scheduleSchema> | null;
     tools: Tool[];
     updatedAt: Date;
 }
 
-export type { CreateJobPayload, UpdateJobPayload };
+/**
+ * A job document schema.
+ */
+type JobDocument = z.infer<typeof jobDocumentSchema>;
+
+export type { CreateJobPayload, UpdateJobPayload, JobDocument };

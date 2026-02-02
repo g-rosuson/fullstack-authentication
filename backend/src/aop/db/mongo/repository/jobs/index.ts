@@ -8,7 +8,8 @@ import config from '../../config';
 
 import { ErrorMessage } from 'shared/enums/error-messages';
 
-import type { CreateJobPayload, UpdateJobPayload } from './types';
+import type { CreateJobPayload, JobDocument, UpdateJobPayload } from './types';
+import type { ExecutionPayload } from 'shared/types/jobs';
 
 import { jobDocumentSchema } from './schemas';
 
@@ -48,15 +49,16 @@ class JobRepository {
      *
      * @param id The cron job ID to update
      * @param updatedCronJob Partial cron job data to update
-     * @returns Promise resolving to MongoDB's UpdateResult
      * @throws ResourceNotFoundException if cron job not found
+     * @throws SchemaValidationException if schema validation fails
+     * @returns Promise resolving to MongoDB's UpdateResult
      */
     async update(payload: UpdateJobPayload, session?: ClientSession) {
-        const { id, ...payloadFields } = payload;
+        const { id, name, schedule, tools, updatedAt } = payload;
 
         const updateResult = await this.db.collection(this.collectionName).findOneAndUpdate(
             { _id: new ObjectId(id) },
-            { $set: payloadFields },
+            { $set: { name, schedule, tools, updatedAt } },
             {
                 returnDocument: 'after',
                 ...(session ? { session } : {}),
@@ -77,6 +79,39 @@ class JobRepository {
             id: schemaResult.data._id.toString(),
             ...schemaResult.data,
         };
+    }
+
+    /**
+     * Adds an execution to a job document.
+     * @param payload Execution data to add
+     * @param session Optional Mongo session for transactional contexts
+     * @throws ResourceNotFoundException if resource is not found
+     * @throws SchemaValidationException if schema validation fails
+     * @returns The updated job document
+     */
+    async addExecution(payload: ExecutionPayload, session?: ClientSession) {
+        const { jobId, ...executions } = payload;
+
+        const updateResult = await this.db.collection<JobDocument>(this.collectionName).findOneAndUpdate(
+            { _id: new ObjectId(jobId) },
+            { $push: { executions } },
+            {
+                returnDocument: 'after',
+                ...(session ? { session } : {}),
+            }
+        );
+
+        if (!updateResult) {
+            throw new ResourceNotFoundException(ErrorMessage.JOBS_FAILED_TO_ADD_EXECUTION);
+        }
+
+        const schemaResult = parseSchema(jobDocumentSchema, updateResult);
+
+        if (!schemaResult.success) {
+            throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, { issues: schemaResult.issues });
+        }
+
+        return schemaResult.data;
     }
 
     /**

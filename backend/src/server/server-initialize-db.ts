@@ -58,7 +58,9 @@ export const initializeDatabase = async () => {
         const delegatorInstance = Delegator.getInstance();
 
         for (const job of persistedJobs) {
-            if (job.schedule) {
+            const isOutdated = job.schedule && job.schedule.endDate && new Date(job.schedule.endDate) < new Date();
+
+            if (job.schedule && !isOutdated) {
                 schedulerInstance.schedule({
                     id: job.id,
                     name: job.name,
@@ -67,12 +69,12 @@ export const initializeDatabase = async () => {
                     startDate: job.schedule.startDate,
                     endDate: job.schedule.endDate,
                 });
-            } else {
-                // Delegate the job immediately when it has no schedule
-                delegatorInstance.delegate({
+
+                delegatorInstance.register({
                     jobId: job.id,
                     name: job.name,
                     tools: job.tools,
+                    schedule: job.schedule,
                 });
             }
         }

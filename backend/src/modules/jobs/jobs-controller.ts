@@ -31,7 +31,7 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
         const body = req.body;
         const timestamp = new Date(body.timestamp);
         let schedule = null;
-        body.tools;
+
         // Create the schedule object if it's defined
         if (body.schedule) {
             schedule = {
@@ -76,24 +76,16 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
                 jobId: createdJob.id,
                 name: createdJob.name,
                 tools: createdJob.tools,
+                schedule: createdJob.schedule,
             });
         } else {
             // Delegate the job immediately when it has no schedule
-            req.context.delegator
-                .delegate({
-                    jobId: createdJob.id,
-                    name: createdJob.name,
-                    tools: createdJob.tools,
-                    /**
-                     * The "forwardAsyncError" middleware only catches errors from the promise
-                     * chain that the route handler returns. And since this is a fire-and-forget
-                     * promise, we need to explicitly catch the error.
-                     */
-                })
-                .catch(error => {
-                    // TODO: Add proper error logging.
-                    logger.error('Failed to delegate job', { error: error as Error });
-                });
+            req.context.delegator.delegate({
+                jobId: createdJob.id,
+                name: createdJob.name,
+                tools: createdJob.tools,
+                schedule: createdJob.schedule,
+            });
         }
 
         // Commit the transaction
@@ -150,7 +142,6 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
                 ...body.schedule,
                 endDate: body.schedule.endDate ? new Date(body.schedule.endDate) : null,
                 nextRun: utils.getNextRunDate(body.schedule.type, body.schedule.startDate),
-                lastRun: null,
             };
         }
 
@@ -191,6 +182,7 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
                 jobId: updatedJob.id,
                 name: updatedJob.name,
                 tools: updatedJob.tools,
+                schedule: updatedJob.schedule,
             });
         } else {
             // Delegate the job immediately when it has no schedule
@@ -198,6 +190,7 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
                 jobId: updatedJob.id,
                 name: updatedJob.name,
                 tools: updatedJob.tools,
+                schedule: updatedJob.schedule,
             });
         }
 

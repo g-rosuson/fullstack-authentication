@@ -185,6 +185,7 @@ class Scraper {
                     }
 
                     return;
+
                     /**
                      * Add the result to the "targetToResultsMap" map.
                      * Note: Its an extraction request when "result" is defined.

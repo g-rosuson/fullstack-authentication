@@ -50,7 +50,6 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
-                    results: null,
                     id: crypto.randomUUID(),
                 })),
             })),
@@ -156,7 +155,6 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
-                    results: null,
                     // Add an ID for new targets
                     id: item.id || crypto.randomUUID(),
                 })),

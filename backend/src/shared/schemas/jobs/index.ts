@@ -53,7 +53,7 @@ const targetSchema = z.enum(['jobs-ch']);
  * A base target schema.
  */
 const baseTargetSchema = z.object({
-    results: z.array(scraperResultSchema).nullable(),
+    results: z.array(scraperResultSchema).nullable().optional(),
     target: targetSchema,
     id: z.string(),
 });
@@ -98,7 +98,7 @@ const toolTargetsSchema = z.array(scraperTargetSchema);
 const toolSchema = scraperToolSchema;
 
 /**
- * A execution payload schema.
+ * An execution payload schema.
  */
 const executionSchema = z.object({
     schedule: z.object({

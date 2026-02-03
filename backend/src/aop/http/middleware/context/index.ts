@@ -1,7 +1,9 @@
+import authenticateContextMiddleware from './authenticate-context';
 import dbContextMiddleware from './db-context';
 import delegatorContextMiddleware from './delegator-context';
 import schedulerContextMiddleware from './scheduler-context';
 
-const contextMiddleware = [dbContextMiddleware, schedulerContextMiddleware, delegatorContextMiddleware];
+const contextResourceMiddleware = [dbContextMiddleware, schedulerContextMiddleware, delegatorContextMiddleware];
 
-export default contextMiddleware;
+export { authenticateContextMiddleware };
+export default contextResourceMiddleware;

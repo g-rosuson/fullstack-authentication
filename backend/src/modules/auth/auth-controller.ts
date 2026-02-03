@@ -10,12 +10,13 @@ import utils from './utils';
 import config from 'config';
 
 import { CreateUserPayload, RegisterUserPayload } from './types';
-import { JwtPayload, LoginUserPayload } from './types';
+import { LoginUserPayload } from './types';
 import { ErrorMessage } from 'shared/enums/error-messages';
 import { HttpStatusCode } from 'shared/enums/http-status-codes';
+import { JwtPayload } from 'shared/types/jwt';
 
-import { jwtPayloadSchema } from './schemas';
 import jwtService from 'services/jwt';
+import { jwtPayloadSchema } from 'shared/schemas/jwt';
 
 /**
  * Attempts to create a new user document using atomic insertion.

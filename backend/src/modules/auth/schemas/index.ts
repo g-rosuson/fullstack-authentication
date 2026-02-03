@@ -3,7 +3,9 @@ import { z } from 'zod';
 
 extendZodWithOpenApi(z);
 
-// Password schema
+/**
+ * A password schema.
+ */
 const passwordSchema = z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -12,7 +14,9 @@ const passwordSchema = z
     .regex(/\d+/, 'Password must include a number')
     .regex(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/, 'Password must include a special character');
 
-// Login schema
+/**
+ * A login user payload schema.
+ */
 const loginUserPayloadSchema = z
     .object({
         password: passwordSchema,
@@ -20,19 +24,14 @@ const loginUserPayloadSchema = z
     })
     .openapi('LoginUserPayload');
 
-// Access-token schema
+/**
+ * An access-token schema.
+ */
 const accessTokenSchema = z.string().jwt().openapi('AccessToken');
 
-// JWT payload schema
-const jwtPayloadSchema = z
-    .object({
-        firstName: z.string(),
-        lastName: z.string(),
-        email: z.string().email(),
-        id: z.string(),
-    })
-    .openapi('JwtPayload');
-
+/**
+ * A register user payload schema.
+ */
 const registerUserPayloadSchema = z
     .object({
         firstName: z.string(),
@@ -48,4 +47,4 @@ const registerUserPayloadSchema = z
     })
     .openapi('RegisterUserPayload');
 
-export { accessTokenSchema, jwtPayloadSchema, loginUserPayloadSchema, passwordSchema, registerUserPayloadSchema };
+export { accessTokenSchema, loginUserPayloadSchema, passwordSchema, registerUserPayloadSchema };

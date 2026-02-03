@@ -9,6 +9,7 @@ import { executionSchema, scheduleSchema, toolSchema } from 'shared/schemas/jobs
 const jobDocumentSchema = z
     .object({
         _id: z.instanceof(ObjectId),
+        userId: z.instanceof(ObjectId),
         name: z.string(),
         tools: z.array(toolSchema).min(1),
         schedule: scheduleSchema.nullable(),

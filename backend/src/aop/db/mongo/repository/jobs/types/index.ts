@@ -17,6 +17,7 @@ type Tool = ScraperTool;
  * A create job payload schema.
  */
 interface CreateJobPayload {
+    userId: string;
     name: string;
     schedule: z.infer<typeof scheduleSchema> | null;
     tools: Tool[];
@@ -28,6 +29,7 @@ interface CreateJobPayload {
  */
 interface UpdateJobPayload {
     id: string;
+    userId: string;
     name?: string;
     schedule: z.infer<typeof scheduleSchema> | null;
     tools: Tool[];

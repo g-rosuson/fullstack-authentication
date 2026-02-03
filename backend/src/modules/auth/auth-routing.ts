@@ -11,7 +11,7 @@ import { LOGIN_ROUTE, LOGOUT_ROUTE, REFRESH_ROUTE, REGISTER_ROUTE } from './cons
 const router = Router();
 
 // Determine routes
-router.post(LOGIN_ROUTE, loginLimiter, validateAuthenticationInput, login);
+router.post(LOGIN_ROUTE, loginLimiter, validateUserInput, validateAuthenticationInput, login);
 router.post(REGISTER_ROUTE, registerLimiter, validateUserInput, validateAuthenticationInput, register);
 router.post(LOGOUT_ROUTE, validateRefreshToken, logout);
 router.get(REFRESH_ROUTE, refreshLimiter, validateRefreshToken, renewAccessToken);

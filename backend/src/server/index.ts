@@ -6,7 +6,6 @@ import authenticationRoutes from 'modules/auth/auth-routing';
 import documentationRoute from 'modules/docs/docs-routing';
 import jobsRoutes from 'modules/jobs/jobs-routing';
 
-// import { authenticate } from 'modules/shared/middleware/authenticate';
 import { exceptionsMiddleware } from 'aop/exceptions';
 import http from 'aop/http';
 
@@ -26,14 +25,14 @@ const init = async () => {
     server.use(express.json({ limit: REQ_BODY_LIMIT }));
 
     // Add context to request
-    server.use(http.context.middleware);
+    server.use(http.context.middleware.resources);
 
     // Routes:
     // Authentication
     server.use(config.basePath, authenticationRoutes);
 
-    // Authenticate
-    // server.use(config.basePath, authenticate);
+    // Authenticate middleware
+    server.use(config.basePath, http.context.middleware.authenticate);
 
     // Documentation
     server.use(config.basePath, documentationRoute);

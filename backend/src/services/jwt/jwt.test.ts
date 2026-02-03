@@ -1,4 +1,4 @@
-import { JwtPayload } from 'modules/auth/types';
+import { JwtPayload } from 'shared/types/jwt';
 
 import jwt from './index';
 

@@ -47,7 +47,7 @@ export const initializeDatabase = async () => {
 
     const dbContext = new DbContext(db, transaction);
 
-    // Get all persisted jobs
+    // Get all persisted jobs for rescheduling
     const persistedJobs = await dbContext.repository.jobs.getAll(0, 0);
 
     if (persistedJobs.length) {

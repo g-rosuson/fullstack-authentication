@@ -32,7 +32,15 @@ class JobRepository {
      * @returns The created job document
      */
     async create(payload: CreateJobPayload, session?: ClientSession) {
-        const insertResult = await this.db.collection(this.collectionName).insertOne(payload, { session });
+        const { userId, ...rest } = payload;
+
+        const insertResult = await this.db.collection(this.collectionName).insertOne(
+            {
+                ...rest,
+                userId: new ObjectId(userId),
+            },
+            { session }
+        );
 
         if (!insertResult.acknowledged) {
             throw new DatabaseOperationFailedException(ErrorMessage.DATABASE_OPERATION_FAILED_ERROR);
@@ -47,17 +55,17 @@ class JobRepository {
     /**
      * Updates an existing cron job document by ID.
      *
-     * @param id The cron job ID to update
-     * @param updatedCronJob Partial cron job data to update
-     * @throws ResourceNotFoundException if cron job not found
+     * @param payload The update payload including id and userId for ownership verification
+     * @param session Optional Mongo session for transactional contexts
+     * @throws ResourceNotFoundException if cron job not found or user doesn't own it
      * @throws SchemaValidationException if schema validation fails
      * @returns Promise resolving to MongoDB's UpdateResult
      */
     async update(payload: UpdateJobPayload, session?: ClientSession) {
-        const { id, name, schedule, tools, updatedAt } = payload;
+        const { id, userId, name, schedule, tools, updatedAt } = payload;
 
         const updateResult = await this.db.collection(this.collectionName).findOneAndUpdate(
-            { _id: new ObjectId(id) },
+            { _id: new ObjectId(id), userId: new ObjectId(userId) },
             { $set: { name, schedule, tools, updatedAt } },
             {
                 returnDocument: 'after',
@@ -118,13 +126,15 @@ class JobRepository {
      * Deletes a job document by ID.
      *
      * @param id The job ID to delete
+     * @param userId The user ID for ownership verification
+     * @param session Optional Mongo session for transactional contexts
      * @returns Promise resolving to MongoDB's DeleteResult
-     * @throws ResourceNotFoundException if job not found
+     * @throws ResourceNotFoundException if job not found or user doesn't own it
      */
-    async delete(id: string, session?: ClientSession) {
+    async delete(id: string, userId: string, session?: ClientSession) {
         const result = await this.db
             .collection(this.collectionName)
-            .deleteOne({ _id: new ObjectId(id) }, { ...(session ? { session } : {}) });
+            .deleteOne({ _id: new ObjectId(id), userId: new ObjectId(userId) }, { ...(session ? { session } : {}) });
 
         if (result.deletedCount === 0) {
             throw new ResourceNotFoundException(ErrorMessage.JOBS_NOT_FOUND_IN_DATABASE);
@@ -137,11 +147,14 @@ class JobRepository {
      * Retrieves a job document by ID.
      *
      * @param id The job ID to search for
+     * @param userId The user ID for ownership verification
      * @returns Promise resolving to the job document if found
-     * @throws ResourceNotFoundException if job not found
+     * @throws ResourceNotFoundException if job not found or user doesn't own it
      */
-    async getById(id: string) {
-        const jobDocument = await this.db.collection(this.collectionName).findOne({ _id: new ObjectId(id) });
+    async getById(id: string, userId: string) {
+        const jobDocument = await this.db
+            .collection(this.collectionName)
+            .findOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
 
         if (!jobDocument) {
             throw new ResourceNotFoundException(ErrorMessage.JOBS_NOT_FOUND_IN_DATABASE);
@@ -157,14 +170,53 @@ class JobRepository {
     }
 
     /**
-     * Retrieves all jobs with pagination.
+     * Retrieves all jobs for a user with pagination.
      *
+     * @param userId The user ID to filter jobs by
      * @param limit Maximum number of jobs to return
      * @param offset Number of jobs to skip
      * @returns Promise resolving to array of job documents
      */
+    async getAllByUserId(userId: string, limit: number, offset: number) {
+        const jobDocuments = await this.db
+            .collection(this.collectionName)
+            .find({ userId: new ObjectId(userId) })
+            .skip(offset)
+            .limit(limit)
+            .toArray();
+
+        const mappedJobs = [];
+
+        for (const jobDocument of jobDocuments) {
+            const result = parseSchema(jobDocumentSchema, jobDocument);
+
+            if (!result.success) {
+                throw new SchemaValidationException(ErrorMessage.SCHEMA_VALIDATION_FAILED, { issues: result.issues });
+            }
+
+            const mappedJob = {
+                id: result.data._id.toString(),
+                ...result.data,
+            };
+
+            mappedJobs.push(mappedJob);
+        }
+
+        return mappedJobs;
+    }
+
+    /**
+     * Retrieves all jobs for system operations (e.g., server initialization, rescheduling).
+     * This method is NOT user-scoped and should only be used for system-level operations.
+     *
+     * @param limit Maximum number of jobs to return (0 for unlimited)
+     * @param offset Number of jobs to skip
+     * @returns Promise resolving to array of job documents
+     */
     async getAll(limit: number, offset: number) {
-        const jobDocuments = await this.db.collection(this.collectionName).find().skip(offset).limit(limit).toArray();
+        const query = this.db.collection(this.collectionName).find().skip(offset);
+
+        const jobDocuments = limit > 0 ? await query.limit(limit).toArray() : await query.toArray();
 
         const mappedJobs = [];
 

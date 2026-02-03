@@ -1,10 +1,9 @@
 import { sign } from 'jsonwebtoken';
 
-import { JwtPayload } from 'modules/auth/types';
-
 import config from 'config';
 
 import { TokenExpiration } from 'shared/enums/jwt';
+import { JwtPayload } from 'shared/types/jwt';
 
 const _signToken = (payload: JwtPayload, signAccessToken = true) => {
     const tokenSecret = signAccessToken ? config.accessTokenSecret : config.refreshTokenSecret;

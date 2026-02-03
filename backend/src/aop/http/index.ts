@@ -1,8 +1,12 @@
-import contextMiddleware from './middleware/context';
+import contextResourceMiddleware from './middleware/context';
+import authenticateContextMiddleware from './middleware/context/authenticate-context';
 
 const http = {
     context: {
-        middleware: contextMiddleware,
+        middleware: {
+            resources: contextResourceMiddleware,
+            authenticate: authenticateContextMiddleware,
+        },
     },
 };
 

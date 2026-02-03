@@ -9,13 +9,13 @@ import config from 'config';
 
 import { ErrorMessage } from 'shared/enums/error-messages';
 
-import { jwtInputSchema } from './schemas';
+import { jwtPayloadSchema } from 'shared/schemas/jwt';
 
 /**
- * Verifies the access-token from the "authorization" header before forwarding
- * the request and granting access to protected resources.
+ * Validates the authorization header, verifies the access token,
+ * and attaches the authenticated user to the request context.
  */
-const authenticate = async (req: Request, _res: Response, next: NextFunction) => {
+const authenticateContextMiddleware = async (req: Request, _res: Response, next: NextFunction) => {
     // Check if the "authorization" header is valid
     const authHeader = req.headers?.['authorization'];
 
@@ -33,15 +33,18 @@ const authenticate = async (req: Request, _res: Response, next: NextFunction) =>
     const decoded = verify(accessToken, config.accessTokenSecret);
 
     // Validate the refresh JWT structure
-    const result = parseSchema(jwtInputSchema, decoded);
+    const result = parseSchema(jwtPayloadSchema, decoded);
 
     if (!result.success) {
         throw new TokenException(ErrorMessage.TOKEN_INVALID);
     }
 
-    req.context.user = result.data;
+    req.context = {
+        ...req.context,
+        user: result.data,
+    };
 
     next();
 };
 
-export { authenticate };
+export default authenticateContextMiddleware;

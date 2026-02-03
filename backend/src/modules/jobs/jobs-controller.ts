@@ -44,12 +44,12 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
 
         // Create the job document
         const createJobPayload = {
+            userId: req.context.user.id,
             name: body.name,
             tools: body.tools.map(tool => ({
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
-                    results: null,
                     id: crypto.randomUUID(),
                 })),
             })),
@@ -148,13 +148,13 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
         // Determine job document
         const updateJobPayload = {
             id: req.params.id,
+            userId: req.context.user.id,
             name: body.name,
             schedule,
             tools: body.tools.map(tool => ({
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
-                    results: null,
                     // Add an ID for new targets
                     id: item.id || crypto.randomUUID(),
                 })),
@@ -223,9 +223,10 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
  */
 const deleteJob = async (req: Request<IdRouteParam>, res: Response) => {
     const { id } = req.params;
+    const userId = req.context.user.id;
 
     // Delete the job from the database
-    const result = await req.context.db.repository.jobs.delete(id);
+    const result = await req.context.db.repository.jobs.delete(id, userId);
 
     // Respond with the deleted job
     res.status(HttpStatusCode.OK).json({
@@ -242,8 +243,9 @@ const deleteJob = async (req: Request<IdRouteParam>, res: Response) => {
  */
 const getJob = async (req: Request<IdRouteParam>, res: Response) => {
     const { id } = req.params;
+    const userId = req.context.user.id;
 
-    const job = await req.context.db.repository.jobs.getById(id);
+    const job = await req.context.db.repository.jobs.getById(id, userId);
 
     res.status(HttpStatusCode.OK).json({
         success: true,
@@ -258,6 +260,8 @@ const getJob = async (req: Request<IdRouteParam>, res: Response) => {
  * @param res Express response object
  */
 const getAllJobs = async (req: Request, res: Response) => {
+    const userId = req.context.user.id;
+
     // Parse query params with defaults
     // Limit refers to the number of jobs to return
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 0;
@@ -265,7 +269,7 @@ const getAllJobs = async (req: Request, res: Response) => {
     // Offset refers to the number of jobs to skip (e.g. if offset is 10, we skip the first 10 jobs)
     const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
 
-    const jobs = await req.context.db.repository.jobs.getAll(limit, offset);
+    const jobs = await req.context.db.repository.jobs.getAllByUserId(userId, limit, offset);
 
     res.status(HttpStatusCode.OK).json({
         success: true,

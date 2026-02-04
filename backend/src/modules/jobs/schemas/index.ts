@@ -2,9 +2,14 @@ import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 
 import { validateJobSchedule } from './schemas-validators';
-import { scheduleSchema, targetSchema } from 'shared/schemas/jobs';
 
 extendZodWithOpenApi(z);
+
+/**
+ * A cron job type schema.
+ * @private
+ */
+const cronJobTypeSchema = z.enum(['once', 'daily', 'weekly', 'monthly', 'yearly']);
 
 /**
  * A scraper tool payload schema.
@@ -14,10 +19,9 @@ const scraperToolPayloadSchema = z.object({
     type: z.literal('scraper'),
     targets: z.array(
         z.object({
-            target: targetSchema,
+            target: z.enum(['jobs-ch']),
             keywords: z.array(z.string()).min(1).optional(),
             maxPages: z.number().positive().optional(),
-            id: z.string().optional(),
         })
     ),
     keywords: z.array(z.string()).min(1),
@@ -30,8 +34,13 @@ const scraperToolPayloadSchema = z.object({
 const createJobPayloadSchema = z
     .object({
         name: z.string(),
-        timestamp: z.coerce.date(),
-        schedule: scheduleSchema.nullable(),
+        schedule: z
+            .object({
+                type: cronJobTypeSchema,
+                startDate: z.coerce.date(),
+                endDate: z.coerce.date().nullable(),
+            })
+            .nullable(),
         tools: z.array(scraperToolPayloadSchema).min(1),
     })
     .superRefine(validateJobSchedule)
@@ -43,11 +52,35 @@ const createJobPayloadSchema = z
 const updateJobPayloadSchema = z
     .object({
         name: z.string(),
-        timestamp: z.coerce.date(),
-        schedule: scheduleSchema.nullable(),
+        schedule: z
+            .object({
+                type: cronJobTypeSchema,
+                startDate: z.coerce.date(),
+                endDate: z.coerce.date().nullable(),
+            })
+            .nullable(),
         tools: z.array(scraperToolPayloadSchema).min(1),
     })
     .superRefine(validateJobSchedule)
     .openapi('UpdateJobPayload');
 
-export { createJobPayloadSchema, updateJobPayloadSchema };
+/**
+ * An ID route param schema.
+ */
+const idRouteParamSchema = z
+    .object({
+        id: z.string(),
+    })
+    .openapi('IdRouteParam');
+
+/**
+ * A paginated route param schema.
+ */
+const paginatedRouteParamSchema = z
+    .object({
+        limit: z.string().optional(),
+        offset: z.string().optional(),
+    })
+    .openapi('PaginatedRouteParam');
+
+export { createJobPayloadSchema, updateJobPayloadSchema, idRouteParamSchema, paginatedRouteParamSchema };

@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 import { ErrorMessage } from 'shared/enums/error-messages';
-
-import { cronJobTypeSchema } from 'shared/schemas/jobs';
+import { CronJobType } from 'shared/types/jobs';
 
 /**
  * Validates the job schedule.
@@ -14,12 +13,11 @@ import { cronJobTypeSchema } from 'shared/schemas/jobs';
  */
 const validateJobSchedule = (
     payload: {
-        timestamp: Date;
-        schedule?: { type: z.infer<typeof cronJobTypeSchema>; startDate?: Date; endDate?: Date | null } | null;
+        schedule?: { type: CronJobType; startDate?: Date; endDate?: Date | null } | null;
     },
     ctx: z.RefinementCtx
 ) => {
-    if (payload.schedule?.startDate && payload.schedule.startDate < payload.timestamp) {
+    if (payload.schedule?.startDate && payload.schedule.startDate < new Date()) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: ErrorMessage.JOBS_START_DATE_IN_FUTURE,

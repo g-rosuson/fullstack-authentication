@@ -5,10 +5,9 @@ import { logger } from 'aop/logging';
 
 import utils from './utils';
 
-import { CreateJobPayload, UpdateJobPayload } from './types';
+import { CreateJobPayload, IdRouteParam, UpdateJobPayload } from './types';
 import { ErrorMessage } from 'shared/enums/error-messages';
 import { HttpStatusCode } from 'shared/enums/http-status-codes';
-import { IdRouteParam } from 'shared/types';
 
 /**
  * Creates a new job in the database and if defined, schedules it to run at a later time.
@@ -29,16 +28,14 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
 
         // Determine body, time and schedule
         const body = req.body;
-        const timestamp = new Date(body.timestamp);
+        const now = new Date();
         let schedule = null;
 
         // Create the schedule object if it's defined
         if (body.schedule) {
             schedule = {
                 ...body.schedule,
-                endDate: body.schedule.endDate ? new Date(body.schedule.endDate) : null,
                 nextRun: utils.getNextRunDate(body.schedule.type, body.schedule.startDate),
-                lastRun: null,
             };
         }
 
@@ -54,7 +51,7 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
                 })),
             })),
             schedule,
-            createdAt: timestamp,
+            createdAt: now,
             updatedAt: null,
         };
 
@@ -65,7 +62,6 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
             req.context.scheduler.schedule({
                 id: createdJob.id,
                 name: createdJob.name,
-                timestamp,
                 type: createdJob.schedule.type,
                 startDate: createdJob.schedule.startDate,
                 endDate: createdJob.schedule.endDate,
@@ -76,7 +72,7 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
                 jobId: createdJob.id,
                 name: createdJob.name,
                 tools: createdJob.tools,
-                schedule: createdJob.schedule,
+                scheduleType: createdJob.schedule.type,
             });
         } else {
             // Delegate the job immediately when it has no schedule
@@ -84,7 +80,7 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
                 jobId: createdJob.id,
                 name: createdJob.name,
                 tools: createdJob.tools,
-                schedule: createdJob.schedule,
+                scheduleType: null,
             });
         }
 
@@ -133,14 +129,13 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
 
         // Determine body, time and schedule
         const body = req.body;
-        const timestamp = new Date(body.timestamp);
+        const now = new Date();
         let schedule = null;
 
         // Create the schedule object if it's defined
         if (body.schedule) {
             schedule = {
                 ...body.schedule,
-                endDate: body.schedule.endDate ? new Date(body.schedule.endDate) : null,
                 nextRun: utils.getNextRunDate(body.schedule.type, body.schedule.startDate),
             };
         }
@@ -155,42 +150,40 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
-                    // Add an ID for new targets
-                    id: item.id || crypto.randomUUID(),
+                    id: crypto.randomUUID(),
                 })),
             })),
-            updatedAt: timestamp,
+            updatedAt: now,
         };
 
         // Update the job in the database
         const updatedJob = await req.context.db.repository.jobs.update(updateJobPayload, session);
 
         // Schedule a cron job if the job has a schedule
-        if (updatedJob.schedule) {
+        if (updateJobPayload.schedule) {
             // Note: .schedule() destroys an existing cron job before scheduling a new one
             req.context.scheduler.schedule({
-                name: updatedJob.name,
-                timestamp,
-                type: updatedJob.schedule.type,
-                startDate: updatedJob.schedule.startDate,
-                endDate: updatedJob.schedule.endDate,
-                id: updatedJob.id,
+                name: updateJobPayload.name,
+                type: updateJobPayload.schedule.type,
+                startDate: updateJobPayload.schedule.startDate,
+                endDate: updateJobPayload.schedule.endDate,
+                id: updateJobPayload.id,
             });
 
             // Note: .register() replaces an existing task with the new one
             req.context.delegator.register({
-                jobId: updatedJob.id,
-                name: updatedJob.name,
-                tools: updatedJob.tools,
-                schedule: updatedJob.schedule,
+                jobId: updateJobPayload.id,
+                name: updateJobPayload.name,
+                tools: updateJobPayload.tools,
+                scheduleType: updateJobPayload.schedule.type,
             });
         } else {
             // Delegate the job immediately when it has no schedule
             req.context.delegator.delegate({
-                jobId: updatedJob.id,
-                name: updatedJob.name,
-                tools: updatedJob.tools,
-                schedule: updatedJob.schedule,
+                jobId: updateJobPayload.id,
+                name: updateJobPayload.name,
+                tools: updateJobPayload.tools,
+                scheduleType: null,
             });
         }
 

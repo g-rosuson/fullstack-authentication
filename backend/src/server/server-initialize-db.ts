@@ -64,7 +64,6 @@ export const initializeDatabase = async () => {
                 schedulerInstance.schedule({
                     id: job.id,
                     name: job.name,
-                    timestamp: job.createdAt,
                     type: job.schedule.type,
                     startDate: job.schedule.startDate,
                     endDate: job.schedule.endDate,
@@ -74,7 +73,7 @@ export const initializeDatabase = async () => {
                     jobId: job.id,
                     name: job.name,
                     tools: job.tools,
-                    schedule: job.schedule,
+                    scheduleType: job.schedule.type,
                 });
             }
         }

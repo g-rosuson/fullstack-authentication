@@ -10,8 +10,12 @@ import {
 
 import { jobDocumentSchema } from 'aop/db/mongo/repository/jobs/schemas';
 
-import { createJobPayloadSchema, updateJobPayloadSchema } from './schemas';
-import { idRouteParamSchema, paginatedRouteParamSchema } from 'shared/schemas/routeParam';
+import {
+    createJobPayloadSchema,
+    idRouteParamSchema,
+    paginatedRouteParamSchema,
+    updateJobPayloadSchema,
+} from './schemas';
 
 const jobsRegistry = new OpenAPIRegistry();
 

@@ -94,7 +94,7 @@ export class Scheduler {
         const cronJobId = payload.id;
         const startDate = payload.startDate;
         const endDate = payload.endDate;
-        const now = new Date(payload.timestamp);
+        const now = new Date();
 
         // Delete an existing job and task if it exists
         const cronJob = this.cronJobs.get(cronJobId);

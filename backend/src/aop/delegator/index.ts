@@ -4,7 +4,8 @@ import { logger } from 'aop/logging';
 
 import config from 'config';
 
-import type { Job, TargetResult, ToolMap, ToolType } from './types';
+import type { TargetResult, ToolMap, ToolTarget, ToolType, ToolWithTargetResults } from './tools/types';
+import type { DelegationPayload } from './types';
 import type { ExecutionPayload } from 'shared/types/jobs';
 
 import toolRegistry from './tools';
@@ -17,8 +18,8 @@ import { retryWithFixedInterval } from 'utils';
  */
 export class Delegator {
     private static instance: Delegator | null = null;
-    public pendingJobs = new Map<string, Job>();
-    public runningJobs = new Map<string, Job>();
+    public pendingJobs = new Map<string, DelegationPayload>();
+    public runningJobs = new Map<string, DelegationPayload>();
 
     /**
      * Private constructor enforces singleton pattern.
@@ -41,24 +42,24 @@ export class Delegator {
     }
 
     /**
-     * Executes a tool and returns targets with their results populated.
-     * Creates a shallow copy of targets to avoid mutating the original.
+     * Maps tool targets with results by executing the tool and mapping the results.
      *
-     * @template T Tool type extending ToolType
-     * @param jobId Job identifier
      * @param tool Tool to execute
-     * @returns Targets with execution results
+     * @returns Tool targets with results
      */
-    private async targetsWithResults<T extends ToolType>(jobId: string, tool: ToolMap[T]) {
-        const mappedTargets = [...tool.targets];
+    async getToolTargetsWithResults<T extends ToolType>(tool: ToolMap[T]) {
+        const mappedToolTargets: ToolTarget[] = [];
 
         const onTargetFinish = (targetResult: TargetResult) => {
-            const targetToUpdate = mappedTargets.find(target => target.id === targetResult.targetId);
+            const toolTarget = tool.targets.find(target => target.id === targetResult.targetId);
 
-            if (!targetToUpdate) {
-                logger.error(`Cannot find target with ID: "${targetResult.targetId}" for job with ID: "${jobId}"`, {});
-            } else {
-                targetToUpdate.results = targetResult.results;
+            if (toolTarget) {
+                const toolTargetWithResults = {
+                    ...toolTarget,
+                    results: targetResult.results,
+                };
+
+                mappedToolTargets.push(toolTargetWithResults);
             }
         };
 
@@ -67,54 +68,60 @@ export class Delegator {
             onTargetFinish,
         });
 
-        return mappedTargets;
+        return mappedToolTargets;
     }
 
     /**
-     * Executes a job by running all tools sequentially and persisting results.
+     * Executes a delegation by running all tools sequentially and persisting results.
      * Cleans up job queues in finally block regardless of success or failure.
      *
-     * @param job Job to execute
+     * @param payload Delegation payload
      */
-    async delegate(job: Job) {
+    async delegate(payload: DelegationPayload) {
         try {
-            const tools = [...job.tools];
             const delegatedAt = new Date();
+            const mappedTools: ToolWithTargetResults[] = [];
 
-            for (let toolIndex = 0; toolIndex < tools.length; toolIndex++) {
-                const tool = tools[toolIndex];
-                const mappedToolTargets = await this.targetsWithResults(job.jobId, tool);
-                tool.targets = mappedToolTargets;
+            for (let toolIndex = 0; toolIndex < payload.tools.length; toolIndex++) {
+                const tool = payload.tools[toolIndex];
+                const toolWithMappedTargets = await this.getToolTargetsWithResults(tool);
+
+                const mappedTool = {
+                    ...tool,
+                    targets: toolWithMappedTargets,
+                };
+
+                mappedTools.push(mappedTool);
             }
 
             const finishedAt = new Date();
 
-            const executionPayload: ExecutionPayload = {
-                jobId: job.jobId,
+            const executionPayload = {
+                jobId: payload.jobId,
                 schedule: {
-                    type: job.schedule?.type || null,
+                    type: payload.scheduleType,
                     delegatedAt,
                     finishedAt,
                 },
-                tools,
+                tools: mappedTools,
             };
 
             await this.persistResult(executionPayload);
         } catch (error) {
-            logger.error(`Delegation process failed for job with ID: "${job.jobId}"`, { error: error as Error });
+            logger.error(`Failed to new delegation for job with ID: ${payload.jobId}`, { error: error as Error });
         } finally {
-            this.runningJobs.delete(job.jobId);
-            this.pendingJobs.delete(job.jobId);
+            this.runningJobs.delete(payload.jobId);
+            this.pendingJobs.delete(payload.jobId);
         }
     }
 
     /**
      * Registers a job in the pending queue for later execution.
      *
-     * @param job Job to register
+     * @param payload Delegation payload
      */
-    register(job: Job) {
-        this.pendingJobs.set(job.jobId, job);
+    register(payload: DelegationPayload) {
+        this.pendingJobs.set(payload.jobId, payload);
     }
 
     /**

@@ -1,10 +1,9 @@
 import { z } from 'zod';
 
-import { createJobPayloadSchema, updateJobPayloadSchema } from '../schemas';
-import { cronJobTypeSchema } from 'shared/schemas/jobs';
+import { createJobPayloadSchema, idRouteParamSchema, updateJobPayloadSchema } from '../schemas';
 
-type CronJobSchedule = z.infer<typeof cronJobTypeSchema>;
 type CreateJobPayload = z.infer<typeof createJobPayloadSchema>;
 type UpdateJobPayload = z.infer<typeof updateJobPayloadSchema>;
+type IdRouteParam = z.infer<typeof idRouteParamSchema>;
 
-export type { CronJobSchedule, CreateJobPayload, UpdateJobPayload };
+export type { CreateJobPayload, IdRouteParam, UpdateJobPayload };

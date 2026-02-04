@@ -1,19 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { z } from 'zod';
 
 import { parseSchema } from 'lib/validation';
 
 import constants from './constants';
 
-import type { ExecuteFunction } from '../../types';
-import type { Request as ScraperRequest } from './types';
+import type { ExecuteFunction } from '../types';
+import type { ScraperRequest, ScraperResult } from './types';
 import type { Dictionary, Request as CrawleeRequest } from 'crawlee';
 import type { Page } from 'playwright';
 
 import Scraper from './index';
 import targetRegistry from './targets';
 import { PlaywrightCrawler, RequestQueue } from 'crawlee';
-import { scraperResultSchema } from 'shared/schemas/jobs';
 import { kebabToCamelCase } from 'utils';
 
 vi.mock('config', () => ({
@@ -138,7 +136,6 @@ describe('Scraper', () => {
                 {
                     [targetIdProperty]: targetId,
                     [targetProperty]: target,
-                    results: null,
                     [keywordsProperty]: keywords,
                     [maxPagesProperty]: maxPages,
                 },
@@ -202,7 +199,6 @@ describe('Scraper', () => {
                     {
                         [targetIdProperty]: targetId,
                         [targetProperty]: target,
-                        results: null,
                         [keywordsProperty]: targetKeywords,
                         [maxPagesProperty]: targetMaxPages,
                     },
@@ -235,7 +231,6 @@ describe('Scraper', () => {
                     {
                         [targetIdProperty]: targetId,
                         [targetProperty]: target,
-                        results: null,
                     },
                 ],
                 [keywordsProperty]: keywords,
@@ -269,12 +264,10 @@ describe('Scraper', () => {
                     {
                         [targetIdProperty]: targetId,
                         [targetProperty]: target,
-                        results: null,
                     },
                     {
                         [targetIdProperty]: targetId2,
                         [targetProperty]: target2,
-                        results: null,
                     },
                 ],
                 [keywordsProperty]: keywords,
@@ -343,7 +336,6 @@ describe('Scraper', () => {
                     {
                         id: targetId,
                         target,
-                        results: null,
                     },
                 ],
                 keywords,
@@ -399,7 +391,6 @@ describe('Scraper', () => {
                     {
                         id: targetId,
                         target,
-                        results: null,
                     },
                 ],
                 keywords,
@@ -454,7 +445,6 @@ describe('Scraper', () => {
                     {
                         id: targetId,
                         target: 'jobs-ch' as const,
-                        results: null,
                     },
                 ],
                 keywords,
@@ -525,7 +515,7 @@ describe('Scraper', () => {
         const uniqueKey = 'unique-key-1';
         const jobUrl = 'https://example.com/job/1';
         const jobTitle = 'Software Engineer';
-        const jobDescription: z.infer<typeof scraperResultSchema>['result'] = {
+        const jobDescription: ScraperResult['result'] = {
             [urlProperty]: jobUrl,
             [titleProperty]: jobTitle,
             [descriptionProperty]: [],
@@ -556,7 +546,6 @@ describe('Scraper', () => {
                     {
                         id: targetId,
                         target,
-                        results: null,
                     },
                 ],
                 keywords,
@@ -645,7 +634,6 @@ describe('Scraper', () => {
                     {
                         id: targetId,
                         target,
-                        results: null,
                     },
                 ],
                 keywords,
@@ -762,7 +750,6 @@ describe('Scraper', () => {
                     {
                         id: targetId,
                         target,
-                        results: null,
                     },
                 ],
                 keywords,
@@ -845,7 +832,6 @@ describe('Scraper', () => {
                     {
                         id: targetId,
                         target,
-                        results: null,
                     },
                 ],
                 keywords,

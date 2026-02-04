@@ -1,17 +1,8 @@
 import { z } from 'zod';
 
+import { CronJobType } from 'shared/types/jobs';
+
 import { jobDocumentSchema } from '../schemas';
-import { scheduleSchema, scraperToolSchema } from 'shared/schemas/jobs';
-
-/**
- * A scraper tool.
- */
-type ScraperTool = z.infer<typeof scraperToolSchema>;
-
-/**
- * A union of all available tool types.
- */
-type Tool = ScraperTool;
 
 /**
  * A create job payload schema.
@@ -19,8 +10,23 @@ type Tool = ScraperTool;
 interface CreateJobPayload {
     userId: string;
     name: string;
-    schedule: z.infer<typeof scheduleSchema> | null;
-    tools: Tool[];
+    schedule: {
+        type: CronJobType;
+        startDate: Date;
+        endDate: Date | null;
+        nextRun: Date;
+    } | null;
+    tools: {
+        type: 'scraper';
+        targets: {
+            target: 'jobs-ch';
+            id: string;
+            keywords?: string[];
+            maxPages?: number;
+        }[];
+        keywords: string[];
+        maxPages: number;
+    }[];
     createdAt: Date;
 }
 
@@ -31,8 +37,23 @@ interface UpdateJobPayload {
     id: string;
     userId: string;
     name?: string;
-    schedule: z.infer<typeof scheduleSchema> | null;
-    tools: Tool[];
+    schedule: {
+        type: CronJobType;
+        startDate: Date;
+        endDate: Date | null;
+        nextRun: Date;
+    } | null;
+    tools: {
+        type: 'scraper';
+        targets: {
+            target: 'jobs-ch';
+            id: string;
+            keywords?: string[];
+            maxPages?: number;
+        }[];
+        keywords: string[];
+        maxPages: number;
+    }[];
     updatedAt: Date;
 }
 

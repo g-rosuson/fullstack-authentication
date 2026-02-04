@@ -1,4 +1,4 @@
-import type { ToolRegistry } from '../types';
+import type { ToolRegistry } from '../tools/types';
 
 import Scraper from './scraper';
 

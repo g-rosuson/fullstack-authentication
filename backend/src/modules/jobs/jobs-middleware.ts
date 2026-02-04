@@ -6,8 +6,12 @@ import { CREATE_JOB_ROUTE } from './constants';
 
 import { ErrorMessage } from 'shared/enums/error-messages';
 
-import { createJobPayloadSchema, updateJobPayloadSchema } from './schemas';
-import { idRouteParamSchema, paginatedRouteParamSchema } from 'shared/schemas/routeParam';
+import {
+    createJobPayloadSchema,
+    idRouteParamSchema,
+    paginatedRouteParamSchema,
+    updateJobPayloadSchema,
+} from './schemas';
 
 /**
  * Validates that the request body adhears to the corresponding schema.

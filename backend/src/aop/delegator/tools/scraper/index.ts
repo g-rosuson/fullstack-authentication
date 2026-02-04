@@ -1,16 +1,13 @@
-import { z } from 'zod';
-
 import { parseSchema } from 'lib/validation';
 
 import constants from './constants';
 
-import type { ExecuteFunction } from '../../types';
-import type { Request } from './types';
+import type { ExecuteFunction } from '../../tools/types';
+import type { ScraperRequest, ScraperResult } from './types';
 
 import { requestUserDataSchema } from './schemas';
 import targetRegistry from './targets';
 import { PlaywrightCrawler, RequestQueue } from 'crawlee';
-import { scraperResultSchema } from 'shared/schemas/jobs';
 import { kebabToCamelCase } from 'utils';
 
 /**
@@ -44,7 +41,7 @@ class Scraper {
     }: Parameters<ExecuteFunction<'scraper'>>[0]): ReturnType<ExecuteFunction<'scraper'>> {
         // Determine tracking maps for targets and requests
         const targetToUniqueKeysMap = new Map<string, Set<string>>();
-        const targetToResultsMap = new Map<string, z.infer<typeof scraperResultSchema>[]>();
+        const targetToResultsMap = new Map<string, ScraperResult[]>();
         const completedTargets = new Set<string>();
 
         /**
@@ -52,7 +49,7 @@ class Scraper {
          * @param targetId - The ID of the target.
          * @param results - The results of the target.
          */
-        function callbackWithTargetResults(targetId: string, results: z.infer<typeof scraperResultSchema>[]) {
+        function callbackWithTargetResults(targetId: string, results: ScraperResult[]) {
             onTargetFinish({
                 targetId,
                 results,
@@ -63,7 +60,7 @@ class Scraper {
          * Determine PlaywrightCrawler request objects for each target and populate the request queue.
          */
         const requestQueue = await RequestQueue.open();
-        const requests: Request[] = [];
+        const requests: ScraperRequest[] = [];
 
         for (const targetSettings of tool.targets) {
             const keywords = targetSettings.keywords || tool.keywords;

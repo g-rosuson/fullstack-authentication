@@ -1,4 +1,4 @@
-import { CronJobSchedule } from '../types';
+import { CronJobType } from 'shared/types/jobs';
 
 /**
  * Calculates the next run date for a cron job based on its type and start date.
@@ -6,7 +6,7 @@ import { CronJobSchedule } from '../types';
  * @param startDate - The start date of the cron job
  * @returns The next run date
  */
-const getNextRunDate = (type: CronJobSchedule, startDate: Date) => {
+const getNextRunDate = (type: CronJobType, startDate: Date) => {
     const dayInMs = 24 * 60 * 60 * 1000;
     const weekInMs = 7 * dayInMs;
     const monthInMs = 30 * dayInMs;

@@ -1,17 +1,68 @@
 import type { z } from 'zod';
 
 import { requestUserDataSchema } from '../schemas';
-import { descriptionSectionSchema, informationItemSchema } from 'shared/schemas/jobs';
+
+/**
+ * A scraper tool.
+ */
+interface ScraperTool {
+    type: 'scraper';
+    targets: Omit<ScraperToolTarget, 'results'>[];
+    keywords: string[];
+    maxPages: number;
+}
+
+/**
+ * A scraper tool with results.
+ */
+interface ScraperToolWithResults {
+    type: 'scraper';
+    targets: ScraperToolTarget[];
+    keywords: string[];
+    maxPages: number;
+}
+
+/**
+ * A scraper tool target.
+ */
+interface ScraperToolTarget {
+    target: 'jobs-ch';
+    id: string;
+    keywords?: string[];
+    maxPages?: number;
+    results: ScraperResult[];
+}
 
 /**
  * A description section type.
  */
-type DescriptionSection = z.infer<typeof descriptionSectionSchema>;
+interface DescriptionSection {
+    title?: string;
+    blocks: string[];
+}
 
 /**
  * An information item type.
  */
-type InformationItem = z.infer<typeof informationItemSchema>;
+interface InformationItem {
+    label: string;
+    value: string;
+}
+
+/**
+ * A scraper result type.
+ */
+interface ScraperResult {
+    result: {
+        url: string;
+        title: string;
+        description: DescriptionSection[];
+        information: InformationItem[];
+    } | null;
+    error: {
+        message: string;
+    } | null;
+}
 
 /**
  * A request user data type.
@@ -21,9 +72,18 @@ type RequestUserData = z.infer<typeof requestUserDataSchema>;
 /**
  * A scraper request interface.
  */
-interface Request {
+interface ScraperRequest {
     url: string;
     userData: RequestUserData;
 }
 
-export type { DescriptionSection, InformationItem, Request, RequestUserData };
+export type {
+    ScraperTool,
+    ScraperToolWithResults,
+    ScraperToolTarget,
+    DescriptionSection,
+    InformationItem,
+    ScraperRequest,
+    RequestUserData,
+    ScraperResult,
+};

@@ -1,18 +1,16 @@
 import { ScheduledTask } from 'node-cron';
-import { z } from 'zod';
 
-import { cronJobTypeSchema } from 'shared/schemas/jobs';
+import { CronJobType } from 'shared/types/jobs';
 
 interface FormatCronExpressionPayload {
     startDate: Date;
-    type: Exclude<z.infer<typeof cronJobTypeSchema>, 'once'>;
+    type: Exclude<CronJobType, 'once'>;
 }
 
 interface SchedulePayload {
     id: string;
     name: string;
-    type: z.infer<typeof cronJobTypeSchema>;
-    timestamp: Date;
+    type: CronJobType;
     startDate: Date;
     endDate: Date | null;
 }

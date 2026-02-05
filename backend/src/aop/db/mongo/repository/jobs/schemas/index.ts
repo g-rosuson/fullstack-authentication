@@ -1,5 +1,8 @@
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
+
+extendZodWithOpenApi(z);
 
 /**
  * A cron job type schema.

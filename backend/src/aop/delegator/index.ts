@@ -23,7 +23,7 @@ export class Delegator {
 
     /**
      * Private constructor enforces singleton pattern.
-     * Binds instance methods for correct `this` context.
+     * Binds instance methods for correct `this` DelegatorContext.
      */
     private constructor() {
         this.delegate = this.delegate.bind(this);
@@ -47,7 +47,7 @@ export class Delegator {
      * @param tool Tool to execute
      * @returns Tool targets with results
      */
-    async getToolTargetsWithResults<T extends ToolType>(tool: ToolMap[T]) {
+    private async getToolTargetsWithResults<T extends ToolType>(tool: ToolMap[T]) {
         const mappedToolTargets: ToolTarget[] = [];
 
         const onTargetFinish = (targetResult: TargetResult) => {
@@ -60,6 +60,8 @@ export class Delegator {
                 };
 
                 mappedToolTargets.push(toolTargetWithResults);
+            } else {
+                logger.error(`Cannot find tool target with ID: "${targetResult.targetId}"`, {});
             }
         };
 
@@ -81,6 +83,7 @@ export class Delegator {
         try {
             const delegatedAt = new Date();
             const mappedTools: ToolWithTargetResults[] = [];
+            this.runningJobs.set(payload.jobId, payload);
 
             for (let toolIndex = 0; toolIndex < payload.tools.length; toolIndex++) {
                 const tool = payload.tools[toolIndex];

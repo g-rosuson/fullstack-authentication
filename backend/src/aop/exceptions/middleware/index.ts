@@ -35,7 +35,7 @@ class ErrorHandlerMiddleware {
      * @param res Express response object
      * @param next Express next function (required for Express to recognize this as error middleware)
      */
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    // eslint-disable-next-line
     public handle = (error: Error, req: Request, res: Response, next: NextFunction) => {
         // Skip if a response has already been sent
         if (res.headersSent) {

@@ -4,7 +4,7 @@ import { logger } from 'aop/logging';
 
 import config from 'config';
 
-import type { TargetResult, ToolMap, ToolTarget, ToolType, ToolWithTargetResults } from './tools/types';
+import type { ToolMap, ToolTarget, ToolType, ToolWithTargetResults } from './tools/types';
 import type { DelegationPayload } from './types';
 import type { ExecutionPayload } from 'shared/types/jobs';
 
@@ -50,19 +50,13 @@ export class Delegator {
     private async getToolTargetsWithResults<T extends ToolType>(tool: ToolMap[T]) {
         const mappedToolTargets: ToolTarget[] = [];
 
-        const onTargetFinish = (targetResult: TargetResult) => {
-            const toolTarget = tool.targets.find(target => target.id === targetResult.targetId);
+        const onTargetFinish = (target: ToolTarget) => {
+            const toolTargetWithResults = {
+                ...target,
+                results: target.results,
+            };
 
-            if (toolTarget) {
-                const toolTargetWithResults = {
-                    ...toolTarget,
-                    results: targetResult.results,
-                };
-
-                mappedToolTargets.push(toolTargetWithResults);
-            } else {
-                logger.error(`Cannot find tool target with ID: "${targetResult.targetId}"`, {});
-            }
+            mappedToolTargets.push(toolTargetWithResults);
         };
 
         await toolRegistry[tool.type as T].execute({

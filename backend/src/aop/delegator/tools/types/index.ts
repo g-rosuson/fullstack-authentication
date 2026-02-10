@@ -42,6 +42,9 @@ type ToolRegistry = {
  * A target result, with an union type of all results.
  */
 type TargetResult = {
+    target: 'jobs-ch';
+    keywords: string[] | null;
+    maxPages: number | null;
     targetId: string;
     results: ScraperResult[];
 };
@@ -55,7 +58,7 @@ type ExecuteFunction<T extends ToolType> = ({
     onTargetFinish,
 }: {
     tool: ToolMap[T];
-    onTargetFinish: (targetResult: TargetResult) => void;
+    onTargetFinish: (target: ToolTarget) => void;
 }) => Promise<void>;
 
 export type { ExecuteFunction, ToolMap, ToolTarget, Tool, ToolWithTargetResults, ToolType, ToolRegistry, TargetResult };

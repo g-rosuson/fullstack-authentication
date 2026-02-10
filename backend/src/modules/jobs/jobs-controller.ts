@@ -32,7 +32,7 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
-                    id: crypto.randomUUID(),
+                    targetId: crypto.randomUUID(),
                 })),
             })),
             schedule: req.body.schedule,
@@ -122,7 +122,7 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
-                    id: crypto.randomUUID(),
+                    targetId: crypto.randomUUID(),
                 })),
             })),
             updatedAt: new Date(),

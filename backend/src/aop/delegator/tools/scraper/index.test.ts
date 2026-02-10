@@ -119,7 +119,7 @@ describe('Scraper', () => {
         const targetsProperty = 'targets';
         const keywordsProperty = 'keywords';
         const maxPagesProperty = 'maxPages';
-        const targetIdProperty = 'id';
+        const targetIdProperty = 'targetId';
         const targetProperty = 'target';
 
         const requestUserDataTargetIdProperty = 'targetId';
@@ -334,7 +334,7 @@ describe('Scraper', () => {
                 type: 'scraper',
                 targets: [
                     {
-                        id: targetId,
+                        targetId,
                         target,
                     },
                 ],
@@ -389,7 +389,7 @@ describe('Scraper', () => {
                 type: 'scraper',
                 targets: [
                     {
-                        id: targetId,
+                        targetId,
                         target,
                     },
                 ],
@@ -443,7 +443,7 @@ describe('Scraper', () => {
                 type: 'scraper',
                 targets: [
                     {
-                        id: targetId,
+                        targetId,
                         target: 'jobs-ch' as const,
                     },
                 ],
@@ -544,7 +544,7 @@ describe('Scraper', () => {
                 type: 'scraper',
                 targets: [
                     {
-                        id: targetId,
+                        targetId,
                         target,
                     },
                 ],
@@ -632,7 +632,7 @@ describe('Scraper', () => {
                 type: 'scraper',
                 targets: [
                     {
-                        id: targetId,
+                        targetId,
                         target,
                     },
                 ],
@@ -748,7 +748,7 @@ describe('Scraper', () => {
                 type: 'scraper',
                 targets: [
                     {
-                        id: targetId,
+                        targetId,
                         target,
                     },
                 ],
@@ -830,7 +830,7 @@ describe('Scraper', () => {
                 type: 'scraper',
                 targets: [
                     {
-                        id: targetId,
+                        targetId,
                         target,
                     },
                 ],

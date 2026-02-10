@@ -41,10 +41,10 @@ const tool = {
     type: 'scraper' as const,
     keywords: [],
     maxPages: 1,
-    targets: [{ id: 'target-1', target: 'jobs-ch' as const }],
+    targets: [{ targetId: 'target-1', target: 'jobs-ch' as const }],
 };
 const targetWithResults = {
-    id: 'target-1',
+    targetId: 'target-1',
     target: 'jobs-ch' as const,
     results: [{ data: 'scraped content' }],
 };
@@ -162,7 +162,7 @@ describe('Delegator', () => {
                 type: 'scraper' as const,
                 keywords: [],
                 maxPages: 1,
-                targets: [{ id: 'target-33', target: 'jobs-ch' as const }],
+                targets: [{ targetId: 'target-33', target: 'jobs-ch' as const }],
             };
 
             const result = await delegator['getToolTargetsWithResults'](toolWithInvalidTarget);

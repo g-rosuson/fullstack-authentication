@@ -3,8 +3,6 @@ import { Request, Response } from 'express';
 import { BusinessLogicException } from 'aop/exceptions';
 import { logger } from 'aop/logging';
 
-import utils from './utils';
-
 import { CreateJobPayload, IdRouteParam, UpdateJobPayload } from './types';
 import { ErrorMessage } from 'shared/enums/error-messages';
 import { HttpStatusCode } from 'shared/enums/http-status-codes';
@@ -26,32 +24,19 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
         // Start a new transaction
         session.startTransaction();
 
-        // Determine body, time and schedule
-        const body = req.body;
-        const now = new Date();
-        let schedule = null;
-
-        // Create the schedule object if it's defined
-        if (body.schedule) {
-            schedule = {
-                ...body.schedule,
-                nextRun: utils.getNextRunDate(body.schedule.type, body.schedule.startDate),
-            };
-        }
-
         // Create the job document
         const createJobPayload = {
             userId: req.context.user.id,
-            name: body.name,
-            tools: body.tools.map(tool => ({
+            name: req.body.name,
+            tools: req.body.tools.map(tool => ({
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
                     id: crypto.randomUUID(),
                 })),
             })),
-            schedule,
-            createdAt: now,
+            schedule: req.body.schedule,
+            createdAt: new Date(),
             updatedAt: null,
         };
 
@@ -60,7 +45,7 @@ const createJob = async (req: Request<unknown, unknown, CreateJobPayload>, res: 
         // Schedule the job if it has a schedule
         if (createdJob.schedule) {
             req.context.scheduler.schedule({
-                id: createdJob.id,
+                jobId: createdJob.id,
                 name: createdJob.name,
                 type: createdJob.schedule.type,
                 startDate: createdJob.schedule.startDate,
@@ -127,33 +112,20 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
             throw new BusinessLogicException(ErrorMessage.JOBS_CANNOT_BE_UPDATED_WHILE_RUNNING);
         }
 
-        // Determine body, time and schedule
-        const body = req.body;
-        const now = new Date();
-        let schedule = null;
-
-        // Create the schedule object if it's defined
-        if (body.schedule) {
-            schedule = {
-                ...body.schedule,
-                nextRun: utils.getNextRunDate(body.schedule.type, body.schedule.startDate),
-            };
-        }
-
         // Determine job document
         const updateJobPayload = {
             id: req.params.id,
             userId: req.context.user.id,
-            name: body.name,
-            schedule,
-            tools: body.tools.map(tool => ({
+            name: req.body.name,
+            schedule: req.body.schedule,
+            tools: req.body.tools.map(tool => ({
                 ...tool,
                 targets: tool.targets.map(item => ({
                     ...item,
                     id: crypto.randomUUID(),
                 })),
             })),
-            updatedAt: now,
+            updatedAt: new Date(),
         };
 
         // Update the job in the database
@@ -167,7 +139,7 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
                 type: updateJobPayload.schedule.type,
                 startDate: updateJobPayload.schedule.startDate,
                 endDate: updateJobPayload.schedule.endDate,
-                id: updateJobPayload.id,
+                jobId: updateJobPayload.id,
             });
 
             // Note: .register() replaces an existing task with the new one

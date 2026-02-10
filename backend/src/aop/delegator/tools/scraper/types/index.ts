@@ -27,7 +27,7 @@ interface ScraperToolWithResults {
  */
 interface ScraperToolTarget {
     target: 'jobs-ch';
-    id: string;
+    targetId: string;
     keywords?: string[];
     maxPages?: number;
     results: ScraperResult[];

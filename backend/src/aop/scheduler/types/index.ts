@@ -8,7 +8,7 @@ interface FormatCronExpressionPayload {
 }
 
 interface SchedulePayload {
-    id: string;
+    jobId: string;
     name: string;
     type: CronJobType;
     startDate: Date;

@@ -27,7 +27,7 @@ const executionSchema = z.object({
                 targets: z.array(
                     z.object({
                         target: z.enum(['jobs-ch']),
-                        id: z.string(),
+                        targetId: z.string(),
                         keywords: z.array(z.string()).optional(),
                         maxPages: z.number().positive().optional(),
                         results: z
@@ -83,7 +83,7 @@ const jobDocumentSchema = z
                     targets: z.array(
                         z.object({
                             target: z.enum(['jobs-ch']),
-                            id: z.string(),
+                            targetId: z.string(),
                             keywords: z.array(z.string()).optional(),
                             maxPages: z.number().positive().optional(),
                         })

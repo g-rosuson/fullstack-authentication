@@ -14,13 +14,12 @@ interface CreateJobPayload {
         type: CronJobType;
         startDate: Date;
         endDate: Date | null;
-        nextRun: Date;
     } | null;
     tools: {
         type: 'scraper';
         targets: {
             target: 'jobs-ch';
-            id: string;
+            targetId: string;
             keywords?: string[];
             maxPages?: number;
         }[];
@@ -41,13 +40,12 @@ interface UpdateJobPayload {
         type: CronJobType;
         startDate: Date;
         endDate: Date | null;
-        nextRun: Date;
     } | null;
     tools: {
         type: 'scraper';
         targets: {
             target: 'jobs-ch';
-            id: string;
+            targetId: string;
             keywords?: string[];
             maxPages?: number;
         }[];

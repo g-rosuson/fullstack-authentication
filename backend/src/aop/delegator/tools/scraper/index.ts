@@ -1,9 +1,10 @@
+import { logger } from 'aop/logging';
 import { parseSchema } from 'lib/validation';
 
 import constants from './constants';
 
 import type { ExecuteFunction } from '../../tools/types';
-import type { ScraperRequest, ScraperResult } from './types';
+import type { RequestUserData, ScraperRequest, ScraperResult } from './types';
 
 import { requestUserDataSchema } from './schemas';
 import targetRegistry from './targets';
@@ -49,9 +50,13 @@ class Scraper {
          * @param targetId - The ID of the target.
          * @param results - The results of the target.
          */
-        function callbackWithTargetResults(targetId: string, results: ScraperResult[]) {
+        function callbackWithTargetResults(userData: RequestUserData, results: ScraperResult[]) {
+            // Remove the __crawlee property from the user data.
+            // eslint-disable-next-line
+            const { __crawlee, ...spread } = userData;
+
             onTargetFinish({
-                targetId,
+                ...spread,
                 results,
             });
         }
@@ -66,14 +71,14 @@ class Scraper {
             const keywords = targetSettings.keywords || tool.keywords;
             const maxPages = targetSettings.maxPages || tool.maxPages;
 
-            targetToUniqueKeysMap.set(targetSettings.id, new Set());
-            targetToResultsMap.set(targetSettings.id, []);
+            targetToUniqueKeysMap.set(targetSettings.targetId, new Set());
+            targetToResultsMap.set(targetSettings.targetId, []);
 
             requests.push({
                 url: constants.placeholderUrl,
                 userData: {
                     label: constants.requestLabels.targetRequest,
-                    targetId: targetSettings.id,
+                    targetId: targetSettings.targetId,
                     target: targetSettings.target,
                     keywords,
                     maxPages,
@@ -91,49 +96,41 @@ class Scraper {
             // maxRequestRetries defaults to 3
             // NOTE: This runs concurrently (Controlled via concurrency settings) for every request in the request queue.
             requestHandler: async ({ page, request, enqueueLinks }) => {
-                const targetId = request.userData.targetId;
                 const userDataResult = parseSchema(requestUserDataSchema, request.userData);
 
                 /**
-                 * Validate the request user data and either:
-                 * - Invoke onTargetFinish with an error if the request user data is invalid.
-                 * - Add a result to the "targetToResultsMap" map with a null result and an error.
+                 * Handle schema validation errors.
                  */
                 if (!userDataResult.success) {
-                    if (request.userData.label === constants.requestLabels.targetRequest) {
-                        callbackWithTargetResults(targetId, [
-                            {
-                                result: null,
-                                error: {
-                                    message: `Target request schema validation failed for: ${request.uniqueKey}`,
-                                },
-                            },
-                        ]);
+                    logger.error(`Target request schema validation failed for: ${request.uniqueKey}`, {
+                        issues: userDataResult.issues,
+                    });
 
-                        completedTargets.add(targetId);
-                    } else if (request.userData.label === constants.requestLabels.extractionRequest) {
-                        const targetResults = targetToResultsMap.get(targetId);
+                    const targetId = request?.userData?.targetId;
+                    const label = request?.userData?.label;
 
-                        // Note: "targetResults" is initialized when mapping to the initial target requests.
-                        targetResults?.push({
-                            result: null,
-                            error: {
-                                message: `Extraction request schema validation failed for: ${request.uniqueKey}`,
-                            },
-                        });
-
-                        // Remove the unique request key to mark its completion
-                        targetToUniqueKeysMap.get(targetId)?.delete(request.uniqueKey);
-
-                        /**
-                         * Invoke onTargetFinish with complete target results.
-                         */
-                        const isTargetToUniqueKeysMapEmpty = targetToUniqueKeysMap.get(targetId)?.size === 0;
-                        const isTargetFinished = completedTargets.has(targetId);
-
-                        if (isTargetToUniqueKeysMapEmpty && !isTargetFinished) {
+                    if (label === constants.requestLabels.targetRequest) {
+                        if (targetId) {
                             completedTargets.add(targetId);
-                            callbackWithTargetResults(targetId, targetToResultsMap.get(targetId) || []);
+                        }
+                    } else if (label === constants.requestLabels.extractionRequest) {
+                        if (targetId) {
+                            // Remove the unique request key to mark its completion
+                            targetToUniqueKeysMap.get(targetId)?.delete(request.uniqueKey);
+
+                            /**
+                             * Invoke onTargetFinish with complete target results.
+                             */
+                            const isTargetToUniqueKeysMapEmpty = targetToUniqueKeysMap.get(targetId)?.size === 0;
+                            const isTargetFinished = completedTargets.has(targetId);
+
+                            if (isTargetToUniqueKeysMapEmpty && !isTargetFinished) {
+                                completedTargets.add(targetId);
+                                logger.error(
+                                    `Target completed but request schema validation failed: ${request.uniqueKey}`,
+                                    {}
+                                );
+                            }
                         }
                     }
 
@@ -153,7 +150,7 @@ class Scraper {
                 const target = this.getTargetFromRegistry(targetToCamelCase);
 
                 if (!target) {
-                    callbackWithTargetResults(userData.targetId, [
+                    callbackWithTargetResults(userData, [
                         {
                             result: null,
                             error: {
@@ -202,12 +199,12 @@ class Scraper {
                     /**
                      * Invoke onTargetFinish with complete target results.
                      */
-                    const isTargetToUniqueKeysMapEmpty = targetToUniqueKeysMap.get(targetId)?.size === 0;
+                    const isTargetToUniqueKeysMapEmpty = targetToUniqueKeysMap.get(userData.targetId)?.size === 0;
                     const isTargetFinished = completedTargets.has(userData.targetId);
 
                     if (isTargetToUniqueKeysMapEmpty && !isTargetFinished) {
                         completedTargets.add(userData.targetId);
-                        callbackWithTargetResults(userData.targetId, targetToResultsMap.get(userData.targetId) || []);
+                        callbackWithTargetResults(userData, targetToResultsMap.get(userData.targetId) || []);
                     }
 
                     return;
@@ -217,7 +214,7 @@ class Scraper {
                  * Invoke onTargetFinish with an error when the crawler throws.
                  * Note: "result" is null and "uniqueKeys" is null when this happens.
                  */
-                callbackWithTargetResults(userData.targetId, [
+                callbackWithTargetResults(userData, [
                     {
                         result: null,
                         error: {

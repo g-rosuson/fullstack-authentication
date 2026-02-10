@@ -62,7 +62,7 @@ export const initializeDatabase = async () => {
 
             if (job.schedule && !isOutdated) {
                 schedulerInstance.schedule({
-                    id: job.id,
+                    jobId: job.id,
                     name: job.name,
                     type: job.schedule.type,
                     startDate: job.schedule.startDate,

@@ -1,4 +1,4 @@
-import { ZodSchema } from 'zod';
+import { z, ZodTypeAny } from 'zod';
 
 import { InputValidationException } from 'aop/exceptions/errors/validation';
 import { parseSchema } from 'lib/validation';
@@ -9,7 +9,11 @@ import { parseSchema } from 'lib/validation';
  * @param errorMessage The error message to throw if the validation fails
  * @returns A middleware function that validates the request body
  */
-const validateRequestPayload = <T>(schema: ZodSchema<T>, payload: unknown, errorMessage: string) => {
+const validateRequestPayload = <T extends ZodTypeAny>(
+    schema: T,
+    payload: unknown,
+    errorMessage: string
+): z.infer<T> => {
     const result = parseSchema(schema, payload);
 
     if (!result.success) {

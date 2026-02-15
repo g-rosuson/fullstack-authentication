@@ -98,7 +98,6 @@ const jobDocumentSchema = z
                 type: cronJobTypeSchema,
                 startDate: z.coerce.date(),
                 endDate: z.coerce.date().nullable(),
-                nextRun: z.coerce.date(),
             })
             .nullable(),
         createdAt: z.coerce.date(),

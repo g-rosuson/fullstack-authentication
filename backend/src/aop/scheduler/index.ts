@@ -1,15 +1,10 @@
 import cron from 'node-cron';
 
 import { Delegator } from 'aop/delegator';
+import { InternalException } from 'aop/exceptions';
 import { logger } from 'aop/logging';
 
-import {
-    CronJob,
-    CronJobWithId,
-    FormatCronExpressionPayload,
-    NextAndPreviousRunPayload,
-    SchedulePayload,
-} from './types';
+import { CronJob, FormatCronExpressionPayload, NextAndPreviousRunPayload, SchedulePayload } from './types';
 
 import parser from 'cron-parser';
 
@@ -100,7 +95,6 @@ export class Scheduler {
      * @returns A cron expression string in the format: "minute hour day-of-month month day-of-week"
      */
     private formatCronExpression({ startDate, type }: FormatCronExpressionPayload) {
-        // TODO: https://nodecron.com/api-reference.html#%F0%9F%94%B9-validate-expression-string-boolean
         const minute = startDate.getMinutes();
         const hour = startDate.getHours();
         const monthDay = startDate.getDate();
@@ -168,12 +162,20 @@ export class Scheduler {
             // Format the cron expression and create task only for recurring jobs
             cronExpression = this.formatCronExpression({ startDate, type: payload.type });
 
+            // Validate the cron expression
+            const isValid = cron.validate(cronExpression);
+
+            if (!isValid) {
+                throw new InternalException(`Invalid cron expression: ${cronExpression}`);
+            }
+
             cronTask = cron.createTask(cronExpression, () => {
                 delegator.delegateScheduledJob(jobId);
             });
         }
 
         const newCronJob: CronJob = {
+            jobId,
             cronExpression,
             startDate,
             endDate,
@@ -229,7 +231,6 @@ export class Scheduler {
         }
 
         this.cronJobs.set(jobId, newCronJob);
-        // logger.info(`Scheduled cron-job with id: "${jobId}", name: "${cronTask?.name}", id: "${cronTask?.id}", status: "${cronTask?.getStatus()}", nextRun: "${cronTask?.getNextRun()}", expression: "${cronExpression}"`);
     }
 
     /**
@@ -291,7 +292,7 @@ export class Scheduler {
      *
      * @returns An array of cron job objects with their id and metadata.
      */
-    get allJobs(): ReadonlyArray<CronJobWithId> {
+    get allJobs(): ReadonlyArray<CronJob> {
         const jobsArray = Array.from(this.cronJobs.entries()).map(([id, job]) => ({
             id,
             ...job,

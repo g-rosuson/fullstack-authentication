@@ -56,6 +56,7 @@ vi.mock('node-cron', () => ({
             stop: mockStopCronTask,
             destroy: mockDestroy,
         })),
+        validate: vi.fn(() => true),
     },
 }));
 
@@ -65,6 +66,7 @@ vi.mock('node-cron', () => ({
  * @returns A mock cron job.
  */
 const getMockCronJob = (cronJob: Partial<CronJob> = {}) => ({
+    jobId: mockJobId,
     cronExpression: defaultCronExpression,
     startDate: new Date(),
     endDate: new Date(),

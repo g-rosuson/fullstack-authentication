@@ -16,6 +16,7 @@ interface SchedulePayload {
 }
 
 interface CronJob {
+    jobId: string;
     cronExpression: string | undefined;
     startDate: Date;
     endDate: Date | null;
@@ -26,13 +27,9 @@ interface CronJob {
     };
 }
 
-interface CronJobWithId extends CronJob {
-    id: string;
-}
-
 interface NextAndPreviousRunPayload {
     nextRun: Date | null;
     previousRun: Date | null;
 }
 
-export type { CronJob, CronJobWithId, SchedulePayload, FormatCronExpressionPayload, NextAndPreviousRunPayload };
+export type { CronJob, SchedulePayload, FormatCronExpressionPayload, NextAndPreviousRunPayload };

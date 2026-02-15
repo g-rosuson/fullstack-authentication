@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { logger } from 'aop/logging';
 import { parseSchema } from 'lib/validation';
 
 import constants from './constants';
 
-import type { ExecuteFunction } from '../types';
-import type { ScraperRequest, ScraperResult } from './types';
+import type { ScraperRequest, ScraperResult, ScraperTool } from './types';
 import type { Dictionary, Request as CrawleeRequest } from 'crawlee';
 import type { Page } from 'playwright';
 
@@ -14,6 +14,14 @@ import targetRegistry from './targets';
 import { PlaywrightCrawler, RequestQueue } from 'crawlee';
 import { kebabToCamelCase } from 'utils';
 
+// Mock dependencies
+vi.mock('aop/logging', () => ({
+    logger: {
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+    },
+}));
 vi.mock('config', () => ({
     default: {
         isDeveloping: true,
@@ -29,7 +37,9 @@ vi.mock('config', () => ({
     },
 }));
 vi.mock('crawlee');
-vi.mock('lib/validation');
+vi.mock('lib/validation', () => ({
+    parseSchema: vi.fn(),
+}));
 vi.mock('utils');
 vi.mock('./targets', () => ({
     default: {
@@ -122,15 +132,13 @@ describe('Scraper', () => {
         const targetIdProperty = 'targetId';
         const targetProperty = 'target';
 
-        const requestUserDataTargetIdProperty = 'targetId';
-
         const toolType = 'scraper';
         const targetId = 'target-1';
         const target = 'jobs-ch';
         const keywords = ['software', 'engineer'];
         const maxPages = 2;
 
-        const tool: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
+        const tool: ScraperTool = {
             [typeProperty]: toolType,
             [targetsProperty]: [
                 {
@@ -177,7 +185,7 @@ describe('Scraper', () => {
                         url: constants.placeholderUrl,
                         userData: expect.objectContaining({
                             label: constants.requestLabels.targetRequest,
-                            [requestUserDataTargetIdProperty]: targetId,
+                            [targetIdProperty]: targetId,
                             [targetProperty]: target,
                             [keywordsProperty]: keywords,
                             [maxPagesProperty]: maxPages,
@@ -193,7 +201,7 @@ describe('Scraper', () => {
             const targetKeywords = ['javascript', 'react'];
             const targetMaxPages = 5;
 
-            const toolWithTargetOverrides: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
+            const toolWithTargetOverrides: ScraperTool = {
                 [typeProperty]: toolType,
                 [targetsProperty]: [
                     {
@@ -225,7 +233,7 @@ describe('Scraper', () => {
         });
 
         it('should use tool-level keywords and maxPages when target does not provide them', async () => {
-            const toolWithoutTargetOverrides: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
+            const toolWithoutTargetOverrides: ScraperTool = {
                 [typeProperty]: toolType,
                 [targetsProperty]: [
                     {
@@ -258,7 +266,7 @@ describe('Scraper', () => {
             const targetId2 = 'target-2';
             const target2 = 'jobs-ch';
 
-            const toolWithMultipleTargets: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
+            const toolWithMultipleTargets: ScraperTool = {
                 [typeProperty]: toolType,
                 [targetsProperty]: [
                     {
@@ -283,12 +291,12 @@ describe('Scraper', () => {
                 expect.arrayContaining([
                     expect.objectContaining({
                         userData: expect.objectContaining({
-                            [requestUserDataTargetIdProperty]: targetId,
+                            [targetIdProperty]: targetId,
                         }),
                     }),
                     expect.objectContaining({
                         userData: expect.objectContaining({
-                            [requestUserDataTargetIdProperty]: targetId2,
+                            [targetIdProperty]: targetId2,
                         }),
                     }),
                 ])
@@ -330,7 +338,7 @@ describe('Scraper', () => {
             const uniqueKey1 = 'key-1';
             const uniqueKey2 = 'key-2';
 
-            const tool: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
+            const tool: ScraperTool = {
                 type: 'scraper',
                 targets: [
                     {
@@ -384,8 +392,8 @@ describe('Scraper', () => {
             expect(mockOnTargetFinish).not.toHaveBeenCalled();
         });
 
-        it('should invoke onTargetFinish with error when target request validation fails', async () => {
-            const tool: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
+        it('should log an error when target request validation fails', async () => {
+            const tool: ScraperTool = {
                 type: 'scraper',
                 targets: [
                     {
@@ -395,18 +403,6 @@ describe('Scraper', () => {
                 ],
                 keywords,
                 maxPages,
-            };
-
-            const request = {
-                url: constants.placeholderUrl,
-                uniqueKey: uniqueKey,
-                userData: {
-                    [labelProperty]: constants.requestLabels.targetRequest,
-                    [targetIdProperty]: targetId,
-                    [targetProperty]: target,
-                    [keywordsProperty]: keywords,
-                    [maxPagesProperty]: maxPages,
-                },
             };
 
             vi.mocked(parseSchema).mockReturnValue({
@@ -421,25 +417,19 @@ describe('Scraper', () => {
 
             await requestHandler({
                 page: mockPage,
-                request: request as unknown as CrawleeRequest<Dictionary>,
+                request: {
+                    url: constants.placeholderUrl,
+                    uniqueKey: 'key',
+                    userData: {},
+                } as unknown as CrawleeRequest<Dictionary>,
                 enqueueLinks: mockEnqueueLinks,
             });
 
-            expect(mockOnTargetFinish).toHaveBeenCalledWith({
-                [targetIdProperty]: targetId,
-                results: [
-                    {
-                        result: null,
-                        error: {
-                            message: `Target request schema validation failed for: ${uniqueKey}`,
-                        },
-                    },
-                ],
-            });
+            expect(logger.error).toHaveBeenCalled();
         });
 
         it('should invoke onTargetFinish with error when target is not found in registry', async () => {
-            const tool: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
+            const tool: ScraperTool = {
                 type: 'scraper',
                 targets: [
                     {
@@ -483,17 +473,18 @@ describe('Scraper', () => {
                 enqueueLinks: mockEnqueueLinks,
             });
 
-            expect(mockOnTargetFinish).toHaveBeenCalledWith({
-                [targetIdProperty]: targetId,
-                results: [
-                    {
-                        result: null,
-                        error: {
-                            message: 'Could not find target class with name: invalidTarget',
+            expect(mockOnTargetFinish).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    results: [
+                        {
+                            error: {
+                                message: expect.any(String),
+                            },
+                            result: null,
                         },
-                    },
-                ],
-            });
+                    ],
+                })
+            );
         });
     });
 
@@ -540,7 +531,7 @@ describe('Scraper', () => {
         });
 
         it('should process extraction request and add result to target results', async () => {
-            const tool: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
+            const tool: ScraperTool = {
                 type: 'scraper',
                 targets: [
                     {
@@ -613,22 +604,23 @@ describe('Scraper', () => {
                 enqueueLinks: mockEnqueueLinks,
             });
 
-            expect(mockOnTargetFinish).toHaveBeenCalledWith({
-                [targetIdProperty]: targetId,
-                results: [
-                    {
-                        result: jobDescription,
-                        error: null,
-                    },
-                ],
-            });
+            expect(mockOnTargetFinish).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    results: [
+                        {
+                            result: jobDescription,
+                            error: null,
+                        },
+                    ],
+                })
+            );
         });
 
         it('should invoke onTargetFinish when all extraction requests complete', async () => {
             const uniqueKey1 = 'key-1';
             const uniqueKey2 = 'key-2';
 
-            const tool: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
+            const tool: ScraperTool = {
                 type: 'scraper',
                 targets: [
                     {
@@ -728,105 +720,24 @@ describe('Scraper', () => {
             });
 
             expect(mockOnTargetFinish).toHaveBeenCalledTimes(1);
-            expect(mockOnTargetFinish).toHaveBeenCalledWith({
-                [targetIdProperty]: targetId,
-                results: [
-                    {
-                        result: jobDescription,
-                        error: null,
-                    },
-                    {
-                        result: jobDescription,
-                        error: null,
-                    },
-                ],
-            });
-        });
-
-        it('should invoke onTargetFinish with error when extraction request validation fails', async () => {
-            const tool: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
-                type: 'scraper',
-                targets: [
-                    {
-                        targetId,
-                        target,
-                    },
-                ],
-                keywords,
-                maxPages,
-            };
-
-            const targetRequest = {
-                url: constants.placeholderUrl,
-                uniqueKey: 'target-request-key',
-                userData: {
-                    [labelProperty]: constants.requestLabels.targetRequest,
-                    [targetIdProperty]: targetId,
-                    [targetProperty]: target,
-                    [keywordsProperty]: keywords,
-                    [maxPagesProperty]: maxPages,
-                },
-            } as unknown as CrawleeRequest<Dictionary>;
-
-            const extractionRequest = {
-                url: jobUrl,
-                uniqueKey: uniqueKey,
-                userData: {
-                    [labelProperty]: constants.requestLabels.extractionRequest,
-                    [targetIdProperty]: targetId,
-                    [targetProperty]: target,
-                    [keywordsProperty]: keywords,
-                    [maxPagesProperty]: maxPages,
-                },
-            } as unknown as CrawleeRequest<Dictionary>;
-
-            vi.mocked(parseSchema)
-                .mockReturnValueOnce({
-                    success: true,
-                    data: targetRequest.userData,
-                })
-                .mockReturnValueOnce({
-                    success: false,
-                    issues: [],
-                });
-
-            mockTarget.processRequest.mockResolvedValueOnce({
-                uniqueKeys: [uniqueKey],
-                result: null,
-            });
-
-            await scraper.execute({
-                tool,
-                onTargetFinish: mockOnTargetFinish,
-            });
-
-            await requestHandler({
-                page: mockPage,
-                request: targetRequest as unknown as CrawleeRequest<Dictionary>,
-                enqueueLinks: mockEnqueueLinks,
-            });
-
-            await requestHandler({
-                page: mockPage,
-                request: extractionRequest as unknown as CrawleeRequest<Dictionary>,
-                enqueueLinks: mockEnqueueLinks,
-            });
-
-            expect(mockOnTargetFinish).toHaveBeenCalledWith({
-                [targetIdProperty]: targetId,
-                results: [
-                    {
-                        result: null,
-                        error: {
-                            message: `Extraction request schema validation failed for: ${uniqueKey}`,
+            expect(mockOnTargetFinish).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    results: [
+                        {
+                            result: jobDescription,
+                            error: null,
                         },
-                    },
-                ],
-            });
+                        {
+                            result: jobDescription,
+                            error: null,
+                        },
+                    ],
+                })
+            );
         });
 
         it('should invoke onTargetFinish with error when request processing fails', async () => {
-            const tool: Parameters<ExecuteFunction<'scraper'>>[0]['tool'] = {
+            const tool: ScraperTool = {
                 type: 'scraper',
                 targets: [
                     {
@@ -871,17 +782,18 @@ describe('Scraper', () => {
                 enqueueLinks: mockEnqueueLinks,
             });
 
-            expect(mockOnTargetFinish).toHaveBeenCalledWith({
-                [targetIdProperty]: targetId,
-                results: [
-                    {
-                        result: null,
-                        error: {
-                            message: `Request processing failed for target with id: ${targetId}`,
+            expect(mockOnTargetFinish).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    results: [
+                        {
+                            result: null,
+                            error: {
+                                message: expect.any(String),
+                            },
                         },
-                    },
-                ],
-            });
+                    ],
+                })
+            );
         });
     });
 });

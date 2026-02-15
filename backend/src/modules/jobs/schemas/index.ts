@@ -37,8 +37,9 @@ const createJobPayloadSchema = z
         schedule: z
             .object({
                 type: cronJobTypeSchema,
-                startDate: z.coerce.date(),
-                endDate: z.coerce.date().nullable(),
+                // Enforce strict ISO 8601 timestamp with timezone to avoid locale-dependent date parsing bugs
+                startDate: z.string().datetime({ offset: true }).pipe(z.coerce.date()),
+                endDate: z.string().datetime({ offset: true }).pipe(z.coerce.date()).nullable(),
             })
             .nullable(),
         tools: z.array(scraperToolPayloadSchema).min(1),
@@ -55,8 +56,15 @@ const updateJobPayloadSchema = z
         schedule: z
             .object({
                 type: cronJobTypeSchema,
-                startDate: z.coerce.date(),
-                endDate: z.coerce.date().nullable(),
+                // Enforce strict ISO 8601 timestamp with timezone to avoid locale-dependent date parsing bugs
+                startDate: z
+                    .string()
+                    .datetime({ offset: true })
+                    .transform(v => new Date(v)),
+                endDate: z
+                    .string()
+                    .datetime({ offset: true })
+                    .transform(v => (v ? new Date(v) : null)),
             })
             .nullable(),
         tools: z.array(scraperToolPayloadSchema).min(1),

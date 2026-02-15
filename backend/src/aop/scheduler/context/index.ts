@@ -13,7 +13,6 @@ import type { Scheduler } from 'aop/scheduler';
 export class SchedulerContext {
     getAllJobs;
     schedule;
-    delete;
     stop;
 
     /**
@@ -24,7 +23,6 @@ export class SchedulerContext {
     constructor(scheduler: Scheduler) {
         this.getAllJobs = scheduler.allJobs;
         this.schedule = scheduler.schedule.bind(scheduler);
-        this.delete = scheduler.delete.bind(scheduler);
         this.stop = scheduler.stop.bind(scheduler);
     }
 }

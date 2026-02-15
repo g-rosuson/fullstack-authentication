@@ -1,17 +1,21 @@
 import cron from 'node-cron';
 
 import { Delegator } from 'aop/delegator';
+import { InternalException } from 'aop/exceptions';
 import { logger } from 'aop/logging';
 
-import { CronJob, FormatCronExpressionPayload, SchedulePayload } from './types';
+import { CronJob, FormatCronExpressionPayload, NextAndPreviousRunPayload, SchedulePayload } from './types';
+
+import parser from 'cron-parser';
 
 /**
  * Singleton scheduler service that manages cron jobs using node-cron.
  * Provides a API for cron job lifecycle management.
+ * @todo Add tests
  */
 export class Scheduler {
     private static instance: Scheduler;
-    private cronJobs: Map<string, CronJob> = new Map();
+    public cronJobs: Map<string, CronJob> = new Map();
 
     private constructor() {}
 
@@ -19,7 +23,7 @@ export class Scheduler {
      * Returns the singleton instance of the Scheduler.
      * Creates a new instance if one doesn't exist.
      */
-    static getInstance() {
+    static getInstance(): Scheduler {
         if (!Scheduler.instance) {
             Scheduler.instance = new Scheduler();
         }
@@ -28,16 +32,59 @@ export class Scheduler {
     }
 
     /**
-     * Extracts hour and minute components from a Date object.
-     *
-     * @param date - The Date object to extract time from
-     * @returns Object containing hour and minute as numbers
+     * Gets the next and previous run dates for a cron job.
+     * @param jobId - The id of the cron job to get the next and previous run for
+     * @returns The next and previous run dates for the cron job
      */
-    private extractTime(date: Date) {
-        const hour = date.getHours();
-        const minute = date.getMinutes();
+    public getNextAndPreviousRun(jobId: string): NextAndPreviousRunPayload {
+        try {
+            const cronJob = this.cronJobs.get(jobId);
+            const now = new Date();
+            let nextRun: Date | null = null;
+            let previousRun: Date | null = null;
 
-        return { hour, minute };
+            if (!cronJob) {
+                logger.error(`Cannot find cron-job with id: "${jobId}"`, {});
+                return { nextRun, previousRun };
+            }
+
+            if (!cronJob.cronExpression) {
+                return { nextRun, previousRun };
+            }
+
+            // Create cron-parser iterators for next and previous runs.
+            // - nextInterval: starts at either now or the job's startDate (whichever is later), stops at endDate if defined.
+            // - prevInterval: starts at now and looks back to the job's startDate to find the last occurrence.
+            const nextInterval = parser.parse(cronJob.cronExpression, {
+                currentDate: now < cronJob.startDate ? cronJob.startDate : now,
+                endDate: cronJob.endDate ?? undefined,
+            });
+
+            const prevInterval = parser.parse(cronJob.cronExpression, {
+                currentDate: now,
+                startDate: cronJob.startDate,
+            });
+
+            // Calling next() or prev() can throw if there is no next/previous occurrence within the defined start/end range,
+            // or if the cron expression is invalid. Nested try-catch allows us to log and recover from errors in each computation
+            // separately while still returning whatever value we can (nextRun or previousRun) instead of nulling both.
+            try {
+                nextRun = nextInterval.next().toDate();
+            } catch (error) {
+                logger.error(`Error computing next run for job "${jobId}":`, { error: error as Error });
+            }
+
+            try {
+                previousRun = prevInterval.prev().toDate();
+            } catch (error) {
+                logger.error(`Error computing previous run for job "${jobId}":`, { error: error as Error });
+            }
+
+            return { nextRun, previousRun };
+        } catch (error) {
+            logger.error(`Error computing next/previous run for job "${jobId}":`, { error: error as Error });
+            return { nextRun: null, previousRun: null };
+        }
     }
 
     /**
@@ -47,10 +94,9 @@ export class Scheduler {
      * @param payload - The cron job payload containing schedule information
      * @returns A cron expression string in the format: "minute hour day-of-month month day-of-week"
      */
-    private formatCronExpression(payload: FormatCronExpressionPayload) {
-        const { startDate, type } = payload;
-        const { hour, minute } = this.extractTime(startDate);
-
+    private formatCronExpression({ startDate, type }: FormatCronExpressionPayload) {
+        const minute = startDate.getMinutes();
+        const hour = startDate.getHours();
         const monthDay = startDate.getDate();
         const month = startDate.getMonth() + 1;
         const weekday = startDate.getDay();
@@ -90,21 +136,16 @@ export class Scheduler {
      *
      * @param payload - The cron job payload
      */
-    schedule(payload: SchedulePayload) {
+    public schedule(payload: SchedulePayload): void {
         const jobId = payload.jobId;
-        const startDate = payload.startDate;
-        const endDate = payload.endDate;
+        const startDate = new Date(payload.startDate);
+        const endDate = payload.endDate ? new Date(payload.endDate) : null;
         const now = new Date();
 
         // Delete an existing job and task if it exists
         const cronJob = this.cronJobs.get(jobId);
 
         if (cronJob) {
-            // Destroy the cron task from node-cron if it exists
-            if (cronJob.cronTask) {
-                cronJob.cronTask.destroy();
-            }
-
             // Delete the job from map and clear any pending timeouts
             this.delete(jobId);
         }
@@ -121,18 +162,28 @@ export class Scheduler {
             // Format the cron expression and create task only for recurring jobs
             cronExpression = this.formatCronExpression({ startDate, type: payload.type });
 
+            // Validate the cron expression
+            const isValid = cron.validate(cronExpression);
+
+            if (!isValid) {
+                throw new InternalException(`Invalid cron expression: ${cronExpression}`);
+            }
+
             cronTask = cron.createTask(cronExpression, () => {
                 delegator.delegateScheduledJob(jobId);
             });
         }
 
         const newCronJob: CronJob = {
+            jobId,
+            cronExpression,
+            startDate,
+            endDate,
             cronTask,
             metadata: {
                 startTimeoutId: undefined,
                 stopTimeoutId: undefined,
             },
-            endDate,
         };
 
         // Calculate the time to start the job
@@ -145,7 +196,13 @@ export class Scheduler {
                 logger.info(`Executed once job: ${payload.name} immediately at scheduled time`);
                 this.delete(jobId);
             } else {
+                // NOTE: If we only start the cron task here, the current minute has already passed,
+                // so node-cron would schedule the first run for the *next* matching interval
+                // (e.g. tomorrow), skipping the intended first execution.
+                delegator.delegateScheduledJob(jobId);
+
                 cronTask!.start();
+
                 logger.info(
                     `Started cron-job: ${payload.name} with expression: ${cronExpression} (type: ${payload.type})`
                 );
@@ -182,7 +239,7 @@ export class Scheduler {
      *
      * @param jobId - The cron job id to delete
      */
-    delete(jobId: string) {
+    private delete(jobId: string): void {
         const cronJobById = this.cronJobs.get(jobId);
 
         if (!cronJobById) {
@@ -208,7 +265,7 @@ export class Scheduler {
      *
      * @param jobId - The cron job id to stop
      */
-    stop(jobId: string) {
+    public stop(jobId: string): void {
         const cronJobById = this.cronJobs.get(jobId);
 
         if (!cronJobById) {
@@ -235,7 +292,7 @@ export class Scheduler {
      *
      * @returns An array of cron job objects with their id and metadata.
      */
-    get allJobs() {
+    get allJobs(): ReadonlyArray<CronJob> {
         const jobsArray = Array.from(this.cronJobs.entries()).map(([id, job]) => ({
             id,
             ...job,

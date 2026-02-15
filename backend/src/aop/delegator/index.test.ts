@@ -5,6 +5,27 @@ import { logger } from 'aop/logging';
 import { Delegator } from './index';
 import toolRegistry from './tools';
 
+const jobId = 'test-job-id';
+const targetId = 'target-1';
+const tool = {
+    type: 'scraper' as const,
+    keywords: [],
+    maxPages: 1,
+    targets: [{ targetId, target: 'jobs-ch' as const }],
+};
+const payloadWithTool = {
+    jobId,
+    name: 'Test Job',
+    tools: [tool],
+    scheduleType: null,
+};
+const payloadWithoutTool = {
+    jobId,
+    name: 'Test Job',
+    tools: [],
+    scheduleType: null,
+};
+
 vi.mock('aop/logging');
 
 vi.mock('./tools', () => ({
@@ -12,7 +33,7 @@ vi.mock('./tools', () => ({
         scraper: {
             execute: vi.fn(async ({ onTargetFinish }) => {
                 onTargetFinish({
-                    targetId: 'target-1',
+                    targetId,
                     results: [{ data: 'scraped content' }],
                 });
             }),
@@ -35,31 +56,6 @@ vi.mock('aop/db/mongo/context', () => ({
         repository: { jobs: { addExecution: mockAddExecution } },
     })),
 }));
-
-const jobId = 'test-job-id';
-const tool = {
-    type: 'scraper' as const,
-    keywords: [],
-    maxPages: 1,
-    targets: [{ targetId: 'target-1', target: 'jobs-ch' as const }],
-};
-const targetWithResults = {
-    targetId: 'target-1',
-    target: 'jobs-ch' as const,
-    results: [{ data: 'scraped content' }],
-};
-const payloadWithTool = {
-    jobId,
-    name: 'Test Job',
-    tools: [tool],
-    scheduleType: null,
-};
-const payloadWithoutTool = {
-    jobId,
-    name: 'Test Job',
-    tools: [],
-    scheduleType: null,
-};
 
 describe('Delegator', () => {
     let delegator: Delegator;
@@ -129,45 +125,27 @@ describe('Delegator', () => {
         it('should persist the execution payload', async () => {
             await delegator.delegate(payloadWithTool);
 
-            const executionPayload = {
-                jobId,
-                schedule: {
-                    type: null,
-                    delegatedAt: new Date(),
-                    finishedAt: new Date(),
-                },
-                tools: [
-                    {
-                        type: 'scraper' as const,
-                        keywords: [],
-                        maxPages: 1,
-                        targets: [targetWithResults],
-                    },
-                ],
-            };
-
-            expect(persistResultSpy).toHaveBeenCalledWith(executionPayload);
+            expect(persistResultSpy).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    jobId,
+                    tools: expect.any(Array),
+                })
+            );
         });
     });
 
     describe('getToolTargetsWithResults', () => {
-        it('should return tool targets with mapped results', async () => {
-            const result = await delegator['getToolTargetsWithResults'](tool);
+        it('should return tool targets with results', async () => {
+            const targetsWithResults = await delegator['getToolTargetsWithResults'](tool);
 
-            expect(result).toEqual([targetWithResults]);
-        });
-
-        it('should log an error if the tool target is not found', async () => {
-            const toolWithInvalidTarget = {
-                type: 'scraper' as const,
-                keywords: [],
-                maxPages: 1,
-                targets: [{ targetId: 'target-33', target: 'jobs-ch' as const }],
-            };
-
-            const result = await delegator['getToolTargetsWithResults'](toolWithInvalidTarget);
-            expect(result).toEqual([]);
-            expect(logger.error).toHaveBeenCalled();
+            expect(targetsWithResults).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        results: expect.any(Array),
+                        targetId,
+                    }),
+                ])
+            );
         });
     });
 

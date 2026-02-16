@@ -61,7 +61,8 @@ const validatePaginationQueryParams = (req: Request, _res: Response, next: NextF
         ErrorMessage.JOBS_SCHEMA_VALIDATION_FAILED
     );
 
-    req.query = validatedPayload;
+    // Merge validated query params into req.query without overwriting the read-only property
+    Object.assign(req.query, validatedPayload);
 
     next();
 };

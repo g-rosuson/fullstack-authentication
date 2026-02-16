@@ -68,6 +68,7 @@ const updateJobPayloadSchema = z
             })
             .nullable(),
         tools: z.array(scraperToolPayloadSchema).min(1),
+        runJob: z.boolean().optional(),
     })
     .superRefine(validateJobSchedule)
     .openapi('UpdateJobPayload');

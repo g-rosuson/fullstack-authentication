@@ -132,7 +132,7 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
         const updatedJob = await req.context.db.repository.jobs.update(updateJobPayload, session);
 
         // Schedule a cron job if the job has a schedule
-        if (updateJobPayload.schedule) {
+        if (req.body.runJob && updateJobPayload.schedule) {
             // Note: .schedule() destroys an existing cron job before scheduling a new one
             req.context.scheduler.schedule({
                 name: updateJobPayload.name,
@@ -149,7 +149,7 @@ const updateJob = async (req: Request<IdRouteParam, unknown, UpdateJobPayload>, 
                 tools: updateJobPayload.tools,
                 scheduleType: updateJobPayload.schedule.type,
             });
-        } else {
+        } else if (req.body.runJob) {
             // Delegate the job immediately when it has no schedule
             req.context.delegator.delegate({
                 jobId: updateJobPayload.id,

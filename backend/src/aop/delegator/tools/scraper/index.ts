@@ -64,7 +64,10 @@ class Scraper {
         /**
          * Determine PlaywrightCrawler request objects for each target and populate the request queue.
          */
-        const requestQueue = await RequestQueue.open();
+        // Use a unique request queue name to gather analytics for each queue
+        // and prevent requests from being cached by crawlee.
+        const requestQueueName = `scraper-${Date.now()}`;
+        const requestQueue = await RequestQueue.open(requestQueueName);
         const requests: ScraperRequest[] = [];
 
         for (const targetSettings of tool.targets) {

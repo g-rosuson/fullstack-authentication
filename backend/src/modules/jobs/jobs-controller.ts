@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 
+import { JobTargetEvent } from 'aop/emitter/types';
 import { BusinessLogicException } from 'aop/exceptions';
 import { logger } from 'aop/logging';
+
+import constants from 'shared/constants';
 
 import { CreateJobPayload, IdRouteParam, UpdateJobPayload } from './types';
 import { ErrorMessage } from 'shared/enums/error-messages';
@@ -247,4 +250,48 @@ const getAllJobs = async (req: Request, res: Response) => {
     });
 };
 
-export { createJob, deleteJob, getAllJobs, getJob, updateJob };
+/**
+ * Retrieves a stream of job events.
+ *
+ * @param req Express request object
+ * @param res Express response object
+ */
+const streamJobs = (req: Request, res: Response) => {
+    // Determine the close event
+    const CLOSE_EVENT = 'close';
+
+    // Set the response headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    /**
+     * Emits a job event to the response.
+     *
+     * @param event The job event to emit
+     */
+    const emitListener = (event: JobTargetEvent) => {
+        res.write(`target-id: ${event.targetId}\n`);
+        res.write(`event: ${constants.events.jobs.targetFinished}\n`);
+        res.write(`data: ${JSON.stringify(event)}\n\n`);
+    };
+
+    // When the client reconnects, we need to emit the previously emitted job target events
+    for (const event of req.context.emitter.allEmittedJobTargetEvents) {
+        if (req.context.delegator.runningJobs.has(event.jobId)) {
+            emitListener(event);
+        }
+    }
+
+    // Listen for job target finished events
+    req.context.emitter.on(constants.events.jobs.targetFinished, emitListener);
+
+    // Listen for the close event
+    req.on(CLOSE_EVENT, () => {
+        // Remove the listener for job target finished events
+        req.context.emitter.off(constants.events.jobs.targetFinished, emitListener);
+    });
+};
+
+export { createJob, deleteJob, getAllJobs, getJob, streamJobs, updateJob };
